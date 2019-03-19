@@ -1,0 +1,23 @@
+abstract Feature
+abstract FeatureModel
+
+WinFeatures : FeatureModel 1..1
+  manualUpDown: Feature 1..1
+  express: Feature 0..1
+    pinchProtection: Feature 0..1
+
+abstract Component
+    abstract Port
+    
+abstract Command
+motorStop: Command 1..1
+
+WinController: Component 1..1
+  final motor -> WinMotor 1..1
+  pinchDetector: Component 0..1
+  [ one this.pinchDetector <=>
+    one WinFeatures.express.pinchProtection
+  ]
+  
+WinMotor : Component
+    cmd: Port -> Command 1..1
