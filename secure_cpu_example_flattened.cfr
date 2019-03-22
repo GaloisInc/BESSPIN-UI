@@ -1,0 +1,45 @@
+// Experiments with a flattened feature model describing a CPU with
+// cryptographic accellerators.
+// Joe Kiniry, Galois
+// @depends nothing
+
+abstract IP_block
+  power -> integer
+  performance -> integer
+  area -> integer
+  security -> integer
+  [ 0 < power
+    0 < performance
+    0 < area
+    0 < security ]
+
+abstract Secure_CPU
+  Randomness 0..2
+    or Pseudo_RNG
+        or Hash_DRBG : IP_block
+           HMAC_DRBG : IP_block
+           CTR_DRBG : IP_block
+       True_RNG : IP_block
+         Metastable_RNG : IP_block
+  Hash 0..2
+    or SHA2 : IP_block
+       SHA3 : IP_block
+       MD5 : IP_block
+  Symmetric_Cipher 0..2
+    or AES : IP_block
+       Triple_DES : IP_block
+       Simon : IP_block
+       Speck : IP_block
+  Asymmetric_Cipher 0..2
+    or RSA : IP_block
+       ElGamal : IP_block
+  [ Hash_DRBG => SHA2
+    HMAC_DRBG => Hash
+    CTR_DRBG => Symmetric_Cipher ]
+
+  CPU_power -> integer = sum IP_block.power
+  CPU_performance -> integer = sum IP_block.performance / # IP_block
+  CPU_area -> integer = sum IP_block.area
+  CPU_security -> integer = min IP_block.security
+
+a_secure_cpu : Secure_CPU

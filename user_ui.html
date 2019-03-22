@@ -1,0 +1,372 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Configurator</title>
+    <script type="text/JavaScript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
+    <link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        #network{
+            width: 1200px;
+            height: 800px;
+            border: 5px solid lightgray;
+        }
+
+        td {
+            vertical-align:top;
+        }
+        table {
+            width:800px;
+        }
+	#node-popUp {
+	    display:none;
+	    position:absolute;
+	    top:350px;
+	    left:170px;
+	    z-index:299;
+	    width:250px;
+	    height:120px;
+	    background-color: #f9f9f9;
+	    border-style:solid;
+	    border-width:3px;
+	    border-color: #5394ed;
+	    padding:10px;
+	    text-align: center;
+	}
+    </style>
+</head>
+<body>
+<h1>Interactive Configurator</h1>
+
+<!--
+<input type="button" onclick="tryAjax()" value="rename ALL nodes"> <br />
+-->
+<input type="button" onclick="load_example()" value="Load example"> <br />
+
+
+
+<!-- Reference for loading file, the page contains fancier file
+ loading modes: https://www.html5rocks.com/en/tutorials/file/dndfiles/
+ https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers
+ -->
+<input type="file" id="cfr_file" accept=".cfr" />
+
+<!-- <form action="/upload/" method="put" enctype="multipart/form-data">
+  <div>
+    <label for="cfr_file">Choose Clafer file to upload</label>
+    <input type="file" id="cfr_file" name="cfrfileurl" accept=".cfr">
+  </div>
+  <div>
+    <button>Submit</button>
+  </div>
+</form>
+-->
+
+
+<div id="node-popUp">
+  <span id="node-operation">node</span> <br>
+  <table style="width:100%">
+    <!--
+    <tr>
+      <td>id</td><td><input id="node-id" value="new value" /></td>
+    </tr>
+    <tr>
+      <td>label</td><td><input id="node-label" value="new value" /></td>
+    </tr> -->
+    <tr>
+      <td>feat select</td><td><input type="checkbox" id="node-feature-select" name="select" checked></td>
+    <tr>
+      <td>card</td><td><input id="node-card" value="new value" /></td>
+    </tr>
+    </tr>
+  </table>
+  <input type="button" value="save" id="node-saveButton" />
+  <input type="button" value="cancel" id="node-cancelButton" />
+</div>
+
+<div id="network"></div>
+
+<script>
+  
+  // Global guid http://guid.us/GUID/JavaScript
+  // currently not using it, but was thinking of using it for token generation
+  function S4() {
+      return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+  }
+
+  // then to call it, plus stitch in '4' in the third group
+  guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
+  console.log('The GUID is '+ guid);
+
+  
+
+  function handleFileSelect(evt) {
+      /* snippet from https://blog.garstasio.com/you-dont-need-jquery/ajax/
+       The second one was chosen. */
+
+      /*var formData = new FormData(),
+	  file = document.getElementById('cfr_file').files[0],
+	  xhr = new XMLHttpRequest();
+
+      formData.append('file', file);
+      xhr.open('POST', '/upload/');
+      xhr.send(formData);
+      */
+
+      var file = document.getElementById('cfr_file').files[0],
+	  xhr = new XMLHttpRequest();
+
+      xhr.open('POST', '/upload/');
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.onload = function() {
+	  if (xhr.status === 200) {
+              console.log('Response from server: ' + xhr.responseText);
+              var changes = JSON.parse(xhr.responseText);
+              var ch = convert_response_to_nodes_and_edges(changes);
+              nodes.clear();
+              edges.clear();
+              nodes.add(ch.nodes);
+	      edges.add(ch.edges);
+	  }
+	  else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+	  }
+      };
+      console.log(file.type);
+      xhr.send(file);
+  }
+
+  document.getElementById('cfr_file').addEventListener('change', handleFileSelect, false);
+
+  /*var nodes = new vis.DataSet([
+      {id: 1, label: "N1"},
+      {id: 2, label: "N2"},
+      ...
+  ]);
+
+  var edges = new vis.DataSet([
+      {from: 1, to:2, id: "e1"},
+      {from: 1, to:3, id: "e2"},
+      ...
+  ]);
+  */
+
+  var nodes = new vis.DataSet([]);
+  var edges = new vis.DataSet([]);
+
+  var data = {
+      nodes: nodes,
+      edges: edges
+  };
+
+  var selected_nodes = [];
+
+  // create a network
+  var container = document.getElementById('network');
+  var options = {
+      layout: {
+          hierarchical: {
+              direction: "UD",
+              sortMethod: "directed",
+	      nodeSpacing: 150,
+          }
+      },
+      interaction: {
+	  dragNodes :false,
+	  selectConnectedEdges: false,
+      },
+      physics: {
+          enabled: false
+      },
+      configure: {
+          filter: function (option, path) {
+              if (path.indexOf('hierarchical') !== -1) {
+                  return true;
+              }
+              return false;
+          },
+          showButton:false
+      },
+      manipulation: {
+          editNode: function (data, callback) {
+              // filling in the popup DOM elements
+              document.getElementById('node-operation').innerHTML = "Feature Selection";
+              editNode(data, cancelNodeEdit, callback);
+          },
+      }
+  };
+
+
+  // from a node n, returns the edges to root
+  function edges_to_root(n){
+
+      var res = new Array();
+      var edges_ids = edges.getIds();
+
+      nodes.update({'id': n, 'shape': 'box'});
+
+      var edge;
+      for (eid in edges_ids) {
+	  edge = edges.get(edges_ids[eid]);
+	  if (edge['to'] === n) {
+	      res = res.concat([edge['id']]);
+
+	      edges.update({'id': edges_ids[eid], 'dashes': false});
+	      nodes.update({'id': edges.get(edges_ids[eid])['to'], 'shape': 'box'});
+	      nodes.update({'id': edges.get(edges_ids[eid])['from'], 'shape': 'box'});
+	      var r;
+	      r = edges_to_root(edge['from']);
+	      res = res.concat(r);
+	  }
+      }
+      console.log("Edges to root for node: " + res.toString());
+      return res;
+  };
+
+  function shade_edges(){
+      var edges_ids = edges.getIds();
+
+      var edge;
+      for (eid in edges_ids) {
+	  edges.update({'id': edges_ids[eid], 'dashes': true});
+	  nodes.update({'id': edges.get(edges_ids[eid])['to'], 'shape': 'text'});
+	  nodes.update({'id': edges.get(edges_ids[eid])['from'], 'shape': 'text'});
+      }
+  };
+
+  function tryAjax (){
+      var nodes_ids = nodes.getIds();
+      var arr_nodes = [];
+
+      for (idn in nodes_ids){
+	  arr_nodes.push({
+	      id: nodes_ids[idn],
+	      label: nodes.get(nodes_ids[idn])["label"]
+	  });
+      }
+      console.log("array of nodes: " + JSON.stringify(arr_nodes));
+
+      /* Ajax with JQuery */
+      $.ajax(
+      	  "/refine",
+	  { headers: {"Content-Type": "application/json"},
+	    data: JSON.stringify(arr_nodes),
+	    type: 'put',
+	    dataType: 'json' }
+      ).then(
+       	  function success(changes) {
+	      console.log("Response changes: " + JSON.stringify(changes));
+      	      for (var i in changes) {
+		  console.log('received id:' + changes[i]);
+       		  nodes.update({id:changes[i]['id'], label: changes[i]['label'] + 'A'});
+       	      }
+       	  },
+	  function error(err) {
+	      console.log("The error is :" + err);
+	  }
+      );
+
+  };
+
+  function convert_response_to_nodes_and_edges(d) {
+      if (d.hasOwnProperty('ident')) {
+	  var n = new Array();
+	  var e = new Array();
+
+	  n = n.concat([{'id': d.ident, 'label': d.ident, 'shape': 'text' }]);
+	  var arrayLength = d['subnodes'].length;
+	  for (var i = 0; i <  arrayLength; i++) {
+	      var d1 = d['subnodes'][i];
+	      var r = convert_response_to_nodes_and_edges(d1);
+	      n = n.concat(r.nodes);
+	      e = e.concat([{
+		  'id': d.ident + d1['ident'],
+		  'label': '',
+		  'from': d.ident,
+		  'to': d1['ident'],
+		  'dashes': true,
+	      }]);
+	      e = e.concat(r.edges);
+	  }
+	  console.log('nodes and edges:')
+	  console.log(n);
+	  console.log(e);
+	  return {'nodes': n, 'edges': e, 'shape': 'text'};
+      }else{
+	  return {'nodes': [], 'edges': []};
+      }
+  };
+
+  function load_example() {
+      /* Ajax in pure javascript instead of jQuery */
+      var xhr = new XMLHttpRequest();
+      xhr.open('PUT', '/loadexample/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+	  if (xhr.status === 200) {
+              console.log('Response from server: ' + xhr.responseText);
+	      var changes = JSON.parse(xhr.responseText);
+	      var ch = convert_response_to_nodes_and_edges(changes);
+	      console.log('done converting to nodes and edges');
+	      console.log(JSON.stringify(ch));
+	      nodes.clear();
+	      edges.clear();
+	      nodes.add(ch.nodes);
+	      edges.add(ch.edges);
+	  }
+	  else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+	  }
+      };
+      xhr.send(JSON.stringify([]));
+
+  }
+
+  // reference: demo from visjs website
+  // http://visjs.org/examples/network/other/manipulationEditEdgeNoDrag.html
+  function editNode(data, cancelAction, callback) {
+      document.getElementById('node-card').value = data.card;
+      document.getElementById('node-feature-select').checked = ! document.getElementById('node-feature-select').checked;
+      document.getElementById('node-saveButton').onclick = saveNodeData.bind(this, data, callback);
+      document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
+      document.getElementById('node-popUp').style.display = 'block';
+  };
+  // Callback passed as parameter is ignored
+  function clearNodePopUp() {
+      document.getElementById('node-saveButton').onclick = null;
+      document.getElementById('node-cancelButton').onclick = null;
+      document.getElementById('node-popUp').style.display = 'none';
+  };
+  function cancelNodeEdit(callback) {
+      clearNodePopUp();
+      callback(null);
+  };
+  function saveNodeData(data, callback) {
+      data.card = document.getElementById('node-card').value;
+      data.label = data.label + '\n' + data.card;
+      clearNodePopUp();
+      callback(data);
+  };
+
+  var network = new vis.Network(container, data, options);
+
+  network.on("click", function (params) {
+      /*
+      params.event = "[original event]";
+      document.getElementById('eventSpan').innerHTML = '<h2>Click event:</h2>' + JSON.stringify(params, null, 4);
+      */
+      console.log('click event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
+      console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
+      edges_to_root(this.getNodeAt(params.pointer.DOM));
+  });
+
+  network.on("doubleClick", function (params) {
+      console.log('doubleClick event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
+      console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
+      edges_to_root(this.getNodeAt(params.pointer.DOM));
+      editNode(this.getNodeAt(params.pointer.DOM), cancelNodeEdit, function(data){});
+
+  });
+</script>
+</body>
+</html>
