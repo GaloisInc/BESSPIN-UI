@@ -39,7 +39,7 @@ class ClaferModule:
 
         # start the traversal
         group = [iclafer_to_conftree(elm) for elm in decls]
-        return ConfTree(ident='Module', group=group)
+        return ConfTree(ident='Module', uid='Module', group=group)
 
     def unfold_product(self, prod):
         """
@@ -49,14 +49,11 @@ class ClaferModule:
         iclafer = prod['iClafer']
 
         if 'super' in iclafer and not iclafer['elements']:
-            app.logger.debug('USPER')
             # notice it could also be ['super']['exp']['binding']
             assert iclafer['super']['exp']['isTop'] is True
             abstract = self.find_uid(iclafer['super']['exp']['sident'])
-            app.logger.debug('SDFSDF ' + json.dumps(abstract))
             iclafer['elements'] = abstract['iClafer']['elements'] if abstract is not None else []
 
-        #app.logger.debug('BUILT '+ json.dumps(prod))
         return prod
 
     @classmethod
@@ -120,7 +117,11 @@ class ClaferModule:
         prod = self.unfold_product(prod)
         return iclafer_to_conftree(prod)
 
-
+FORCEDON = 'FORCEDON'
+FORCEDOFF = 'FORCEDOFF'
+USERSELECTED = 'USERSELECTED'
+USERREJECTED = 'USERREJECTED'
+UNCONFIGURED = 'UNCONFIGURED'
 
 class ConfTree:
     """
@@ -139,9 +140,23 @@ class ConfTree:
         self.uid = uid # unique id
         self.ident = ident # a name
         self.itype = itype # the type of the Node
+        self.selection_state = self._compute_state(card) # from Hari
         self.card = card # [0..1], [1..1], [0..*], etc.
         self.group_card = group_card # or [1..*], xor, [1..1]
         self.group = group # a list of ConfTree
+
+    @classmethod
+    def _compute_state(cls, card):
+        """
+        Compute selection state
+        """
+        # return [FORCEDON, FORCEDOFF, USERSELECTED, USERREJECTED, UNCONFIGURED]
+        if card == [1,1]:
+            return FORCEDON
+        elif card == [0,0]:
+            return FORCEDOFF
+        else:
+            return UNCONFIGURED
 
     def to_json(self):
         """
@@ -150,9 +165,11 @@ class ConfTree:
         groupjson = [t.to_json() for t in self.group]
         return {
             'ident': self.ident,
+            'uid': self.uid,
             'card': self.card,
             'group_card': self.group_card,
             'group': groupjson,
+            'selection_state': self.selection_state,
         }
 
 def load_json(filename):
@@ -165,26 +182,33 @@ def load_json(filename):
     return json.loads(page)
 
 
-def iclafer_to_conftree(d):
+def iclafer_to_conftree(node):
     """
-    Convert a json clafer model for iclafer node into a ConfTree.
+    Convert a iclafer node into a ConfTree.
 
     :return: a Tree or None if it is not a iClafer
     """
 
-    if 'iClafer' not in d:
+    if 'iClafer' not in node:
         return None
 
-    d = d['iClafer']
-    ident = d['ident']
+    iclafer = node['iClafer']
+    ident = iclafer['ident']
+    uid = iclafer['uid']
 
     t = []
-    if 'elements' in d:
-        ts = [iclafer_to_conftree(e) for e in d['elements']]
+    if 'elements' in iclafer:
+        ts = [iclafer_to_conftree(e) for e in iclafer['elements']]
         ts = [t for t in ts if t is not None]
 
-    assert 'card' in d
-    t = ConfTree(ident=ident, card=d['card'], group=ts)
+    assert 'card' in iclafer
+    t = ConfTree(
+        ident=ident,
+        uid=uid,
+        card=iclafer['card'],
+        group_card=iclafer['gcard']['interval'],
+        group=ts
+    )
 
     return t
 
