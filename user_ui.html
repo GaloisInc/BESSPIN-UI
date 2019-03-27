@@ -42,6 +42,7 @@
 <input type="button" onclick="tryAjax()" value="rename ALL nodes"> <br />
 -->
 <input type="button" onclick="load_example()" value="Load example"> <br />
+<input type="button" onclick="send_configured_features()" value="Send configurations"> <br />
 
 
 
@@ -166,8 +167,6 @@
       nodes: nodes,
       edges: edges
   };
-
-  var selected_nodes = {};
 
   // create a network
   var container = document.getElementById('network');
@@ -306,13 +305,13 @@
 
           if (! compare_card(d.card, [1,1]))
               node1['color'] = '#ffffff';
-          switch (d.select_state) {
+          switch (d.selection_state) {
               case 'FORCEDON': {
-                  node1['color'] = '#00ff00';
+                  node1['color'] = '#aaffaa';
                   break;
               };
               case 'FORCEDOFF': {
-                  node1['color'] = '#ff0000';
+                  node1['color'] = '#ffaaaa';
                   break;
               };
               case 'USERSELECTED': {
@@ -330,7 +329,7 @@
           };
           console.log(selected_nodes);
           if (d.uid in selected_nodes) {
-              switch (selected_nodes[d.uid]) {
+              switch (selected_nodes[d.uid][0]) {
               case 'selected': {
                   node1['color'] = '#00cc00';
                   break;
@@ -408,6 +407,25 @@
       return;
   };
 
+  function path_to_uid(tree, uid, path) {
+      var new_path;
+      if (path == '')
+          new_path = path + tree['ident'];
+      else
+          new_path = path + '.' + tree['ident'];
+
+      if (tree['uid'] == uid) {
+          return new_path;
+      }
+      var res;
+      for (var elem in tree['group']) {
+          res = path_to_uid(tree['group'][elem], uid, new_path);
+          if (res != null)
+              return res;
+      }
+      return;
+  };
+
 
   function load_example() {
       /* Ajax in pure javascript instead of jQuery */
@@ -427,6 +445,24 @@
       xhr.send(JSON.stringify([]));
   };
 
+  function send_configured_features() {
+      /* Ajax in pure javascript instead of jQuery */
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/configure/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log('Response from server: ' + xhr.responseText);
+          }
+          else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+          }
+      };
+
+      xhr.send(JSON.stringify(selected_nodes));
+  };
+
+
   // reference: demo from visjs website
   // http://visjs.org/examples/network/other/manipulationEditEdgeNoDrag.html
   function editNode(data, cancelAction, callback) {
@@ -438,7 +474,6 @@
       console.log(document.getElementById('feature-select-option').value);
 
       var select_button = document.getElementById('feature-select-option');
-      var newOptionsHtml = "<option value='dsdfs'>sdfsdf</option>"
       switch (thenode.selection_state) {
       case 'FORCEDON': {
           select_button.disabled = true;
@@ -500,19 +535,19 @@
       case 'unconfigured': {
           select_button.value = 'unconfigured';
           update_conftree(global_conftree, data, 'card', [0, 1]);
-          selected_nodes[data] = 'unconfigured';
+          selected_nodes[data] = ['unconfigured', path_to_uid(global_conftree, data, '')];
           break;
       };
       case 'selected': {
           select_button.value = 'selected';
           update_conftree(global_conftree, data, 'card', [1, 1]);
-          selected_nodes[data] = 'selected';
+          selected_nodes[data] = ['selected', path_to_uid(global_conftree, data, '')];
           break;
       };
       case 'rejected': {
           select_button.value = 'rejected';
           update_conftree(global_conftree, data, 'card', [0, 0]);
-          selected_nodes[data] = 'rejected';
+          selected_nodes[data] = ['rejected', path_to_uid(global_conftree, data, '')];
           break;
       };
       default: {

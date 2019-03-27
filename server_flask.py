@@ -17,7 +17,6 @@ app = Flask(__name__)
 
 default_handler.setLevel(logging.DEBUG)
 
-
 class ClaferModule:
     """
     A class providing functionalities for processing
@@ -212,7 +211,14 @@ def iclafer_to_conftree(node):
 
     return t
 
-
+def selected_features_to_constraints(feats):
+    res = ""
+    for ident, sel in feats.items():
+        if sel[0] == 'selected':
+            res += "\n" + "[ " + sel[1] + " ]"
+        elif sel[0] == 'rejected':
+            res += "\n" + "[ !" + sel[1] + " ]"
+    return res
 
 @app.route('/')
 def feature_configurator():
@@ -269,6 +275,35 @@ def upload_file():
     tree = imodule.build_conftree()
     app.logger.debug('tree to respond: ' + str(tree.to_json()))
     return json.dumps(tree.to_json())
+
+@app.route('/configure/', methods=['POST'])
+def configure_features():
+    """
+    upload a clafer file
+    """
+    app.logger.debug('configure')
+
+    # TODO: REPLACE with file sent
+    source_file = 'secure_cpu_example_flattened2.cfr'
+    filename = './configured_file'
+    filename_cfr = filename + '.cfr'
+    filename_json = filename + '.json'
+    with open(source_file, 'r') as f:
+        file_content = f.read()
+
+    constraints = selected_features_to_constraints(json.loads(request.data))
+    with open(filename_cfr, 'a') as f:
+        f.write(str(file_content))
+        f.write(constraints)
+
+    cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
+    app.logger.debug('\n sdfdsf\n')
+    app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
+    d = load_json(filename_json)
+
+    return json.dumps({})
+
+
 
 
 @app.route('/loadexample/', methods=['PUT'])
