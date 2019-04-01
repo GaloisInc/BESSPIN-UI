@@ -18,21 +18,21 @@
         table {
             width:800px;
         }
-	#node-popUp {
-	    display:none;
-	    position:absolute;
-	    top:350px;
-	    left:170px;
-	    z-index:299;
-	    width:250px;
-	    height:120px;
-	    background-color: #f9f9f9;
-	    border-style:solid;
-	    border-width:3px;
-	    border-color: #5394ed;
-	    padding:10px;
-	    text-align: center;
-	}
+        #node-popUp {
+            display:none;
+            position:absolute;
+            top:350px;
+            left:170px;
+            z-index:299;
+            width:250px;
+            height:120px;
+            background-color: #f9f9f9;
+            border-style:solid;
+            border-width:3px;
+            border-color: #5394ed;
+            padding:10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -42,6 +42,7 @@
 <input type="button" onclick="tryAjax()" value="rename ALL nodes"> <br />
 -->
 <input type="button" onclick="load_example()" value="Load example"> <br />
+<input type="button" onclick="send_configured_features()" value="Send configurations"> <br />
 
 
 
@@ -74,10 +75,20 @@
       <td>label</td><td><input id="node-label" value="new value" /></td>
     </tr> -->
     <tr>
-      <td>feat select</td><td><input type="checkbox" id="node-feature-select" name="select" checked></td>
-    <tr>
-      <td>card</td><td><input id="node-card" value="new value" /></td>
+      <td>Selection</td>
+      <td>
+        <select id="feature-select-option">
+          <option value="unconfigured">Unconfigured</option>
+          <option value="selected">Select</option>
+          <option value="rejected">Reject</option>
+        </select>
+      </td>
     </tr>
+    <!-- <tr>
+      <td>Select</td><td><input type="checkbox" id="node-feature-select" name="select" checked></td>
+    </tr> -->
+    <tr>
+      <td>Card</td><td><input id="node-card" value="new value" /></td>
     </tr>
   </table>
   <input type="button" value="save" id="node-saveButton" />
@@ -87,7 +98,7 @@
 <div id="network"></div>
 
 <script>
-  
+
   // Global guid http://guid.us/GUID/JavaScript
   // currently not using it, but was thinking of using it for token generation
   function S4() {
@@ -98,15 +109,14 @@
   guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
   console.log('The GUID is '+ guid);
 
-  
 
   function handleFileSelect(evt) {
       /* snippet from https://blog.garstasio.com/you-dont-need-jquery/ajax/
        The second one was chosen. */
 
       /*var formData = new FormData(),
-	  file = document.getElementById('cfr_file').files[0],
-	  xhr = new XMLHttpRequest();
+          file = document.getElementById('cfr_file').files[0],
+          xhr = new XMLHttpRequest();
 
       formData.append('file', file);
       xhr.open('POST', '/upload/');
@@ -114,23 +124,19 @@
       */
 
       var file = document.getElementById('cfr_file').files[0],
-	  xhr = new XMLHttpRequest();
+          xhr = new XMLHttpRequest();
 
       xhr.open('POST', '/upload/');
       xhr.setRequestHeader('Content-Type', file.type);
       xhr.onload = function() {
-	  if (xhr.status === 200) {
+          if (xhr.status === 200) {
               console.log('Response from server: ' + xhr.responseText);
-              var changes = JSON.parse(xhr.responseText);
-              var ch = convert_response_to_nodes_and_edges(changes);
-              nodes.clear();
-              edges.clear();
-              nodes.add(ch.nodes);
-	      edges.add(ch.edges);
-	  }
-	  else {
+              global_conftree = JSON.parse(xhr.responseText);
+              draw_conftree(global_conftree);
+          }
+          else {
               alert('Request failed.  Returned status of ' + xhr.status);
-	  }
+          }
       };
       console.log(file.type);
       xhr.send(file);
@@ -151,6 +157,9 @@
   ]);
   */
 
+  var global_conftree = {};
+  var selected_nodes = {};
+
   var nodes = new vis.DataSet([]);
   var edges = new vis.DataSet([]);
 
@@ -159,8 +168,6 @@
       edges: edges
   };
 
-  var selected_nodes = [];
-
   // create a network
   var container = document.getElementById('network');
   var options = {
@@ -168,12 +175,12 @@
           hierarchical: {
               direction: "UD",
               sortMethod: "directed",
-	      nodeSpacing: 150,
+              nodeSpacing: 150,
           }
       },
       interaction: {
-	  dragNodes :false,
-	  selectConnectedEdges: false,
+          dragNodes :false,
+          selectConnectedEdges: false,
       },
       physics: {
           enabled: false
@@ -207,19 +214,19 @@
 
       var edge;
       for (eid in edges_ids) {
-	  edge = edges.get(edges_ids[eid]);
-	  if (edge['to'] === n) {
-	      res = res.concat([edge['id']]);
+          edge = edges.get(edges_ids[eid]);
+          if (edge['to'] === n) {
+              res = res.concat([edge['id']]);
 
-	      edges.update({'id': edges_ids[eid], 'dashes': false});
-	      nodes.update({'id': edges.get(edges_ids[eid])['to'], 'shape': 'box'});
-	      nodes.update({'id': edges.get(edges_ids[eid])['from'], 'shape': 'box'});
-	      var r;
-	      r = edges_to_root(edge['from']);
-	      res = res.concat(r);
-	  }
+              edges.update({'id': edges_ids[eid], 'dashes': false});
+              nodes.update({'id': edges.get(edges_ids[eid])['to'], 'shape': 'box'});
+              nodes.update({'id': edges.get(edges_ids[eid])['from'], 'shape': 'box'});
+              var r;
+              r = edges_to_root(edge['from']);
+              res = res.concat(r);
+          }
       }
-      console.log("Edges to root for node: " + res.toString());
+      // console.log("Edges to root for node: " + res.toString());
       return res;
   };
 
@@ -228,9 +235,9 @@
 
       var edge;
       for (eid in edges_ids) {
-	  edges.update({'id': edges_ids[eid], 'dashes': true});
-	  nodes.update({'id': edges.get(edges_ids[eid])['to'], 'shape': 'text'});
-	  nodes.update({'id': edges.get(edges_ids[eid])['from'], 'shape': 'text'});
+          edges.update({'id': edges_ids[eid], 'dashes': true});
+          nodes.update({'id': edges.get(edges_ids[eid])['to'], 'shape': 'text'});
+          nodes.update({'id': edges.get(edges_ids[eid])['from'], 'shape': 'text'});
       }
   };
 
@@ -239,63 +246,186 @@
       var arr_nodes = [];
 
       for (idn in nodes_ids){
-	  arr_nodes.push({
-	      id: nodes_ids[idn],
-	      label: nodes.get(nodes_ids[idn])["label"]
-	  });
+          arr_nodes.push({
+              id: nodes_ids[idn],
+              label: nodes.get(nodes_ids[idn])["label"]
+          });
       }
       console.log("array of nodes: " + JSON.stringify(arr_nodes));
 
       /* Ajax with JQuery */
       $.ajax(
-      	  "/refine",
-	  { headers: {"Content-Type": "application/json"},
-	    data: JSON.stringify(arr_nodes),
-	    type: 'put',
-	    dataType: 'json' }
+          "/refine",
+          { headers: {"Content-Type": "application/json"},
+            data: JSON.stringify(arr_nodes),
+            type: 'put',
+            dataType: 'json' }
       ).then(
-       	  function success(changes) {
-	      console.log("Response changes: " + JSON.stringify(changes));
-      	      for (var i in changes) {
-		  console.log('received id:' + changes[i]);
-       		  nodes.update({id:changes[i]['id'], label: changes[i]['label'] + 'A'});
-       	      }
-       	  },
-	  function error(err) {
-	      console.log("The error is :" + err);
-	  }
+          function success(changes) {
+              console.log("Response changes: " + JSON.stringify(changes));
+              for (var i in changes) {
+                  console.log('received id:' + changes[i]);
+                  nodes.update({id:changes[i]['id'], label: changes[i]['label'] + 'A'});
+              }
+          },
+          function error(err) {
+              console.log("The error is :" + err);
+          }
       );
-
   };
 
-  function convert_response_to_nodes_and_edges(d) {
-      if (d.hasOwnProperty('ident')) {
-	  var n = new Array();
-	  var e = new Array();
+  function compare_card(arr1, arr2){
+      if (arr1.length != arr2.length)
+          return false;
 
-	  n = n.concat([{'id': d.ident, 'label': d.ident, 'shape': 'text' }]);
-	  var arrayLength = d['subnodes'].length;
-	  for (var i = 0; i <  arrayLength; i++) {
-	      var d1 = d['subnodes'][i];
-	      var r = convert_response_to_nodes_and_edges(d1);
-	      n = n.concat(r.nodes);
-	      e = e.concat([{
-		  'id': d.ident + d1['ident'],
-		  'label': '',
-		  'from': d.ident,
-		  'to': d1['ident'],
-		  'dashes': true,
-	      }]);
-	      e = e.concat(r.edges);
-	  }
-	  console.log('nodes and edges:')
-	  console.log(n);
-	  console.log(e);
-	  return {'nodes': n, 'edges': e, 'shape': 'text'};
+      if (arr1.length != 2)
+          return false;
+
+      if (arr1[0] == arr2[0] && arr1[1] == arr2[1])
+          return true;
+
+      return false;
+  };
+
+  function conftree_to_nodes_and_edges(d) {
+      if (d.hasOwnProperty('ident')) {
+          var n = new Array();
+          var e = new Array();
+
+          var gcard = '';
+          if (compare_card(d.group_card, [1, -1]))
+              gcard = 'Or';       else if (compare_card(d.group_card, [1, 1]))
+              gcard = 'Xor';
+
+          var node1 = {
+              'id': d.uid,
+              'label': d.ident + '\n [' + d.card + ']\n ' + gcard,
+              'shape': 'box',
+          };
+
+          if (! compare_card(d.card, [1,1]))
+              node1['color'] = '#ffffff';
+          switch (d.selection_state) {
+              case 'FORCEDON': {
+                  node1['color'] = '#aaffaa';
+                  break;
+              };
+              case 'FORCEDOFF': {
+                  node1['color'] = '#ffaaaa';
+                  break;
+              };
+              case 'USERSELECTED': {
+                  node1['color'] = '#00AA00';
+                  break;
+              };
+              case 'USERREJECTED': {
+                  node1['color'] = '#AA0000';
+                  break;
+              };
+              case 'UNCONFIGURED': {
+                  node1['color'] = '#ffffff';
+                  break;
+              };
+          };
+          console.log(selected_nodes);
+          if (d.uid in selected_nodes) {
+              switch (selected_nodes[d.uid][0]) {
+              case 'selected': {
+                  node1['color'] = '#00cc00';
+                  break;
+              };
+              case 'rejected': {
+                  node1['color'] = '#cc0000';
+                  break;
+              };
+              case 'unconfigured': {
+                  node1['color'] = '#ffffff';
+                  break;
+              };
+              };
+          }
+          n = n.concat([node1]);
+
+          for (var i in d['group']) {
+              var d1 = d['group'][i];
+              var r = conftree_to_nodes_and_edges(d1);
+              n = n.concat(r.nodes);
+              var isdashes = !(compare_card(d.card, [1,1]) &&
+                               compare_card(d1.card, [1,1]));
+              e = e.concat([{
+                  'id': d.uid + d1['uid'],
+                  'label': '',
+                  'from': d.uid,
+                  'to': d1['uid'],
+                  'dashes': isdashes,
+              }]);
+              e = e.concat(r.edges);
+          }
+          //console.log('nodes and edges:')
+          //console.log(n);
+          //console.log(e);
+          return {'nodes': n, 'edges': e, 'shape': 'text'};
       }else{
-	  return {'nodes': [], 'edges': []};
+          return {'nodes': [], 'edges': []};
       }
   };
+
+  function draw_conftree(conftree){
+      var ch = conftree_to_nodes_and_edges(conftree);
+      //console.log('done converting to nodes and edges');
+      //console.log(JSON.stringify(ch));
+      nodes.clear();
+      edges.clear();
+      nodes.add(ch.nodes);
+      edges.add(ch.edges);
+  }
+
+
+  function update_conftree(tree, uid, key, value) {
+      console.log('update_conftree');
+      console.log(tree['uid']);
+      if (tree['uid'] == uid) {
+          tree[key] = value;
+          return;
+      }
+      for (var elem in tree['group']) {
+          update_conftree(tree['group'][elem], uid, key, value);
+      }
+      return;
+  };
+
+  function find_uid_conftree(tree, uid) {
+      if (tree['uid'] == uid) {
+          return tree;
+      }
+      var res;
+      for (var elem in tree['group']) {
+          res = find_uid_conftree(tree['group'][elem], uid);
+          if (res != null)
+              return res;
+      }
+      return;
+  };
+
+  function path_to_uid(tree, uid, path) {
+      var new_path;
+      if (path == '')
+          new_path = path + tree['ident'];
+      else
+          new_path = path + '.' + tree['ident'];
+
+      if (tree['uid'] == uid) {
+          return new_path;
+      }
+      var res;
+      for (var elem in tree['group']) {
+          res = path_to_uid(tree['group'][elem], uid, new_path);
+          if (res != null)
+              return res;
+      }
+      return;
+  };
+
 
   function load_example() {
       /* Ajax in pure javascript instead of jQuery */
@@ -303,30 +433,76 @@
       xhr.open('PUT', '/loadexample/');
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = function() {
-	  if (xhr.status === 200) {
+          if (xhr.status === 200) {
               console.log('Response from server: ' + xhr.responseText);
-	      var changes = JSON.parse(xhr.responseText);
-	      var ch = convert_response_to_nodes_and_edges(changes);
-	      console.log('done converting to nodes and edges');
-	      console.log(JSON.stringify(ch));
-	      nodes.clear();
-	      edges.clear();
-	      nodes.add(ch.nodes);
-	      edges.add(ch.edges);
-	  }
-	  else {
+              var conftree = JSON.parse(xhr.responseText);
+              draw_conftree(conftree);
+          }
+          else {
               alert('Request failed.  Returned status of ' + xhr.status);
-	  }
+          }
       };
       xhr.send(JSON.stringify([]));
+  };
 
-  }
+  function send_configured_features() {
+      /* Ajax in pure javascript instead of jQuery */
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/configure/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log('Response from server: ' + xhr.responseText);
+          }
+          else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+          }
+      };
+
+      xhr.send(JSON.stringify(selected_nodes));
+  };
+
 
   // reference: demo from visjs website
   // http://visjs.org/examples/network/other/manipulationEditEdgeNoDrag.html
   function editNode(data, cancelAction, callback) {
-      document.getElementById('node-card').value = data.card;
-      document.getElementById('node-feature-select').checked = ! document.getElementById('node-feature-select').checked;
+      var thenode = find_uid_conftree(global_conftree, data);
+      var thecard = thenode['card'];
+      document.getElementById('node-card').value = thecard;
+      //var ischecked;
+      //ischecked = compare_card(thecard, [1, 1]);
+      console.log(document.getElementById('feature-select-option').value);
+
+      var select_button = document.getElementById('feature-select-option');
+      switch (thenode.selection_state) {
+      case 'FORCEDON': {
+          select_button.disabled = true;
+          break;
+      };
+      case 'FORCEDOFF': {
+          select_button.disabled = true;
+          break;
+      };
+      case 'USERSELECTED': {
+          select_button.disabled = false;
+          break;
+      };
+      case 'USERREJECTED': {
+          select_button.disabled = false;
+          break;
+      };
+      case 'UNCONFIGURED': {
+          select_button.disabled = false;
+          break;
+      };
+      default: {
+          alert('no choice');
+      }
+      };
+
+
+      //document.getElementById('node-feature-select').checked = ischecked;
+
       document.getElementById('node-saveButton').onclick = saveNodeData.bind(this, data, callback);
       document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
       document.getElementById('node-popUp').style.display = 'block';
@@ -342,28 +518,63 @@
       callback(null);
   };
   function saveNodeData(data, callback) {
-      data.card = document.getElementById('node-card').value;
-      data.label = data.label + '\n' + data.card;
+      var thenode = find_uid_conftree(global_conftree, data);
+      //data.card = document.getElementById('node-card').value;
+      //if (document.getElementById('node-feature-select').checked) {
+//        update_conftree(global_conftree, data, 'card', [1, 1]);
+//        draw_conftree(global_conftree);
+          /*var ch = convert_response_to_nodes_and_edges(global_conftree);
+          nodes.clear();
+          edges.clear();
+          nodes.add(ch.nodes);
+          edges.add(ch.edges);*/
+      //}
+      var select_button = document.getElementById('feature-select-option');
+      var newOptionsHtml = "<option value='dsdfs'>sdfsdf</option>"
+      switch (select_button.value) {
+      case 'unconfigured': {
+          select_button.value = 'unconfigured';
+          update_conftree(global_conftree, data, 'card', [0, 1]);
+          selected_nodes[data] = ['unconfigured', path_to_uid(global_conftree, data, '')];
+          break;
+      };
+      case 'selected': {
+          select_button.value = 'selected';
+          update_conftree(global_conftree, data, 'card', [1, 1]);
+          selected_nodes[data] = ['selected', path_to_uid(global_conftree, data, '')];
+          break;
+      };
+      case 'rejected': {
+          select_button.value = 'rejected';
+          update_conftree(global_conftree, data, 'card', [0, 0]);
+          selected_nodes[data] = ['rejected', path_to_uid(global_conftree, data, '')];
+          break;
+      };
+      default: {
+          alert('no choice');
+      }
+      };
+
+      draw_conftree(global_conftree);
       clearNodePopUp();
       callback(data);
   };
 
   var network = new vis.Network(container, data, options);
 
-  network.on("click", function (params) {
-      /*
-      params.event = "[original event]";
-      document.getElementById('eventSpan').innerHTML = '<h2>Click event:</h2>' + JSON.stringify(params, null, 4);
-      */
-      console.log('click event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
-      console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
-      edges_to_root(this.getNodeAt(params.pointer.DOM));
-  });
+  // network.on("click", function (params) {
+  //     /*
+  //     params.event = "[original event]";
+  //     document.getElementById('eventSpan').innerHTML = '<h2>Click event:</h2>' + JSON.stringify(params, null, 4);
+  //     */
+  //     console.log('click event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
+  //     console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
+  //     edges_to_root(this.getNodeAt(params.pointer.DOM));
+  // });
 
   network.on("doubleClick", function (params) {
       console.log('doubleClick event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
       console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
-      edges_to_root(this.getNodeAt(params.pointer.DOM));
       editNode(this.getNodeAt(params.pointer.DOM), cancelNodeEdit, function(data){});
 
   });
