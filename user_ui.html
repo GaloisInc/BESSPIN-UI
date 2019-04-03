@@ -132,6 +132,7 @@
           if (xhr.status === 200) {
               console.log('Response from server: ' + xhr.responseText);
               global_conftree = JSON.parse(xhr.responseText);
+              selected_nodes = {}
               draw_conftree(global_conftree);
           }
           else {
