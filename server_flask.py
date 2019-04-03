@@ -1,7 +1,7 @@
 """
 A feature model configurator web app
 """
-
+import os
 import logging
 import json
 import subprocess
@@ -261,7 +261,7 @@ def uploadold_file():
     with open(filename_cfr, 'wb') as f:
         f.write(request.data)
 
-    cp = subprocess.run(['clafer', filename_cfr, '-m=json'], capture_output=True)
+    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
     app.logger.info('Clafer output: ' + str(cp.stdout))
     d = load_json(filename_json)
     t = ClaferModule(d).to_conftree()
@@ -284,6 +284,7 @@ def upload_file():
         f.write(request.data)
 
     cp = subprocess.run(['clafer', filename_cfr, '-m=json'], capture_output=True)
+    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
     app.logger.info('Clafer output: ' + str(cp.stdout))
     d = load_json(filename_json)
     imodule = ClaferModule(d)
