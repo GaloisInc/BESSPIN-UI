@@ -8,6 +8,7 @@ import subprocess
 from flask import Flask
 from flask import request
 from flask.logging import default_handler
+from uuid import uuid4
 
 # pylint: disable=invalid-name
 # pylint: disable=no-member
@@ -32,6 +33,7 @@ class ClaferModule:
 
         :return: Tree
         """
+        # TODO: deprecated!! Should cleanup when ready
         # get to the list of declarations:
         content = self.module['iModule']
         decls = content['mDecls']
@@ -95,9 +97,12 @@ class ClaferModule:
         decls = self.module['iModule']['mDecls']
         res = []
         for decl in decls:
-            assert isinstance(decl['iClafer']['isAbstract'], bool)
-            if not decl['iClafer']['isAbstract']:
-                res += [decl]
+            if decl['tag'] == 'IEClafer':
+                assert isinstance(decl['iClafer']['isAbstract'], bool)
+                if not decl['iClafer']['isAbstract']:
+                    res += [decl]
+            else:
+                 assert decl['tag'] == 'IEConstraint'
         return res
 
 
@@ -108,13 +113,23 @@ class ClaferModule:
         :return: Tree
         """
         prods = self.find_products()
-        if prods == []:
+        nb_prods = len(prods)
+        if nb_prods == 0:
             return None
-
-        # TODO: generalize to more than one. Currently just one:
-        prod = prods[0]
-        prod = self.unfold_product(prod)
-        return iclafer_to_conftree(prod)
+        elif nb_prods == 1:
+            prod = prods[0]
+            prod = self.unfold_product(prod)
+            return iclafer_to_conftree(prod)
+        else: # > 1
+            prods = [iclafer_to_conftree(prod) for prod in prods]
+            t = ConfTree(
+                ident='Features',
+                uid=str(uuid4()),
+                card=[1,1],
+                group_card=[0,-1],
+                group=prods,
+            )
+            return t
 
 FORCEDON = 'FORCEDON'
 FORCEDOFF = 'FORCEDOFF'
