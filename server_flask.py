@@ -5,6 +5,7 @@ import os
 import logging
 import json
 import subprocess
+import tempfile
 from flask import Flask
 from flask import request
 from flask.logging import default_handler
@@ -12,6 +13,17 @@ from uuid import uuid4
 
 # pylint: disable=invalid-name
 # pylint: disable=no-member
+
+
+CODE_DIR = os.path.dirname(__file__)
+
+if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
+    WORK_DIR_OBJ = tempfile.TemporaryDirectory()
+    WORK_DIR = WORK_DIR_OBJ.name
+else:
+    WORK_DIR = '.'
+
+CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
 
 
 app = Flask(__name__)
@@ -241,7 +253,7 @@ def feature_configurator():
     endpoint for the configurator app
     """
     app.logger.info('feature configurator')
-    filepath = './user_ui.html'
+    filepath = os.path.join(CODE_DIR, 'user_ui.html')
     with open(filepath) as f:
         page = f.read()
         app.logger.debug(page)
@@ -255,7 +267,7 @@ def uploadold_file():
     app.logger.debug('load file')
 
     # TODO: save to a filename that depends on user token
-    filename = './generated_file'
+    filename = os.path.join(WORK_DIR, 'generated_file')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.json'
     with open(filename_cfr, 'wb') as f:
@@ -277,13 +289,12 @@ def upload_file():
     app.logger.debug('load file')
 
     # TODO: save to a filename that depends on user token
-    filename = './generated_file'
+    filename = os.path.join(WORK_DIR, 'generated_file')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.json'
     with open(filename_cfr, 'wb') as f:
         f.write(request.data)
 
-    cp = subprocess.run(['clafer', filename_cfr, '-m=json'], capture_output=True)
     cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
     app.logger.info('Clafer output: ' + str(cp.stdout))
     d = load_json(filename_json)
@@ -300,8 +311,8 @@ def configure_features():
     app.logger.debug('configure')
 
     # TODO: REPLACE with file sent
-    source_file = 'secure_cpu_example_flattened2.cfr'
-    filename = './configured_file'
+    source_file = os.path.join(CODE_DIR, 'secure_cpu_example_flattened2.cfr')
+    filename = os.path.join(WORK_DIR, 'configured_file')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.json'
     with open(source_file, 'r') as f:
@@ -328,7 +339,7 @@ def load_example():
     load example file
     """
     app.logger.debug('load example file')
-    tempfilepath = 'secure_cpu_example_flattened.json'
+    tempfilepath = os.path.join(CODE_DIR, 'secure_cpu_example_flattened.json')
     d = load_json(tempfilepath)
     t = ClaferModule(d).to_conftree()
     app.logger.debug(str(t.to_json()))
