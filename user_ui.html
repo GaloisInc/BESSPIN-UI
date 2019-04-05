@@ -155,7 +155,29 @@
   <input type="button" value="cancel" id="node-cancelButton" />
 </div>
 
+
 <div id="network"></div>
+
+<label for="download-button" class="custom-download-button">
+  <!-- <i class="fa fa-cloud-upload"></i> -->
+  Download Configured Model
+</label>
+
+<br />
+
+<div id="editor"></div>
+
+<input type="button" id="download-button" onclick="download()"> <br />
+
+<script>
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/monokai");
+  editor.session.setMode("ace/mode/python");
+  editor.getSession().selection.on(
+      'changeSelection',
+      function (e) { editor.getSession().selection.clearSelection(); }
+  );
+</script>
 
 <script>
 
@@ -518,6 +540,10 @@
       xhr.onload = function() {
           if (xhr.status === 200) {
               console.log('Response from server: ' + xhr.responseText);
+              var editor = ace.edit("editor");
+              //editor.setTheme("ace/theme/monokai");
+              //editor.getSession().setMode("ace/mode/javascript");
+              editor.setValue(xhr.responseText);
           }
           else {
               alert('Request failed.  Returned status of ' + xhr.status);
