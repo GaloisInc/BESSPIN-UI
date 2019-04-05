@@ -4,12 +4,22 @@
     <title>Configurator</title>
     <script type="text/JavaScript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
-    <link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript" charset="utf-8"></script>
+    <!--<link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" /> -->
     <style type="text/css">
+        h1 { text-align: center }
+        body {
+          background-color: #6994bb; /* #2d78bd */
+        }
         #network{
-            width: 1200px;
-            height: 800px;
-            border: 5px solid lightgray;
+            position: relative;
+            width: 900px;
+            height: 600px;
+            right: 100px;
+            left: 100px;
+            top: 5px;
+            border: 5px solid black;
+            background-color: white;
         }
 
         td {
@@ -33,35 +43,85 @@
             padding:10px;
             text-align: center;
         }
+
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            position: relative;
+            left: 100px;
+
+            border: 2px solid black;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        #upload-configs-button {
+            display:none
+        }
+        .custom-upload-configurations {
+            position: relative;
+            left: 625px;
+
+            border: 2px solid black;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        #download-button {
+            display:none
+        }
+        .custom-download-button {
+            position: relative;
+            left: 100px;
+            top: 10px;
+
+            border: 2px solid black;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+    </style>
+    <style type="text/css" media="screen">
+      #editor {
+          position: relative;
+          top: 20px;
+          //right: 0;
+          //bottom: 0;
+          left: 100px;
+          width: 800;
+          height: 600;
+      }
     </style>
 </head>
 <body>
-<h1>Interactive Configurator</h1>
+<h1>Feature Model Configurator</h1>
 
 <!--
 <input type="button" onclick="tryAjax()" value="rename ALL nodes"> <br />
 -->
+<!--
 <input type="button" onclick="load_example()" value="Load example"> <br />
-<input type="button" onclick="send_configured_features()" value="Send configurations"> <br />
-
+-->
 
 
 <!-- Reference for loading file, the page contains fancier file
  loading modes: https://www.html5rocks.com/en/tutorials/file/dndfiles/
  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers
- -->
+  -->
+<label for="cfr_file" class="custom-file-upload">
+  <!-- <i class="fa fa-cloud-upload"></i> -->
+  Upload Model
+</label>
 <input type="file" id="cfr_file" accept=".cfr" />
 
-<!-- <form action="/upload/" method="put" enctype="multipart/form-data">
-  <div>
-    <label for="cfr_file">Choose Clafer file to upload</label>
-    <input type="file" id="cfr_file" name="cfrfileurl" accept=".cfr">
-  </div>
-  <div>
-    <button>Submit</button>
-  </div>
-</form>
--->
+<label for="upload-configs-button" class="custom-upload-configurations">
+  Process Configurations
+</label>
+<input type="button" id="upload-configs-button" onclick="send_configured_features()"> <br />
+
 
 
 <div id="node-popUp">
@@ -177,9 +237,10 @@
   var options = {
       layout: {
           hierarchical: {
-              direction: "UD",
+              direction: "LR",
               sortMethod: "directed",
-              nodeSpacing: 150,
+              nodeSpacing: 70,
+              levelSeparation: 300,
           }
       },
       interaction: {
@@ -189,22 +250,22 @@
       physics: {
           enabled: false
       },
-      configure: {
-          filter: function (option, path) {
-              if (path.indexOf('hierarchical') !== -1) {
-                  return true;
-              }
-              return false;
-          },
-          showButton:false
-      },
-      manipulation: {
-          editNode: function (data, callback) {
-              // filling in the popup DOM elements
-              document.getElementById('node-operation').innerHTML = "Feature Selection";
-              editNode(data, cancelNodeEdit, callback);
-          },
-      }
+      // configure: {
+      //     filter: function (option, path) {
+      //         if (path.indexOf('hierarchical') !== -1) {
+      //             return true;
+      //         }
+      //         return false;
+      //     },
+      //     showButton:false
+      // },
+      // manipulation: {
+      //     editNode: function (data, callback) {
+      //         // filling in the popup DOM elements
+      //         document.getElementById('node-operation').innerHTML = "Feature Selection";
+      //         editNode(data, cancelNodeEdit, callback);
+      //     },
+      // }
   };
 
 
