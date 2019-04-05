@@ -10,6 +10,9 @@ from flask import Flask
 from flask import request
 from flask.logging import default_handler
 from uuid import uuid4
+from datetime import datetime
+import sqlite3
+from hashlib import sha3_256
 
 # pylint: disable=invalid-name
 # pylint: disable=no-member
@@ -29,6 +32,96 @@ CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
 app = Flask(__name__)
 
 default_handler.setLevel(logging.DEBUG)
+
+CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
+
+DATABASE = './database.db'
+CONN = sqlite3.connect(':memory:')
+SCHEMA = '''
+CREATE TABLE
+  feature_models (
+    uid text,
+    filename text,
+    source text,
+    date text,
+    hash text,
+    configs text
+);
+'''
+
+INSERT = """INSERT INTO feature_models VALUES ("{}", "{}", "{}", "{}", "{}", "{}");"""
+
+def initialize_db():
+    """
+    Initiliaze the database
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    try:
+        c.execute(SCHEMA)
+    except sqlite3.OperationalError as err:
+        if 'already exists' not in str(err):
+            raise RuntimeError('Ooops DB')
+    finally:
+        conn.close()
+
+initialize_db()
+
+def insert_feature_model_db(filename, content):
+    """
+    Insert feature mode in db
+
+    :param filename:
+    :param content:
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    uid = str(uuid4())
+    date = str(datetime.today())
+    thehash = str(sha3_256(bytes(content, 'utf8')))
+    query = INSERT.format(uid, filename, content, date, thehash, json.dumps([]))
+    c.execute(query)
+    conn.commit()
+    conn.close()
+
+def retrieve_feature_models_db():
+    """
+    Retrieve feature model from db
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("SELECT * FROM feature_models")
+    entries = c.fetchall()
+    conn.close()
+    return entries
+
+def filename_from_record(record):
+    """
+    returns the filemane from a record
+    """
+    return record[1]
+
+def source_from_record(record):
+    """
+    returns the source from a record
+    """
+    return record[2]
+
+def retrieve_model_from_db(file_identifier):
+    """
+    Retrieve model from db
+    """
+
+    # TODO: for now the file_identifier is the filename
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("SELECT * FROM feature_models")
+    entries = c.fetchall()
+    conn.close()
+    for record in entries:
+        if filename_from_record(record) == file_identifier:
+            return source_from_record(record) # the text
+    return None
 
 class ClaferModule:
     """
@@ -281,8 +374,8 @@ def uploadold_file():
     return json.dumps(t.to_json())
 
 
-@app.route('/upload/', methods=['POST'])
-def upload_file():
+@app.route('/upload/<string:name>', methods=['POST'])
+def upload_file(name):
     """
     upload a clafer file
     """
@@ -295,6 +388,10 @@ def upload_file():
     with open(filename_cfr, 'wb') as f:
         f.write(request.data)
 
+    insert_feature_model_db(name, request.data.decode('utf8'))
+    test = retrieve_feature_models_db()
+    app.logger.info(str(test))
+    app.logger.info('The id is: {}'.format(test[0][0]))
     cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
     app.logger.info('Clafer output: ' + str(cp.stdout))
     d = load_json(filename_json)
@@ -306,31 +403,23 @@ def upload_file():
 @app.route('/configure/', methods=['POST'])
 def configure_features():
     """
-    upload a clafer file
+    process feature configurations
     """
     app.logger.debug('configure')
 
-    # TODO: REPLACE with file sent
-    source_file = os.path.join(CODE_DIR, 'secure_cpu_example_flattened2.cfr')
-    filename = os.path.join(WORK_DIR, 'configured_file')
-    filename_cfr = filename + '.cfr'
-    filename_json = filename + '.json'
-    with open(source_file, 'r') as f:
-        file_content = f.read()
+    data = json.loads(request.data)
+    filename = data['filename']
+    file_content = retrieve_model_from_db(filename)
+    constraints = selected_features_to_constraints(data['feature_selection'])
 
-    constraints = selected_features_to_constraints(json.loads(request.data))
-    with open(filename_cfr, 'a') as f:
-        f.write(str(file_content))
-        f.write(constraints)
+    # pylint: disable=line-too-long
+    # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
+    # app.logger.debug('\n sdfdsf\n')
+    # app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
+    # d = load_json(filename_json)
 
-    cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
-    app.logger.debug('\n sdfdsf\n')
-    app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
-    d = load_json(filename_json)
-
-    return json.dumps({})
-
-
+    newcontent = file_content + constraints
+    return newcontent
 
 
 @app.route('/loadexample/', methods=['PUT'])

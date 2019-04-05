@@ -123,10 +123,13 @@
       xhr.send(formData);
       */
 
-      var file = document.getElementById('cfr_file').files[0],
-          xhr = new XMLHttpRequest();
-
-      xhr.open('POST', '/upload/');
+      var file = document.getElementById('cfr_file').files[0];
+      console.log(file);
+      console.log(file.name);
+      global_filename = file.name;
+      xhr = new XMLHttpRequest();
+      var route = '/upload/' + file.name;
+      xhr.open('POST', route);
       xhr.setRequestHeader('Content-Type', file.type);
       xhr.onload = function() {
           if (xhr.status === 200) {
@@ -460,7 +463,11 @@
           }
       };
 
-      xhr.send(JSON.stringify(selected_nodes));
+      console.log(global_filename);
+      xhr.send(JSON.stringify({
+          'filename': global_filename,
+          'feature_selection': selected_nodes
+      }));
   };
 
 
