@@ -230,6 +230,27 @@
 
   document.getElementById('cfr_file').addEventListener('change', handleFileSelect, false);
 
+  function download() {
+      var editor = ace.edit("editor");
+      var data = editor.getValue();
+      var type = "text/plain";
+      var file = new Blob([data], {type: type});
+      if (window.navigator.msSaveOrOpenBlob) // IE10+
+          window.navigator.msSaveOrOpenBlob(file, filename);
+      else { // Others
+          var a = document.createElement("a"),
+              url = URL.createObjectURL(file);
+          a.href = url;
+          a.download = global_filename + '.configured';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function() {
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(url);
+          }, 0);
+      }
+  }
+
   /*var nodes = new vis.DataSet([
       {id: 1, label: "N1"},
       {id: 2, label: "N2"},
@@ -243,9 +264,15 @@
   ]);
   */
 
+  // this is a global feature configuration tree, received from the server
   var global_conftree = {};
+
+  // the dictionary containing the set of nodes that are selected by the user by clicking.
   var selected_nodes = {};
 
+  var global_filename = 'modelnameplaceholder';
+
+  // Sets for nodes and edges of the tree visualization artifact (visjs)
   var nodes = new vis.DataSet([]);
   var edges = new vis.DataSet([]);
 
