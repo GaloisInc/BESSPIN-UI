@@ -440,15 +440,5 @@ def load_example():
     return json.dumps(t.to_json())
 
 
-@app.route('/refine', methods=['PUT'])
-def refine_configuration():
-    """
-    Refine a configuration
-    """
-    app.logger.info('refine configuration')
-    app.logger.info('body:' + str(request.data))
-    message = request.data
-    return message
-
 
 app.run('localhost', port=3784, debug=True)
