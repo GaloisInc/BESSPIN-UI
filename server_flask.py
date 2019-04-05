@@ -207,7 +207,7 @@ class ClaferModule:
                 if not decl['iClafer']['isAbstract']:
                     res += [decl]
             else:
-                 assert decl['tag'] == 'IEConstraint'
+                assert decl['tag'] == 'IEConstraint'
         return res
 
 
@@ -230,8 +230,8 @@ class ClaferModule:
             t = ConfTree(
                 ident='Features',
                 uid=str(uuid4()),
-                card=[1,1],
-                group_card=[0,-1],
+                card=[1, 1],
+                group_card=[0, -1],
                 group=prods,
             )
             return t
@@ -270,9 +270,9 @@ class ConfTree:
         Compute selection state
         """
         # return [FORCEDON, FORCEDOFF, USERSELECTED, USERREJECTED, UNCONFIGURED]
-        if card == [1,1]:
+        if card == [1, 1]:
             return FORCEDON
-        elif card == [0,0]:
+        if card == [0, 0]:
             return FORCEDOFF
         else:
             return UNCONFIGURED
@@ -332,8 +332,13 @@ def iclafer_to_conftree(node):
     return t
 
 def selected_features_to_constraints(feats):
+    """
+    Convert a set of selected features to constraints
+
+    :return: str
+    """
     res = ""
-    for ident, sel in feats.items():
+    for _, sel in feats.items():
         if sel[0] == 'selected':
             res += "\n" + "[ " + sel[1] + " ]"
         elif sel[0] == 'rejected':

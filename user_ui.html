@@ -401,86 +401,89 @@
       return false;
   };
 
-  function conftree_to_nodes_and_edges(d) {
-      if (d.hasOwnProperty('ident')) {
+  // returns the list of nodes and edges from a node d
+  function conftree_to_nodes_and_edges(conftree) {
+      if (conftree.hasOwnProperty('ident')) {
           var n = new Array();
           var e = new Array();
 
           var gcard = '';
-          if (compare_card(d.group_card, [1, -1]))
-              gcard = 'Or';       else if (compare_card(d.group_card, [1, 1]))
+          if (compare_card(conftree.group_card, [1, -1]))
+              gcard = 'Or';
+          else if (compare_card(conftree.group_card, [1, 1]))
               gcard = 'Xor';
 
-          var node1 = {
-              'id': d.uid,
-              'label': d.ident + '\n [' + d.card + ']\n ' + gcard,
-              'shape': 'box',
-          };
-
-          if (! compare_card(d.card, [1,1]))
-              node1['color'] = '#ffffff';
-          switch (d.selection_state) {
+          var card = conftree.card; // set to the node carinality by default
+          color = '';
+          if (! compare_card(conftree.card, [1,1]))
+              color = '#ffffff';
+          switch (conftree.selection_state) {
               case 'FORCEDON': {
-                  node1['color'] = '#aaffaa';
+                  color = '#aaffaa';
                   break;
               };
               case 'FORCEDOFF': {
-                  node1['color'] = '#ffaaaa';
+                  color = '#ffaaaa';
                   break;
               };
               case 'USERSELECTED': {
-                  node1['color'] = '#00AA00';
+                  color = '#00AA00';
                   break;
               };
               case 'USERREJECTED': {
-                  node1['color'] = '#AA0000';
+                  color = '#AA0000';
                   break;
               };
               case 'UNCONFIGURED': {
-                  node1['color'] = '#ffffff';
+                  color = '#ffffff';
                   break;
               };
           };
           console.log(selected_nodes);
-          if (d.uid in selected_nodes) {
-              switch (selected_nodes[d.uid][0]) {
+          if (conftree.uid in selected_nodes) {
+              switch (selected_nodes[conftree.uid][0]) {
               case 'selected': {
-                  node1['color'] = '#00cc00';
+                  color = '#00cc00';
+                  card = [1,1];
                   break;
               };
               case 'rejected': {
-                  node1['color'] = '#cc0000';
+                  color = '#cc0000';
+                  card = [0,0];
                   break;
               };
               case 'unconfigured': {
-                  node1['color'] = '#ffffff';
+                  color = '#ffffff';
                   break;
               };
               };
           }
+          var node1 = {
+              'id': conftree.uid,
+              'label': conftree.ident + '\n [' + card + ']\n ' + gcard,
+              'shape': 'box',
+              'color': color,
+          };
           n = n.concat([node1]);
 
-          for (var i in d['group']) {
-              var d1 = d['group'][i];
+          for (var i in conftree['group']) {
+              var d1 = conftree['group'][i];
               var r = conftree_to_nodes_and_edges(d1);
               n = n.concat(r.nodes);
-              var isdashes = !(compare_card(d.card, [1,1]) &&
-                               compare_card(d1.card, [1,1]));
+              var isdashes = !(compare_card(card, [1,1]) &&
+                               compare_card(r.topnodecard, [1,1]));
               e = e.concat([{
-                  'id': d.uid + d1['uid'],
+                  'id': conftree.uid + d1['uid'],
                   'label': '',
-                  'from': d.uid,
+                  'from': conftree.uid,
                   'to': d1['uid'],
                   'dashes': isdashes,
               }]);
               e = e.concat(r.edges);
           }
-          //console.log('nodes and edges:')
-          //console.log(n);
-          //console.log(e);
-          return {'nodes': n, 'edges': e, 'shape': 'text'};
+          return {'nodes': n, 'edges': e, 'topnodecard': card};
       }else{
-          return {'nodes': [], 'edges': []};
+          return {'nodes': [], 'edges': [], 'topnodecard': null};
       }
   };
 
@@ -591,8 +594,6 @@
       var thenode = find_uid_conftree(global_conftree, data);
       var thecard = thenode['card'];
       document.getElementById('node-card').value = thecard;
-      //var ischecked;
-      //ischecked = compare_card(thecard, [1, 1]);
       console.log(document.getElementById('feature-select-option').value);
 
       var select_button = document.getElementById('feature-select-option');
@@ -622,9 +623,6 @@
       }
       };
 
-
-      //document.getElementById('node-feature-select').checked = ischecked;
-
       document.getElementById('node-saveButton').onclick = saveNodeData.bind(this, data, callback);
       document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
       document.getElementById('node-popUp').style.display = 'block';
@@ -641,34 +639,20 @@
   };
   function saveNodeData(data, callback) {
       var thenode = find_uid_conftree(global_conftree, data);
-      //data.card = document.getElementById('node-card').value;
-      //if (document.getElementById('node-feature-select').checked) {
-//        update_conftree(global_conftree, data, 'card', [1, 1]);
-//        draw_conftree(global_conftree);
-          /*var ch = convert_response_to_nodes_and_edges(global_conftree);
-          nodes.clear();
-          edges.clear();
-          nodes.add(ch.nodes);
-          edges.add(ch.edges);*/
-      //}
       var select_button = document.getElementById('feature-select-option');
-      var newOptionsHtml = "<option value='dsdfs'>sdfsdf</option>"
       switch (select_button.value) {
       case 'unconfigured': {
           select_button.value = 'unconfigured';
-          update_conftree(global_conftree, data, 'card', [0, 1]);
           selected_nodes[data] = ['unconfigured', path_to_uid(global_conftree, data, '')];
           break;
       };
       case 'selected': {
           select_button.value = 'selected';
-          update_conftree(global_conftree, data, 'card', [1, 1]);
           selected_nodes[data] = ['selected', path_to_uid(global_conftree, data, '')];
           break;
       };
       case 'rejected': {
           select_button.value = 'rejected';
-          update_conftree(global_conftree, data, 'card', [0, 0]);
           selected_nodes[data] = ['rejected', path_to_uid(global_conftree, data, '')];
           break;
       };
@@ -682,24 +666,64 @@
       callback(data);
   };
 
+  function circle_selection(data) {
+      var thenode = find_uid_conftree(global_conftree, data);
+
+      if (thenode.uid in selected_nodes) {
+          switch (selected_nodes[thenode.uid][0]) {
+          case 'selected': {
+              selected_nodes[thenode.uid][0] = 'rejected';
+              return;
+          };
+          case 'rejected': {
+              delete selected_nodes[thenode.uid];
+              return;
+          };
+          case 'unconfigured': {
+              selected_nodes[thenode.uid][0] = 'selected';
+              return;
+          };
+          };
+      }
+
+      switch (thenode.selection_state) {
+      case 'FORCEDON': {
+          return;
+      };
+      case 'FORCEDOFF': {
+          return;
+      };
+      case 'USERSELECTED': {
+          alert('weird');
+      };
+      case 'USERREJECTED': {
+          alert('weird');
+      };
+      case 'UNCONFIGURED': {
+          selected_nodes[data] = ['selected', path_to_uid(global_conftree, data, '')];
+          return;
+      };
+      default: {
+          alert('no choice');
+      }
+      };
+  };
+
   var network = new vis.Network(container, data, options);
 
-  // network.on("click", function (params) {
-  //     /*
-  //     params.event = "[original event]";
-  //     document.getElementById('eventSpan').innerHTML = '<h2>Click event:</h2>' + JSON.stringify(params, null, 4);
-  //     */
-  //     console.log('click event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
-  //     console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
-  //     edges_to_root(this.getNodeAt(params.pointer.DOM));
-  // });
+  network.on("click", function (params) {
+      console.log('click event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
+      console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
+      circle_selection(this.getNodeAt(params.pointer.DOM));
+      draw_conftree(global_conftree);
+  });
 
-  network.on("doubleClick", function (params) {
+  /*network.on("doubleClick", function (params) {
       console.log('doubleClick event, getNodeAt returns: ' + this.getNodeAt(params.pointer.DOM));
       console.log("DOM id:" + typeof this.getNodeAt(params.pointer.DOM));
       editNode(this.getNodeAt(params.pointer.DOM), cancelNodeEdit, function(data){});
+  });*/
 
-  });
 </script>
 </body>
 </html>
