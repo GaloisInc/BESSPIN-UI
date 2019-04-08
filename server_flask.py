@@ -1,10 +1,15 @@
 """
 A feature model configurator web app
 """
-
+import os
 import logging
 import json
 import subprocess
+import tempfile
+from uuid import uuid4
+from datetime import datetime
+import sqlite3
+from hashlib import sha3_256
 from flask import Flask
 from flask import request
 from flask.logging import default_handler
@@ -13,9 +18,112 @@ from flask.logging import default_handler
 # pylint: disable=no-member
 
 
+CODE_DIR = os.path.dirname(__file__)
+
+if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
+    WORK_DIR_OBJ = tempfile.TemporaryDirectory()
+    WORK_DIR = WORK_DIR_OBJ.name
+else:
+    WORK_DIR = '.'
+
+CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
+
+
 app = Flask(__name__)
 
 default_handler.setLevel(logging.DEBUG)
+
+
+XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME') or os.path.expanduser('~/.local/share')
+BESSPIN_DATA_HOME = os.path.join(XDG_DATA_HOME, 'besspin')
+os.makedirs(BESSPIN_DATA_HOME, exist_ok=True)
+DATABASE = os.path.join(BESSPIN_DATA_HOME, 'configurator.db')
+
+SCHEMA = '''
+CREATE TABLE
+  feature_models (
+    uid text,
+    filename text,
+    source text,
+    date text,
+    hash text,
+    configs text
+);
+'''
+
+INSERT = """INSERT INTO feature_models VALUES ("{}", "{}", "{}", "{}", "{}", "{}");"""
+
+def initialize_db():
+    """
+    Initiliaze the database
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    try:
+        c.execute(SCHEMA)
+    except sqlite3.OperationalError as err:
+        if 'already exists' not in str(err):
+            raise RuntimeError('Ooops DB')
+    finally:
+        conn.close()
+
+initialize_db()
+
+def insert_feature_model_db(filename, content):
+    """
+    Insert feature mode in db
+
+    :param filename:
+    :param content:
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    uid = str(uuid4())
+    date = str(datetime.today())
+    thehash = str(sha3_256(bytes(content, 'utf8')))
+    query = INSERT.format(uid, filename, content, date, thehash, json.dumps([]))
+    c.execute(query)
+    conn.commit()
+    conn.close()
+
+def retrieve_feature_models_db():
+    """
+    Retrieve feature model from db
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("SELECT * FROM feature_models")
+    entries = c.fetchall()
+    conn.close()
+    return entries
+
+def filename_from_record(record):
+    """
+    returns the filemane from a record
+    """
+    return record[1]
+
+def source_from_record(record):
+    """
+    returns the source from a record
+    """
+    return record[2]
+
+def retrieve_model_from_db(file_identifier):
+    """
+    Retrieve model from db
+    """
+
+    # TODO: for now the file_identifier is the filename
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute("SELECT * FROM feature_models")
+    entries = c.fetchall()
+    conn.close()
+    for record in entries:
+        if filename_from_record(record) == file_identifier:
+            return source_from_record(record) # the text
+    return None
 
 class ClaferModule:
     """
@@ -32,6 +140,7 @@ class ClaferModule:
 
         :return: Tree
         """
+        # TODO: deprecated!! Should cleanup when ready
         # get to the list of declarations:
         content = self.module['iModule']
         decls = content['mDecls']
@@ -95,9 +204,12 @@ class ClaferModule:
         decls = self.module['iModule']['mDecls']
         res = []
         for decl in decls:
-            assert isinstance(decl['iClafer']['isAbstract'], bool)
-            if not decl['iClafer']['isAbstract']:
-                res += [decl]
+            if decl['tag'] == 'IEClafer':
+                assert isinstance(decl['iClafer']['modifiers']['abstract'], bool)
+                if not decl['iClafer']['modifiers']['abstract']:
+                    res += [decl]
+            else:
+                assert decl['tag'] == 'IEConstraint'
         return res
 
 
@@ -108,13 +220,24 @@ class ClaferModule:
         :return: Tree
         """
         prods = self.find_products()
-        if prods == []:
+        nb_prods = len(prods)
+        # pylint: disable=no-else-return
+        if nb_prods == 0:
             return None
-
-        # TODO: generalize to more than one. Currently just one:
-        prod = prods[0]
-        prod = self.unfold_product(prod)
-        return iclafer_to_conftree(prod)
+        elif nb_prods == 1:
+            prod = prods[0]
+            prod = self.unfold_product(prod)
+            return iclafer_to_conftree(prod)
+        else: # > 1
+            prods = [iclafer_to_conftree(prod) for prod in prods]
+            t = ConfTree(
+                ident='Features',
+                uid=str(uuid4()),
+                card=[1, 1],
+                group_card=[0, -1],
+                group=prods,
+            )
+            return t
 
 FORCEDON = 'FORCEDON'
 FORCEDOFF = 'FORCEDOFF'
@@ -149,10 +272,10 @@ class ConfTree:
         """
         Compute selection state
         """
-        # return [FORCEDON, FORCEDOFF, USERSELECTED, USERREJECTED, UNCONFIGURED]
-        if card == [1,1]:
+        # pylint: disable=no-else-return
+        if card == [1, 1]:
             return FORCEDON
-        elif card == [0,0]:
+        if card == [0, 0]:
             return FORCEDOFF
         else:
             return UNCONFIGURED
@@ -212,8 +335,13 @@ def iclafer_to_conftree(node):
     return t
 
 def selected_features_to_constraints(feats):
+    """
+    Convert a set of selected features to constraints
+
+    :return: str
+    """
     res = ""
-    for ident, sel in feats.items():
+    for _, sel in feats.items():
         if sel[0] == 'selected':
             res += "\n" + "[ " + sel[1] + " ]"
         elif sel[0] == 'rejected':
@@ -226,7 +354,7 @@ def feature_configurator():
     endpoint for the configurator app
     """
     app.logger.info('feature configurator')
-    filepath = './user_ui.html'
+    filepath = os.path.join(CODE_DIR, 'user_ui.html')
     with open(filepath) as f:
         page = f.read()
         app.logger.debug(page)
@@ -240,13 +368,13 @@ def uploadold_file():
     app.logger.debug('load file')
 
     # TODO: save to a filename that depends on user token
-    filename = './generated_file'
+    filename = os.path.join(WORK_DIR, 'generated_file')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.json'
     with open(filename_cfr, 'wb') as f:
         f.write(request.data)
 
-    cp = subprocess.run(['clafer', filename_cfr, '-m=json'], capture_output=True)
+    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
     app.logger.info('Clafer output: ' + str(cp.stdout))
     d = load_json(filename_json)
     t = ClaferModule(d).to_conftree()
@@ -254,21 +382,25 @@ def uploadold_file():
     return json.dumps(t.to_json())
 
 
-@app.route('/upload/', methods=['POST'])
-def upload_file():
+@app.route('/upload/<string:name>', methods=['POST'])
+def upload_file(name):
     """
     upload a clafer file
     """
     app.logger.debug('load file')
 
     # TODO: save to a filename that depends on user token
-    filename = './generated_file'
+    filename = os.path.join(WORK_DIR, 'generated_file')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.json'
     with open(filename_cfr, 'wb') as f:
         f.write(request.data)
 
-    cp = subprocess.run(['clafer', filename_cfr, '-m=json'], capture_output=True)
+    insert_feature_model_db(name, request.data.decode('utf8'))
+    test = retrieve_feature_models_db()
+    app.logger.info(str(test))
+    app.logger.info('The id is: {}'.format(test[0][0]))
+    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
     app.logger.info('Clafer output: ' + str(cp.stdout))
     d = load_json(filename_json)
     imodule = ClaferModule(d)
@@ -279,31 +411,23 @@ def upload_file():
 @app.route('/configure/', methods=['POST'])
 def configure_features():
     """
-    upload a clafer file
+    process feature configurations
     """
     app.logger.debug('configure')
 
-    # TODO: REPLACE with file sent
-    source_file = 'secure_cpu_example_flattened2.cfr'
-    filename = './configured_file'
-    filename_cfr = filename + '.cfr'
-    filename_json = filename + '.json'
-    with open(source_file, 'r') as f:
-        file_content = f.read()
+    data = json.loads(request.data)
+    filename = data['filename']
+    file_content = retrieve_model_from_db(filename)
+    constraints = selected_features_to_constraints(data['feature_selection'])
 
-    constraints = selected_features_to_constraints(json.loads(request.data))
-    with open(filename_cfr, 'a') as f:
-        f.write(str(file_content))
-        f.write(constraints)
+    # pylint: disable=line-too-long
+    # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
+    # app.logger.debug('\n sdfdsf\n')
+    # app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
+    # d = load_json(filename_json)
 
-    cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
-    app.logger.debug('\n sdfdsf\n')
-    app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
-    d = load_json(filename_json)
-
-    return json.dumps({})
-
-
+    newcontent = file_content + constraints
+    return newcontent
 
 
 @app.route('/loadexample/', methods=['PUT'])
@@ -312,22 +436,11 @@ def load_example():
     load example file
     """
     app.logger.debug('load example file')
-    tempfilepath = 'secure_cpu_example_flattened.json'
+    tempfilepath = os.path.join(CODE_DIR, 'secure_cpu_example_flattened.json')
     d = load_json(tempfilepath)
     t = ClaferModule(d).to_conftree()
     app.logger.debug(str(t.to_json()))
     return json.dumps(t.to_json())
-
-
-@app.route('/refine', methods=['PUT'])
-def refine_configuration():
-    """
-    Refine a configuration
-    """
-    app.logger.info('refine configuration')
-    app.logger.info('body:' + str(request.data))
-    message = request.data
-    return message
 
 
 app.run('localhost', port=3784, debug=True)

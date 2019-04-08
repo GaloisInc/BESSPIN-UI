@@ -43,7 +43,3 @@ abstract Secure_CPU
   CPU_security -> integer = min IP_block.security
 
 a_secure_cpu : Secure_CPU
-
-
-// [ a_secure_cpu.Hash.SHA2.security = 5 ]
-// [ SHA2.security = 5 ]
