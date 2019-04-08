@@ -6,13 +6,13 @@ import logging
 import json
 import subprocess
 import tempfile
-from flask import Flask
-from flask import request
-from flask.logging import default_handler
 from uuid import uuid4
 from datetime import datetime
 import sqlite3
 from hashlib import sha3_256
+from flask import Flask
+from flask import request
+from flask.logging import default_handler
 
 # pylint: disable=invalid-name
 # pylint: disable=no-member
@@ -33,10 +33,12 @@ app = Flask(__name__)
 
 default_handler.setLevel(logging.DEBUG)
 
-CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
 
-DATABASE = './database.db'
-CONN = sqlite3.connect(':memory:')
+XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME') or os.path.expanduser('~/.local/share')
+BESSPIN_DATA_HOME = os.path.join(XDG_DATA_HOME, 'besspin')
+os.makedirs(BESSPIN_DATA_HOME, exist_ok=True)
+DATABASE = os.path.join(BESSPIN_DATA_HOME, 'configurator.db')
+
 SCHEMA = '''
 CREATE TABLE
   feature_models (
@@ -219,6 +221,7 @@ class ClaferModule:
         """
         prods = self.find_products()
         nb_prods = len(prods)
+        # pylint: disable=no-else-return
         if nb_prods == 0:
             return None
         elif nb_prods == 1:
@@ -269,7 +272,7 @@ class ConfTree:
         """
         Compute selection state
         """
-        # return [FORCEDON, FORCEDOFF, USERSELECTED, USERREJECTED, UNCONFIGURED]
+        # pylint: disable=no-else-return
         if card == [1, 1]:
             return FORCEDON
         if card == [0, 0]:
@@ -438,7 +441,6 @@ def load_example():
     t = ClaferModule(d).to_conftree()
     app.logger.debug(str(t.to_json()))
     return json.dumps(t.to_json())
-
 
 
 app.run('localhost', port=3784, debug=True)
