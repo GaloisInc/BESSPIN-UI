@@ -205,8 +205,8 @@ class ClaferModule:
         res = []
         for decl in decls:
             if decl['tag'] == 'IEClafer':
-                assert isinstance(decl['iClafer']['isAbstract'], bool)
-                if not decl['iClafer']['isAbstract']:
+                assert isinstance(decl['iClafer']['modifiers']['abstract'], bool)
+                if not decl['iClafer']['modifiers']['abstract']:
                     res += [decl]
             else:
                 assert decl['tag'] == 'IEConstraint'
