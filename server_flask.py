@@ -33,6 +33,7 @@ app = Flask(__name__)
 
 default_handler.setLevel(logging.DEBUG)
 
+TOP_LEVEL_FEATURE_IDENT = 'Features'
 
 XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME') or os.path.expanduser('~/.local/share')
 BESSPIN_DATA_HOME = os.path.join(XDG_DATA_HOME, 'besspin')
@@ -231,7 +232,7 @@ class ClaferModule:
         else: # > 1
             prods = [iclafer_to_conftree(prod) for prod in prods]
             t = ConfTree(
-                ident='Features',
+                ident=TOP_LEVEL_FEATURE_IDENT,
                 uid=str(uuid4()),
                 card=[1, 1],
                 group_card=[0, -1],
@@ -342,10 +343,15 @@ def selected_features_to_constraints(feats):
     """
     res = ""
     for _, sel in feats.items():
+        # delete leading artificial feature path artificially injected
+        # when there are several features at top level
+        prefix = TOP_LEVEL_FEATURE_IDENT + '.'
+        sel_str = sel[1][len(prefix):] if sel[1].startswith(prefix) else sel[1]
+
         if sel[0] == 'selected':
-            res += "\n" + "[ " + sel[1] + " ]"
+            res += "\n" + "[ " + sel_str + " ]"
         elif sel[0] == 'rejected':
-            res += "\n" + "[ !" + sel[1] + " ]"
+            res += "\n" + "[ !" + sel_str + " ]"
     return res
 
 @app.route('/')
