@@ -4,6 +4,7 @@ A feature model configurator web app
 import os
 import logging
 import json
+import base64
 import subprocess
 import tempfile
 from uuid import uuid4
@@ -40,19 +41,28 @@ BESSPIN_DATA_HOME = os.path.join(XDG_DATA_HOME, 'besspin')
 os.makedirs(BESSPIN_DATA_HOME, exist_ok=True)
 DATABASE = os.path.join(BESSPIN_DATA_HOME, 'configurator.db')
 
-SCHEMA = '''
+DB_SCHEMA = '''
 CREATE TABLE
   feature_models (
     uid text,
     filename text,
     source text,
+    conftree text,
     date text,
     hash text,
     configs text
 );
 '''
 
-INSERT = """INSERT INTO feature_models VALUES ("{}", "{}", "{}", "{}", "{}", "{}");"""
+DB_INSERT = """INSERT INTO feature_models VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}");"""
+
+DB_SELECT = """SELECT * FROM feature_models"""
+
+DB_UPDATE = """
+UPDATE feature_models
+SET configs="{config}"
+WHERE uid="{uid}"
+"""
 
 def initialize_db():
     """
@@ -61,7 +71,7 @@ def initialize_db():
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     try:
-        c.execute(SCHEMA)
+        c.execute(DB_SCHEMA)
     except sqlite3.OperationalError as err:
         if 'already exists' not in str(err):
             raise RuntimeError('Ooops DB')
@@ -70,7 +80,48 @@ def initialize_db():
 
 initialize_db()
 
-def insert_feature_model_db(filename, content):
+
+def encode_json_db(content):
+    """
+    Encode a dict to a base64 encoded string for the db
+    """
+    return base64.b64encode(bytes(json.dumps(content), 'utf8')).decode()
+
+def decode_json_db(content):
+    """
+    Decode data previously encoded into the db
+    """
+    return json.loads(base64.b64decode(content).decode())
+
+def insert_feature_model_db(filename, content, conftree):
+    """
+    Insert feature mode in db
+
+    :param filename:
+    :param content:
+
+    :return: uid
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    uid = str(uuid4())
+    date = str(datetime.today())
+    thehash = str(sha3_256(bytes(content, 'utf8')))
+    query = DB_INSERT.format(
+        uid,
+        filename,
+        content,
+        encode_json_db(conftree),
+        date,
+        thehash,
+        json.dumps([])
+    )
+    c.execute(query)
+    conn.commit()
+    conn.close()
+    return uid
+
+def update_config_db(uid, cfg):
     """
     Insert feature mode in db
 
@@ -79,10 +130,8 @@ def insert_feature_model_db(filename, content):
     """
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    uid = str(uuid4())
-    date = str(datetime.today())
-    thehash = str(sha3_256(bytes(content, 'utf8')))
-    query = INSERT.format(uid, filename, content, date, thehash, json.dumps([]))
+    enc_cfg = encode_json_db(cfg)
+    query = DB_UPDATE.format(uid=uid, config=enc_cfg)
     c.execute(query)
     conn.commit()
     conn.close()
@@ -93,10 +142,16 @@ def retrieve_feature_models_db():
     """
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    c.execute("SELECT * FROM feature_models")
+    c.execute(DB_SELECT)
     entries = c.fetchall()
     conn.close()
     return entries
+
+def uid_from_record(record):
+    """
+    returns the uid from a record
+    """
+    return record[0]
 
 def filename_from_record(record):
     """
@@ -110,21 +165,66 @@ def source_from_record(record):
     """
     return record[2]
 
-def retrieve_model_from_db(file_identifier):
+def conftree_from_record(record):
     """
-    Retrieve model from db
+    returns the conftree from a record
     """
+    return record[3]
 
-    # TODO: for now the file_identifier is the filename
+def date_from_record(record):
+    """
+    returns the date from a record
+    """
+    return record[4]
+
+def configs_from_record(record):
+    """
+    returns the configs from a record
+    """
+    return record[6]
+
+def retrieve_model_from_db_by_uid(uid):
+    """
+    Retrieve model from db by its uid
+    """
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    c.execute("SELECT * FROM feature_models")
+    c.execute(DB_SELECT)
     entries = c.fetchall()
     conn.close()
     for record in entries:
-        if filename_from_record(record) == file_identifier:
-            return source_from_record(record) # the text
+        if uid_from_record(record) == uid:
+            return {
+                'uid': uid_from_record(record),
+                'source': source_from_record(record),
+                'conftree': conftree_from_record(record),
+                'configs': configs_from_record(record),
+            }
     return None
+
+
+def record_to_info(record):
+    """
+    Transform a record into a dict with useful information
+    """
+    return {
+        'filename': filename_from_record(record),
+        'date': date_from_record(record),
+        'uid': uid_from_record(record),
+    }
+
+def list_models_from_db():
+    """
+    List models in database
+    """
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute(DB_SELECT)
+    entries = c.fetchall()
+    conn.close()
+    list_models = [record_to_info(record) for record in entries]
+    return list_models
+
 
 class ClaferModule:
     """
@@ -402,17 +502,17 @@ def upload_file(name):
     with open(filename_cfr, 'wb') as f:
         f.write(request.data)
 
-    insert_feature_model_db(name, request.data.decode('utf8'))
-    test = retrieve_feature_models_db()
-    app.logger.info(str(test))
-    app.logger.info('The id is: {}'.format(test[0][0]))
     cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
     app.logger.info('Clafer output: ' + str(cp.stdout))
     d = load_json(filename_json)
     imodule = ClaferModule(d)
-    tree = imodule.build_conftree()
-    app.logger.debug('tree to respond: ' + str(tree.to_json()))
-    return json.dumps(tree.to_json())
+    tree = imodule.build_conftree().to_json()
+    uid = insert_feature_model_db(name, request.data.decode('utf8'), tree)
+    test = retrieve_feature_models_db()
+    app.logger.info(str(test))
+    app.logger.info('The id is: {}'.format(test[0][0]))
+    app.logger.debug('tree to respond: ' + str(tree))
+    return json.dumps({'uid': uid, 'tree': tree})
 
 @app.route('/configure/', methods=['POST'])
 def configure_features():
@@ -423,8 +523,11 @@ def configure_features():
 
     data = json.loads(request.data)
     filename = data['filename']
-    file_content = retrieve_model_from_db(filename)
-    constraints = selected_features_to_constraints(data['feature_selection'])
+    uid = data['uid']
+    feature_selection = data['feature_selection']
+    file_content = retrieve_model_from_db_by_uid(uid)['source']
+    update_config_db(uid, feature_selection)
+    constraints = selected_features_to_constraints(feature_selection)
 
     # pylint: disable=line-too-long
     # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
@@ -432,8 +535,42 @@ def configure_features():
     # app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
     # d = load_json(filename_json)
 
-    newcontent = file_content + constraints
-    return newcontent
+    response = {
+        'server_source': file_content,
+        'server_constraints': constraints
+    }
+    return json.dumps(response)
+
+
+@app.route('/list_db_models/', methods=['GET'])
+def list_db_models():
+    """
+    list db models
+    """
+    app.logger.debug('list_db_models')
+    models = list_models_from_db()
+    return json.dumps(models)
+
+
+@app.route('/load_from_db/', methods=['POST'])
+def load_model_from_db():
+    """
+    Load model from db
+    """
+    app.logger.debug('load from db')
+
+    data = json.loads(request.data)
+    uid = data['model_uid']
+    model = retrieve_model_from_db_by_uid(uid)
+    configs = decode_json_db(model['configs'])
+    conftree = decode_json_db(model['conftree'])
+    return json.dumps({
+        'uid': model['uid'],
+        'source': model['source'],
+        'conftree': conftree,
+        'configs': configs,
+        'configs_pp': selected_features_to_constraints(configs),
+    })
 
 
 @app.route('/loadexample/', methods=['PUT'])

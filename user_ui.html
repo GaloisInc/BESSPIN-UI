@@ -85,7 +85,7 @@
         }
     </style>
     <style type="text/css" media="screen">
-      #editor {
+      #editor_source {
           position: relative;
           top: 20px;
           //right: 0;
@@ -93,6 +93,15 @@
           left: 100px;
           width: 800;
           height: 600;
+      }
+      #editor_configs {
+          position: relative;
+          top: 20px;
+          //right: 0;
+          //bottom: 0;
+          left: 100px;
+          width: 800;
+          height: 200;
       }
     </style>
 </head>
@@ -122,6 +131,11 @@
 </label>
 <input type="button" id="upload-configs-button" onclick="send_configured_features()"> <br />
 
+<select id="db_models">
+  <option>Nothing</option>
+</select>
+<button id="refresh_model_button" onclick="refresh_db_models()">Refresh list</button>
+<button id="db_model_button" onclick="load_configured_model()">Select Model from DB</button>
 
 
 <div id="node-popUp">
@@ -165,17 +179,27 @@
 
 <br />
 
-<div id="editor"></div>
+<div id="editor_source"></div>
+<div id="editor_configs"></div>
 
 <input type="button" id="download-button" onclick="download()"> <br />
 
 <script>
-  var editor = ace.edit("editor");
-  editor.setTheme("ace/theme/monokai");
-  editor.session.setMode("ace/mode/python");
-  editor.getSession().selection.on(
+  var editor_source = ace.edit("editor_source");
+  editor_source.setTheme("ace/theme/monokai");
+  editor_source.session.setMode("ace/mode/python");
+  editor_source.getSession().selection.on(
       'changeSelection',
-      function (e) { editor.getSession().selection.clearSelection(); }
+      function (e) { editor_source.getSession().selection.clearSelection(); }
+  );
+
+
+  var editor_configs = ace.edit("editor_configs");
+  editor_configs.setTheme("ace/theme/monokai");
+  editor_configs.session.setMode("ace/mode/python");
+  editor_configs.getSession().selection.on(
+      'changeSelection',
+      function (e) { editor_configs.getSession().selection.clearSelection(); }
   );
 </script>
 
@@ -192,64 +216,8 @@
   console.log('The GUID is '+ guid);
 
 
-  function handleFileSelect(evt) {
-      /* snippet from https://blog.garstasio.com/you-dont-need-jquery/ajax/
-       The second one was chosen. */
-
-      /*var formData = new FormData(),
-          file = document.getElementById('cfr_file').files[0],
-          xhr = new XMLHttpRequest();
-
-      formData.append('file', file);
-      xhr.open('POST', '/upload/');
-      xhr.send(formData);
-      */
-
-      var file = document.getElementById('cfr_file').files[0];
-      console.log(file);
-      console.log(file.name);
-      global_filename = file.name;
-      xhr = new XMLHttpRequest();
-      var route = '/upload/' + file.name;
-      xhr.open('POST', route);
-      xhr.setRequestHeader('Content-Type', file.type);
-      xhr.onload = function() {
-          if (xhr.status === 200) {
-              console.log('Response from server: ' + xhr.responseText);
-              global_conftree = JSON.parse(xhr.responseText);
-              selected_nodes = {}
-              draw_conftree(global_conftree);
-          }
-          else {
-              alert('Request failed.  Returned status of ' + xhr.status);
-          }
-      };
-      console.log(file.type);
-      xhr.send(file);
-  }
-
   document.getElementById('cfr_file').addEventListener('change', handleFileSelect, false);
 
-  function download() {
-      var editor = ace.edit("editor");
-      var data = editor.getValue();
-      var type = "text/plain";
-      var file = new Blob([data], {type: type});
-      if (window.navigator.msSaveOrOpenBlob) // IE10+
-          window.navigator.msSaveOrOpenBlob(file, filename);
-      else { // Others
-          var a = document.createElement("a"),
-              url = URL.createObjectURL(file);
-          a.href = url;
-          a.download = global_filename + '.configured';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function() {
-              document.body.removeChild(a);
-              window.URL.revokeObjectURL(url);
-          }, 0);
-      }
-  }
 
   /*var nodes = new vis.DataSet([
       {id: 1, label: "N1"},
@@ -265,12 +233,12 @@
   */
 
   // this is a global feature configuration tree, received from the server
+  var global_filename = 'modelnameplaceholder';
   var global_conftree = {};
+  var global_uid = '';
 
   // the dictionary containing the set of nodes that are selected by the user by clicking.
   var selected_nodes = {};
-
-  var global_filename = 'modelnameplaceholder';
 
   // Sets for nodes and edges of the tree visualization artifact (visjs)
   var nodes = new vis.DataSet([]);
@@ -562,6 +530,44 @@
       xhr.send(JSON.stringify([]));
   };
 
+  function handleFileSelect(evt) {
+      /* snippet from https://blog.garstasio.com/you-dont-need-jquery/ajax/
+       The second one was chosen. */
+
+      /*var formData = new FormData(),
+          file = document.getElementById('cfr_file').files[0],
+          xhr = new XMLHttpRequest();
+
+      formData.append('file', file);
+      xhr.open('POST', '/upload/');
+      xhr.send(formData);
+      */
+
+      var file = document.getElementById('cfr_file').files[0];
+      console.log(file);
+      console.log(file.name);
+      global_filename = file.name;
+      xhr = new XMLHttpRequest();
+      var route = '/upload/' + file.name;
+      xhr.open('POST', route);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log('Response from server: ' + xhr.responseText);
+              response = JSON.parse(xhr.responseText);
+              global_conftree = response['tree'];
+              global_uid = response['uid'];
+              selected_nodes = {}
+              draw_conftree(global_conftree);
+          }
+          else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+          }
+      };
+      console.log(file.type);
+      xhr.send(file);
+  };
+
   function send_configured_features() {
       /* Ajax in pure javascript instead of jQuery */
       var xhr = new XMLHttpRequest();
@@ -570,10 +576,13 @@
       xhr.onload = function() {
           if (xhr.status === 200) {
               console.log('Response from server: ' + xhr.responseText);
-              var editor = ace.edit("editor");
-              //editor.setTheme("ace/theme/monokai");
-              //editor.getSession().setMode("ace/mode/javascript");
-              editor.setValue(xhr.responseText);
+              var response = JSON.parse(xhr.responseText);
+
+              var editor_source = ace.edit("editor_source");
+              editor_source.setValue(response['server_source']);
+              var editor_configs = ace.edit("editor_configs");
+              editor_configs.setValue(response['server_constraints']);
+
           }
           else {
               alert('Request failed.  Returned status of ' + xhr.status);
@@ -583,10 +592,86 @@
       console.log(global_filename);
       xhr.send(JSON.stringify({
           'filename': global_filename,
-          'feature_selection': selected_nodes
+          'uid': global_uid,
+          'feature_selection': selected_nodes,
       }));
   };
 
+
+  function refresh_db_models() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/list_db_models');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log('Response from server: ' + xhr.responseText);
+
+              /* https://stackoverflow.com/questions/6364748/change-the-options-array-of-a-select-list */
+              $('#db_models').empty();
+              var db_models_options = $('#db_models').get(0);
+
+              $.each(JSON.parse(xhr.responseText), function(key, value) {
+                  var opt = document.createElement('option');
+                  opt.text = value['filename'] + ' ' + value['date'];
+                  opt.value = value['uid'];
+                  db_models_options.add(opt, null);
+              });
+          }
+          else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+          }
+      };
+      xhr.send();
+  };
+
+  function load_configured_model() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/load_from_db/');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log('Response from server: ' + xhr.responseText);
+              response = JSON.parse(xhr.responseText);
+              global_conftree = response['conftree'];
+              global_uid = response['uid'];
+              selected_nodes = response['configs'];
+              draw_conftree(global_conftree);
+              var editor_source = ace.edit("editor_source");
+              editor_source.setValue(response['source']);
+              var editor_configs = ace.edit("editor_configs");
+              editor_configs.setValue(response['configs_pp']);
+          }
+          else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+          }
+      };
+      var e = document.getElementById("db_models");
+      var uid = e.options[e.selectedIndex].value;
+      xhr.send(JSON.stringify({'model_uid': uid}));
+  };
+
+  function download() {
+      var editor_source = ace.edit("editor_source");
+      var data = editor_source.getValue();
+      var editor_configs = ace.edit("editor_configs");
+      data = data + editor_configs.getValue();
+      var type = "text/plain";
+      var file = new Blob([data], {type: type});
+      if (window.navigator.msSaveOrOpenBlob) // IE10+
+          window.navigator.msSaveOrOpenBlob(file, filename);
+      else { // Others
+          var a = document.createElement("a"),
+              url = URL.createObjectURL(file);
+          a.href = url;
+          a.download = global_filename + '.configured';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function() {
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(url);
+          }, 0);
+      }
+  };
 
   // reference: demo from visjs website
   // http://visjs.org/examples/network/other/manipulationEditEdgeNoDrag.html
