@@ -1,113 +1,68 @@
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Configurator</title>
-    <script type="text/JavaScript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript" charset="utf-8"></script>
-    <!--<link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" /> -->
-    <style type="text/css">
-        h1 { text-align: center }
-        body {
-          background-color: #6994bb; /* #2d78bd */
-        }
-        #network{
-            position: relative;
-            width: 900px;
-            height: 600px;
-            right: 100px;
-            left: 100px;
-            top: 5px;
-            border: 5px solid black;
-            background-color: white;
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Configurator</title>
+  <script type="text/JavaScript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript" charset="utf-8"></script>
+  <!--<link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" /> -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-        td {
-            vertical-align:top;
-        }
-        table {
-            width:800px;
-        }
-        #node-popUp {
-            display:none;
-            position:absolute;
-            top:350px;
-            left:170px;
-            z-index:299;
-            width:250px;
-            height:120px;
-            background-color: #f9f9f9;
-            border-style:solid;
-            border-width:3px;
-            border-color: #5394ed;
-            padding:10px;
-            text-align: center;
-        }
+  <style type="text/css">
+    h1 { text-align: center; padding: 30px }
+    body {
+        background-color: #6994bb; /* #2d78bd */
+    }
+    #network{
+        position: relative;
+        width: 900px;
+        height: 600px;
+        /*right: 100px;
+        left: 100px;*/
+        top: 5px;
+        border: 5px solid black;
+        background-color: white;
+    }
 
-        input[type="file"] {
-            display: none;
-        }
-        .custom-file-upload {
-            position: relative;
-            left: 100px;
-
-            border: 2px solid black;
-            display: inline-block;
-            padding: 6px 12px;
-            cursor: pointer;
-        }
-
-        #upload-configs-button {
-            display:none
-        }
-        .custom-upload-configurations {
-            position: relative;
-            left: 625px;
-
-            border: 2px solid black;
-            display: inline-block;
-            padding: 6px 12px;
-            cursor: pointer;
-        }
-
-        #download-button {
-            display:none
-        }
-        .custom-download-button {
-            position: relative;
-            left: 100px;
-            top: 10px;
-
-            border: 2px solid black;
-            display: inline-block;
-            padding: 6px 12px;
-            cursor: pointer;
-        }
-    </style>
-    <style type="text/css" media="screen">
-      #editor_source {
-          position: relative;
-          top: 20px;
-          //right: 0;
-          //bottom: 0;
-          left: 100px;
-          width: 800;
-          height: 600;
-      }
-      #editor_configs {
-          position: relative;
-          top: 20px;
-          //right: 0;
-          //bottom: 0;
-          left: 100px;
-          width: 800;
-          height: 200;
-      }
-    </style>
+    .grid {
+        display: flex;
+    }
+    .editor {
+        flex: 1;
+        height: 250px;
+    }
+  </style>
+  <style type="text/css" media="screen">
+    #ed_source_div {
+        position: relative;
+        top: 20px;
+        //right: 0;
+        //bottom: 0;
+        //left: 100px;
+        width: 800;
+        height: 600;
+    }
+    #ed_configs_div {
+        position: relative;
+        top: 20px;
+        //right: 0;
+        //bottom: 0;
+        left: 10px;
+        width: 400;
+        height: 200;
+    }
+  </style>
 </head>
 <body>
-<h1>Feature Model Configurator</h1>
 
+<div class="container">
+
+<div class="page-header">
+  <h1>Feature Model Configurator</h1>
+</div>
 <!--
 <input type="button" onclick="tryAjax()" value="rename ALL nodes"> <br />
 -->
@@ -120,69 +75,77 @@
  loading modes: https://www.html5rocks.com/en/tutorials/file/dndfiles/
  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers
   -->
-<label for="cfr_file" class="custom-file-upload">
-  <!-- <i class="fa fa-cloud-upload"></i> -->
-  Upload Model
-</label>
-<input type="file" id="cfr_file" accept=".cfr" />
-
-<label for="upload-configs-button" class="custom-upload-configurations">
-  Process Configurations
-</label>
-<input type="button" id="upload-configs-button" onclick="send_configured_features()"> <br />
-
-<select id="db_models">
-  <option>Nothing</option>
-</select>
-<button id="refresh_model_button" onclick="refresh_db_models()">Refresh list</button>
-<button id="db_model_button" onclick="load_configured_model()">Select Model from DB</button>
-
-
-<div id="node-popUp">
-  <span id="node-operation">node</span> <br>
-  <table style="width:100%">
+<label for="upload-row">Choose file</label>
+<div class="row" id="upload-row">
+  <div class="col-lg-6">
+    <div class="input-group">
+      <div class="custom-file">
+        <input type="file" class="custom-file-input" id="cfr_file" aria-describedby="inputGroupFileAddon01" accept=".cfr" onchange="$('#blablabla').html(this.files[0].name)">
+        <label class="custom-file-label" for="cfr_file" id="blablabla">Choose file</label>
+      </div>
+    </div>
     <!--
-    <tr>
-      <td>id</td><td><input id="node-id" value="new value" /></td>
-    </tr>
-    <tr>
-      <td>label</td><td><input id="node-label" value="new value" /></td>
-    </tr> -->
-    <tr>
-      <td>Selection</td>
-      <td>
-        <select id="feature-select-option">
-          <option value="unconfigured">Unconfigured</option>
-          <option value="selected">Select</option>
-          <option value="rejected">Reject</option>
-        </select>
-      </td>
-    </tr>
-    <!-- <tr>
-      <td>Select</td><td><input type="checkbox" id="node-feature-select" name="select" checked></td>
-    </tr> -->
-    <tr>
-      <td>Card</td><td><input id="node-card" value="new value" /></td>
-    </tr>
-  </table>
-  <input type="button" value="save" id="node-saveButton" />
-  <input type="button" value="cancel" id="node-cancelButton" />
+            <label for="cfr_file" > Upload Model </label>
+            <input type="file" id="cfr_file" class="form-control-file" accept=".cfr" /> -->
+  </div>
+
+  <div class="col-lg-3">
+    <button class="btn btn-light btn-outline-secondary" id="inputGroupFileAddon01" onclick="handleFileSelect()">Load</button>
+  </div>
 </div>
-
-
-<div id="network"></div>
-
-<label for="download-button" class="custom-download-button">
-  <!-- <i class="fa fa-cloud-upload"></i> -->
-  Download Configured Model
-</label>
 
 <br />
 
-<div id="editor_source"></div>
-<div id="editor_configs"></div>
+<label for="restore-row">Choose session</label>
+<div class="row" id="restore-row">
+  <div class="col-lg-6">
+    <div class="input-group">
+      <select class="custom-select" id="db_models">
+        <option>sessions</option>
+      </select>
+      <div class="input-group-append">
+        <button id="refresh_model_button" class="btn btn-light" onclick="refresh_db_models()">
+          <span class="glyphicon glyphicon-refresh"></span> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3">
+    <button id="db_model_button" class="btn btn-light btn-outline-secondary" onclick="load_configured_model()">
+      Restore Session
+    </button>
+  </div>
+</div>
 
-<input type="button" id="download-button" onclick="download()"> <br />
+<br />
+
+<label for="action-buttons">Actions</label>
+<div class="row" id="action-buttions">
+  <div class="col-md-3">
+    <button id="upload-configs-button" class="btn btn-primary" onclick="send_configured_features()">Process Configurations</button>
+  </div>
+  <div class="col-md-3">
+    <button id="download-button" class="btn btn-dark" onclick="download()">Download Configured Model</button>
+  </div>
+</div>
+
+<br />
+
+<div id="network"></div>
+<br />
+
+<div class="grid">
+
+  <div id="ed_source_div">
+    <label for="editor_source">Model source</label>
+    <div class="editor" id="editor_source"></div>
+  </div>
+  <div id="ed_configs_div">
+    <label for="editor_configs">Feature selection</label>
+    <div class="editor" id="editor_configs"></div>
+  </div>
+</div>
+
 
 <script>
   var editor_source = ace.edit("editor_source");
@@ -216,7 +179,7 @@
   console.log('The GUID is '+ guid);
 
 
-  document.getElementById('cfr_file').addEventListener('change', handleFileSelect, false);
+  //document.getElementById('cfr_file').addEventListener('change', handleFileSelect, false);
 
 
   /*var nodes = new vis.DataSet([
