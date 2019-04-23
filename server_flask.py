@@ -54,15 +54,11 @@ CREATE TABLE
 );
 '''
 
-DB_INSERT = """INSERT INTO feature_models VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}");"""
+DB_INSERT = """INSERT INTO feature_models VALUES (?, ?, ?, ?, ?, ?, ?);"""
 
 DB_SELECT = """SELECT * FROM feature_models"""
 
-DB_UPDATE = """
-UPDATE feature_models
-SET configs="{config}"
-WHERE uid="{uid}"
-"""
+DB_UPDATE = """UPDATE feature_models SET configs = :config WHERE uid = :uid"""
 
 def initialize_db():
     """
@@ -107,7 +103,7 @@ def insert_feature_model_db(filename, content, conftree):
     uid = str(uuid4())
     date = str(datetime.today())
     thehash = str(sha3_256(bytes(content, 'utf8')))
-    query = DB_INSERT.format(
+    c.execute(DB_INSERT, (
         uid,
         filename,
         content,
@@ -115,8 +111,7 @@ def insert_feature_model_db(filename, content, conftree):
         date,
         thehash,
         json.dumps([])
-    )
-    c.execute(query)
+    ))
     conn.commit()
     conn.close()
     return uid
@@ -131,8 +126,7 @@ def update_config_db(uid, cfg):
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     enc_cfg = encode_json_db(cfg)
-    query = DB_UPDATE.format(uid=uid, config=enc_cfg)
-    c.execute(query)
+    c.execute(DB_UPDATE, {'uid': uid, 'config': enc_cfg})
     conn.commit()
     conn.close()
 
