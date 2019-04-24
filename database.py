@@ -87,7 +87,7 @@ def insert_feature_model_db(filename, content, conftree):
         encode_json_db(conftree),
         date,
         thehash,
-        encode_json_db([])
+        encode_json_db({})
     ))
     conn.commit()
     conn.close()

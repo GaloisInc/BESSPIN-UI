@@ -380,6 +380,7 @@ def load_model_from_db():
     return json.dumps({
         'uid': model['uid'],
         'source': model['source'],
+        'filename': model['filename'],
         'conftree': conftree,
         'configs': configs,
         'configs_pp': selected_features_to_constraints(configs),

@@ -597,6 +597,7 @@
               response = JSON.parse(xhr.responseText);
               global_conftree = response['conftree'];
               global_uid = response['uid'];
+              global_filename = response['filename'];
               selected_nodes = response['configs'];
               draw_conftree(global_conftree);
               var editor_source = ace.edit("editor_source");
