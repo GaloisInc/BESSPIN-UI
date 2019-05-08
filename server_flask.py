@@ -392,5 +392,13 @@ def dashboard():
         app.logger.debug(page)
     return page
 
+@app.route('/dashboard/get_db_models/', methods=['GET'])
+def get_db_models():
+    """
+    list db models
+    """
+    app.logger.debug('list_db_models')
+    models = list_models_from_db()
+    return json.dumps(models)
 
 app.run('localhost', port=3784, debug=True)
