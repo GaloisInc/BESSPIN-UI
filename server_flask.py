@@ -279,27 +279,6 @@ def feature_configurator():
         app.logger.debug(page)
     return page
 
-@app.route('/uploadold/', methods=['POST'])
-def uploadold_file():
-    """
-    upload a clafer file
-    """
-    app.logger.debug('load file')
-
-    # TODO: save to a filename that depends on user token
-    filename = os.path.join(WORK_DIR, 'generated_file')
-    filename_cfr = filename + '.cfr'
-    filename_json = filename + '.json'
-    with open(filename_cfr, 'wb') as f:
-        f.write(request.data)
-
-    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
-    app.logger.info('Clafer output: ' + str(cp.stdout))
-    d = load_json(filename_json)
-    t = ClaferModule(d).to_conftree()
-    app.logger.debug('tree to respond: ' + str(t.to_json()))
-    return json.dumps(t.to_json())
-
 
 @app.route('/upload/<string:name>', methods=['POST'])
 def upload_file(name):
