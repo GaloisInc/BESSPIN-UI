@@ -5,14 +5,65 @@
   <title>Configurator</title>
   <script type="text/JavaScript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js"
+          type="text/javascript" charset="utf-8"></script>
   <!--<link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" /> -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+          integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+          crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+          integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+          crossorigin="anonymous"></script>
 
   <style type="text/css">
     h1 { text-align: center; padding: 30px }
+
+
+    /* The sidebar menu */
+    .sidenav {
+        height: 100%; /* Full-height: remove this if you want "auto" height */
+        width: 200px; /* Set the width of the sidebar */
+        position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+        z-index: 1; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background-color: #3974ab; /* Black */
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding-top: 100px;
+        border-right: 2px solid black;
+    }
+
+    /* The navigation menu links */
+    .sidenav a {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #111;
+        display: block;
+    }
+
+    /* When you mouse over the navigation links, change their color */
+    .sidenav a:hover {
+        color: #f1f1f1;
+    }
+
+    /* Style page content */
+    .main {
+        margin-left: 200px; /* Same as the width of the sidebar */
+        padding: 0px 10px;
+    }
+
+    /* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+    @media screen and (max-height: 450px) {
+        .sidenav {padding-top: 15px;}
+        .sidenav a {font-size: 18px;}
+    }
+
+
     body {
         background-color: #6994bb; /* #2d78bd */
     }
@@ -56,6 +107,7 @@
     }
   </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -75,6 +127,19 @@
  loading modes: https://www.html5rocks.com/en/tutorials/file/dndfiles/
  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers
   -->
+
+
+
+<!-- Side navigation -->
+<div class="sidenav">
+  <a href="/">Configurator</a>
+  <a href="/dashboard">Dashboard</a>
+</div>
+
+
+
+<div class="main">
+
 <label for="upload-row">Choose file</label>
 <div class="row" id="upload-row">
   <div class="col-lg-6">
@@ -117,7 +182,7 @@
   </div>
 </div>
 
-<br />
+<hr />
 
 <label for="action-buttons">Actions</label>
 <div class="row" id="action-buttions">
@@ -146,6 +211,7 @@
   </div>
 </div>
 
+</main>
 
 <script>
   var editor_source = ace.edit("editor_source");
@@ -511,7 +577,7 @@
       console.log(file.name);
       global_filename = file.name;
       xhr = new XMLHttpRequest();
-      var route = '/upload/' + file.name;
+      var route = '/configurator/upload/' + file.name;
       xhr.open('POST', route);
       xhr.setRequestHeader('Content-Type', file.type);
       xhr.onload = function() {
@@ -534,7 +600,7 @@
   function send_configured_features() {
       /* Ajax in pure javascript instead of jQuery */
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/configure/');
+      xhr.open('POST', '/configurator/configure/');
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = function() {
           if (xhr.status === 200) {
@@ -563,7 +629,7 @@
 
   function refresh_db_models() {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', '/list_db_models');
+      xhr.open('GET', '/configurator/list_db_models');
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = function() {
           if (xhr.status === 200) {
@@ -589,7 +655,7 @@
 
   function load_configured_model() {
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/load_from_db/');
+      xhr.open('POST', '/configurator/load_from_db/');
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onload = function() {
           if (xhr.status === 200) {

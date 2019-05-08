@@ -280,7 +280,7 @@ def feature_configurator():
     return page
 
 
-@app.route('/upload/<string:name>', methods=['POST'])
+@app.route('/configurator/upload/<string:name>', methods=['POST'])
 def upload_file(name):
     """
     upload a clafer file
@@ -306,7 +306,8 @@ def upload_file(name):
     app.logger.debug('tree to respond: ' + str(tree))
     return json.dumps({'uid': uid, 'tree': tree})
 
-@app.route('/configure/', methods=['POST'])
+
+@app.route('/configurator/configure/', methods=['POST'])
 def configure_features():
     """
     process feature configurations
@@ -334,7 +335,7 @@ def configure_features():
     return json.dumps(response)
 
 
-@app.route('/list_db_models/', methods=['GET'])
+@app.route('/configurator/list_db_models/', methods=['GET'])
 def list_db_models():
     """
     list db models
@@ -344,7 +345,7 @@ def list_db_models():
     return json.dumps(models)
 
 
-@app.route('/load_from_db/', methods=['POST'])
+@app.route('/configurator/load_from_db/', methods=['POST'])
 def load_model_from_db():
     """
     Load model from db
@@ -377,6 +378,19 @@ def load_example():
     t = ClaferModule(d).to_conftree()
     app.logger.debug(str(t.to_json()))
     return json.dumps(t.to_json())
+
+
+@app.route('/dashboard/')
+def dashboard():
+    """
+    endpoint for the configurator app
+    """
+    app.logger.info('feature configurator')
+    filepath = os.path.join(CODE_DIR, 'dashboard.html')
+    with open(filepath) as f:
+        page = f.read()
+        app.logger.debug(page)
+    return page
 
 
 app.run('localhost', port=3784, debug=True)
