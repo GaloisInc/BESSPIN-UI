@@ -295,8 +295,9 @@
   var global_conftree = {};
   var global_uid = '';
 
-  // the dictionary containing the set of nodes that are selected by the user by clicking.
-  var selected_nodes = {};
+  // the dictionary containing the set of nodes that are selected by
+  // the user by clicking.
+  var global_selected_nodes = {};
 
   // Sets for nodes and edges of the tree visualization artifact (visjs)
   var nodes = new vis.DataSet([]);
@@ -465,9 +466,9 @@
                   break;
               };
           };
-          console.log(selected_nodes);
-          if (conftree.uid in selected_nodes) {
-              switch (selected_nodes[conftree.uid][0]) {
+          console.log(global_selected_nodes);
+          if (conftree.uid in global_selected_nodes) {
+              switch (global_selected_nodes[conftree.uid][0]) {
               case 'selected': {
                   color = '#00cc00';
                   card = [1,1];
@@ -615,7 +616,7 @@
               response = JSON.parse(xhr.responseText);
               global_conftree = response['tree'];
               global_uid = response['uid'];
-              selected_nodes = {}
+              global_selected_nodes = {};
               draw_conftree(global_conftree);
           }
           else {
@@ -651,7 +652,7 @@
       xhr.send(JSON.stringify({
           'filename': global_filename,
           'uid': global_uid,
-          'feature_selection': selected_nodes,
+          'feature_selection': global_selected_nodes,
       }));
   };
 
@@ -693,7 +694,7 @@
               global_conftree = response['conftree'];
               global_uid = response['uid'];
               global_filename = response['filename'];
-              selected_nodes = response['configs'];
+              global_selected_nodes = response['configs'];
               draw_conftree(global_conftree);
               var editor_source = ace.edit("editor_source");
               editor_source.setValue(response['source']);
@@ -735,18 +736,18 @@
   function circle_selection(data) {
       var thenode = find_uid_conftree(global_conftree, data);
 
-      if (thenode.uid in selected_nodes) {
-          switch (selected_nodes[thenode.uid][0]) {
+      if (thenode.uid in global_selected_nodes) {
+          switch (global_selected_nodes[thenode.uid][0]) {
           case 'selected': {
-              selected_nodes[thenode.uid][0] = 'rejected';
+              global_selected_nodes[thenode.uid][0] = 'rejected';
               return;
           };
           case 'rejected': {
-              delete selected_nodes[thenode.uid];
+              delete global_selected_nodes[thenode.uid];
               return;
           };
           case 'unconfigured': {
-              selected_nodes[thenode.uid][0] = 'selected';
+              global_selected_nodes[thenode.uid][0] = 'selected';
               return;
           };
           };
@@ -766,7 +767,7 @@
           alert('weird');
       };
       case 'UNCONFIGURED': {
-          selected_nodes[data] = ['selected', path_to_uid(global_conftree, data, '')];
+          global_selected_nodes[data] = ['selected', path_to_uid(global_conftree, data, '')];
           return;
       };
       default: {
