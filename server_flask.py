@@ -267,7 +267,45 @@ def selected_features_to_constraints(feats):
             res += "\n" + "[ !" + sel_str + " ]"
     return res
 
+
 @app.route('/')
+def root_page():
+    """
+    Endpoint for root app.
+    Currently set to the dashboard.
+    """
+    app.logger.info('feature configurator')
+    filepath = os.path.join(CODE_DIR, 'dashboard.html')
+    with open(filepath) as f:
+        page = f.read()
+        app.logger.debug(page)
+    return page
+
+
+@app.route('/dashboard/')
+def dashboard():
+    """
+    endpoint for the dashboard
+    """
+    app.logger.info('feature configurator')
+    filepath = os.path.join(CODE_DIR, 'dashboard.html')
+    with open(filepath) as f:
+        page = f.read()
+        app.logger.debug(page)
+    return page
+
+
+@app.route('/dashboard/get_db_models/', methods=['GET'])
+def get_db_models():
+    """
+    list db models
+    """
+    app.logger.debug('list_db_models')
+    models = list_models_from_db()
+    return json.dumps(models)
+
+
+@app.route('/configurator/')
 def feature_configurator():
     """
     endpoint for the configurator app
@@ -379,26 +417,5 @@ def load_example():
     app.logger.debug(str(t.to_json()))
     return json.dumps(t.to_json())
 
-
-@app.route('/dashboard/')
-def dashboard():
-    """
-    endpoint for the configurator app
-    """
-    app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'dashboard.html')
-    with open(filepath) as f:
-        page = f.read()
-        app.logger.debug(page)
-    return page
-
-@app.route('/dashboard/get_db_models/', methods=['GET'])
-def get_db_models():
-    """
-    list db models
-    """
-    app.logger.debug('list_db_models')
-    models = list_models_from_db()
-    return json.dumps(models)
 
 app.run('localhost', port=3784, debug=True)
