@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 from uuid import uuid4
 from flask import Flask
-from flask import request
+from flask import request, send_from_directory
 from flask.logging import default_handler
 from database import (
     list_models_from_db,
@@ -266,6 +266,30 @@ def selected_features_to_constraints(feats):
         elif sel[0] == 'rejected':
             res += "\n" + "[ !" + sel_str + " ]"
     return res
+
+
+
+@app.route('/script/dashboard')
+def script_dashboard():
+    """
+    Endpoint serving the dashboard script
+    """
+    return send_from_directory(
+        os.path.join(CODE_DIR, 'js'),
+        'dashboard.js',
+        mimetype='application/javascript'
+    )
+
+@app.route('/script/configurator')
+def script_configurator():
+    """
+    Endpoint serving the configurator script
+    """
+    return send_from_directory(
+        os.path.join(CODE_DIR, 'js'),
+        'configurator.js',
+        mimetype='application/javascript'
+    )
 
 
 @app.route('/')
