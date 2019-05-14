@@ -335,7 +335,7 @@ def feature_configurator():
     endpoint for the configurator app
     """
     app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'user_ui.html')
+    filepath = os.path.join(CODE_DIR, 'configurator.html')
     with open(filepath) as f:
         page = f.read()
         app.logger.debug(page)
