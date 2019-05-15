@@ -183,6 +183,7 @@ def record_to_info(record):
         'filename': filename_from_record(record),
         'date': date_from_record(record),
         'uid': uid_from_record(record),
+        'nb_features_selected': len(configs_from_record(record)),
     }
 
 def list_models_from_db():
@@ -195,4 +196,5 @@ def list_models_from_db():
     entries = c.fetchall()
     conn.close()
     list_models = [record_to_info(record) for record in entries]
+    list_models.reverse()
     return list_models

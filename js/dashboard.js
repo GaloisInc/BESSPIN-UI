@@ -20,10 +20,12 @@ function refresh_db_models() {
                 var cell_filename = row.insertCell(1);
                 var cell_start = row.insertCell(2);
                 var cell_last = row.insertCell(3);
+                var cell_nb_features_selected = row.insertCell(4);
                 cell_number.innerHTML = "<a href=\"/configurator/" + value['uid'] + "\">" + String(row_index) + "</a>";
                 cell_filename.innerHTML = value['filename'];
                 cell_start.innerHTML = value['date'];
                 cell_last.innerHTML = "";
+                cell_nb_features_selected.innerHTML = value['nb_features_selected'];
                 row_index += 1;
             });
         }
