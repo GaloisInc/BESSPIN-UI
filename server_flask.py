@@ -8,7 +8,11 @@ import subprocess
 import tempfile
 from uuid import uuid4
 from flask import Flask
-from flask import request, send_from_directory
+from flask import (
+    request,
+    send_from_directory,
+    render_template,
+)
 from flask.logging import default_handler
 from database import (
     list_models_from_db,
@@ -330,16 +334,12 @@ def get_db_models():
 
 
 @app.route('/configurator/')
-def feature_configurator():
+@app.route('/configurator/<string:uid>')
+def feature_configurator(uid=None):
     """
     endpoint for the configurator app
     """
-    app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'configurator.html')
-    with open(filepath) as f:
-        page = f.read()
-        app.logger.debug(page)
-    return page
+    return render_template('configurator.html', uid=uid)
 
 
 @app.route('/configurator/upload/<string:name>', methods=['POST'])

@@ -148,11 +148,11 @@
       <div class="custom-file">
         <input type="file"
                class="custom-file-input"
-               id="cfr_file2"
+               id="cfr_file"
                aria-describedby="inputGroupFileAddon01"
                accept=".cfr"
                onchange="$('#blablabla').html(this.files[0].name)">
-        <label class="custom-file-label" for="cfr_file" id="blablabla2">Choose file</label>
+        <label class="custom-file-label" for="cfr_file" id="blablabla">Choose file</label>
       </div>
     </div>
     <!--
@@ -191,7 +191,7 @@
   <div class="col-lg-3">
     <button id="db_model_button"
             class="btn btn-light btn-outline-secondary"
-            onclick="load_configured_model()">
+            onclick="load_configured_model(null)">
       Restore Session
     </button>
   </div>
@@ -241,6 +241,12 @@
 </div>
 
 <script src="/script/configurator"></script>
+
+{% if uid %}
+<script>
+  load_configured_model("{{ uid }}");
+</script>
+{% endif %}
 
 </div> <!-- main -->
 </body>

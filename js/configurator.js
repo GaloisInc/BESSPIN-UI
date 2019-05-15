@@ -435,7 +435,7 @@ function refresh_db_models() {
     xhr.send();
 };
 
-function load_configured_model() {
+function load_configured_model(uid) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/configurator/load_from_db/');
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -457,8 +457,10 @@ function load_configured_model() {
             alert('Request failed.  Returned status of ' + xhr.status);
         }
     };
-    var e = document.getElementById("db_models");
-    var uid = e.options[e.selectedIndex].value;
+    if (uid == null) {
+	var e = document.getElementById("db_models");
+	var uid = e.options[e.selectedIndex].value;
+    }
     xhr.send(JSON.stringify({'model_uid': uid}));
 };
 
