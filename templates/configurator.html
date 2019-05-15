@@ -18,6 +18,10 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
           integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
           crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay"
+        crossorigin="anonymous">
 
   <style type="text/css">
     h1 { text-align: center; padding: 30px }
@@ -141,7 +145,7 @@
 
 <div class="main">
 
-<label for="upload-row">Choose file</label>
+<label for="upload-row">New file</label>
 <div class="row" id="upload-row">
   <div class="col-lg-6">
     <div class="input-group">
@@ -164,6 +168,7 @@
     <button class="btn btn-light btn-outline-secondary"
             id="inputGroupFileAddon01"
             onclick="handleFileSelect()">
+      <i class="fas fa-plus"></i>
       Load
     </button>
   </div>
@@ -182,8 +187,7 @@
         <button id="refresh_model_button"
                 class="btn btn-light"
                 onclick="refresh_db_models()">
-          <span class="glyphicon glyphicon-refresh"></span>
-          Refresh
+          <i class="fas fa-sync"></i>
         </button>
       </div>
     </div>
@@ -192,6 +196,7 @@
     <button id="db_model_button"
             class="btn btn-light btn-outline-secondary"
             onclick="load_configured_model(null)">
+      <i class="fas fa-cloud-download-alt"></i>
       Restore Session
     </button>
   </div>
@@ -200,31 +205,38 @@
 
 <label for="action-buttons">Actions</label>
 <div class="row" id="action-buttions">
-  <div class="col-md-1">
-    <button id="undo-configure-button"
-            class="btn btn-primary"
-            onclick="undo_selection()">
-      Undo
-    </button>
-  </div>
-  <div class="col-md-1">
-    <button id="redo-configure-button"
-            class="btn btn-primary"
-            onclick="redo_selection()">
-      Redo
-    </button>
+
+  <div class="btn-group col-md-3" role="group" aria-label="Basic example">
+    <!-- <div class="col-md-2"> -->
+      <button id="undo-configure-button"
+              class="btn btn-secondary"
+              onclick="undo_selection()">
+        <i class="fas fa-undo"></i>
+        Undo
+      </button>
+    <!-- </div> -->
+    <!-- <div class="col-md-2"> -->
+      <button id="redo-configure-button"
+              class="btn btn-secondary"
+              onclick="redo_selection()">
+        Redo
+        <i class="fas fa-redo"></i>
+      </button>
+    <!-- </div> -->
   </div>
   <div class="col-md-2">
     <button id="upload-configs-button"
             class="btn btn-primary"
             onclick="send_configured_features()">
-      Process Configurations
+      <i class="fas fa-check"></i>
+      Validate
     </button>
   </div>
   <div class="col-md-3">
     <button id="download-button"
             class="btn btn-dark"
             onclick="download()">
+      <i class="fas fa-file-download"></i>
       Download Model
     </button>
   </div>
