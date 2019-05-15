@@ -88,7 +88,6 @@ function selection_reset(uid){
 };
 
 function selection_push(uid, mode, other){
-    var index = this.search_index(uid);
     this.selection.push(
         { 'uid': uid,
           'content': {
@@ -96,6 +95,10 @@ function selection_push(uid, mode, other){
               'other': other,
           },
         });
+};
+
+function selection_push_elm(elm){
+    this.selection.push(elm);
 };
 
 function selection_pop(){
@@ -130,6 +133,7 @@ function Selection() {
     this.from_json = selection_from_json;
     this.remove = selection_remove;
     this.push = selection_push;
+    this.push_elm = selection_push_elm;
     this.pop = selection_pop;
     this.change = selection_change;
     this.get_mode = selection_get_mode;
@@ -145,6 +149,7 @@ var global_uid = '';
 // the dictionary containing the set of nodes that are selected by
 // the user by clicking.
 var global_selected_nodes = new Selection();
+var global_redo_selection = [];
 
 // Sets for nodes and edges of the tree visualization artifact (visjs)
 var nodes = new vis.DataSet([]);
@@ -616,6 +621,20 @@ function circle_selection(data) {
     }
     };
 };
+
+function undo_selection(data) {
+    var elm = global_selected_nodes.pop();
+    global_redo_selection.push(elm);
+    draw_conftree(global_conftree);
+};
+
+function redo_selection(data) {
+    var elm = global_redo_selection.pop();
+    if (elm != undefined && ! global_selected_nodes.mem(elm['uid']))
+	global_selected_nodes.push_elm(elm);
+    draw_conftree(global_conftree);
+};
+
 
 var network = new vis.Network(container, data, options);
 

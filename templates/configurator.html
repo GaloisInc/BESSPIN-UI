@@ -200,14 +200,21 @@
 
 <label for="action-buttons">Actions</label>
 <div class="row" id="action-buttions">
-  <div class="col-md-3">
+  <div class="col-md-1">
     <button id="undo-configure-button"
             class="btn btn-primary"
-            onclick="send_configured_features()">
+            onclick="undo_selection()">
       Undo
     </button>
   </div>
-  <div class="col-md-3">
+  <div class="col-md-1">
+    <button id="redo-configure-button"
+            class="btn btn-primary"
+            onclick="redo_selection()">
+      Redo
+    </button>
+  </div>
+  <div class="col-md-2">
     <button id="upload-configs-button"
             class="btn btn-primary"
             onclick="send_configured_features()">
