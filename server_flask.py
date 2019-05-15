@@ -259,16 +259,18 @@ def selected_features_to_constraints(feats):
     :return: str
     """
     res = ""
-    for _, sel in feats.items():
+    for sel in feats:
         # delete leading artificial feature path artificially injected
         # when there are several features at top level
         prefix = TOP_LEVEL_FEATURE_IDENT + '.'
-        sel_str = sel[1][len(prefix):] if sel[1].startswith(prefix) else sel[1]
+        path = sel['content']['other']
+        sel_str = path[len(prefix):] if path.startswith(prefix) else path
 
-        if sel[0] == 'selected':
-            res += "\n" + "[ " + sel_str + " ]"
-        elif sel[0] == 'rejected':
-            res += "\n" + "[ !" + sel_str + " ]"
+        mode = sel['content']['mode']
+        if mode == 'selected':
+            res += "[ " + sel_str + " ]" + "\n"
+        elif mode == 'rejected':
+            res += "[ !" + sel_str + " ]" + "\n"
     return res
 
 

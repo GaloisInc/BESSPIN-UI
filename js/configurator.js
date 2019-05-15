@@ -42,6 +42,101 @@ console.log('The GUID is '+ guid);
   ]);
 */
 
+
+function selection_mem(uid){
+    var sel = this.selection.find(entry => entry['uid'] == uid);
+    console.log('the sel is:');
+    console.log(sel);
+    if (sel == undefined) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
+function selection_search(uid){
+    var sel = this.selection.find( entry => entry['uid'] == uid);
+    return sel;
+};
+
+function selection_search_index(uid){
+    var index = this.selection.findIndex( entry => entry['uid'] == uid);
+    console.log('Index');
+    console.log(index);
+    return index;
+};
+
+
+function selection_from_json(content){
+    if (! Array.isArray(content))
+        alert("selection not an array");
+    this.selection = content;
+};
+
+function selection_to_json(){
+    if (! Array.isArray(this.selection))
+        alert("selection not an array");
+    return this.selection;
+};
+
+function selection_remove(uid){
+    this.selection = this.selection.filter(entry => entry.uid != uid);
+};
+
+function selection_reset(uid){
+    this.selection = [];
+};
+
+function selection_push(uid, mode, other){
+    var index = this.search_index(uid);
+    this.selection.push(
+        { 'uid': uid,
+          'content': {
+              'mode': mode,
+              'other': other,
+          },
+        });
+};
+
+function selection_pop(){
+    return this.selection.pop();
+};
+
+function selection_change(uid, content){
+    var index = this.search_index(uid);
+    this.selection[index] = { 'uid': uid, 'content': content};
+};
+
+function selection_get_mode(uid){
+    var index = this.search_index(uid);
+    return this.selection[index]['content']['mode'];
+};
+
+function selection_change_mode(uid, mode){
+    var index = this.search_index(uid);
+    this.selection[index]['content']['mode'] = mode;
+};
+
+function Selection() {
+    // instance variable
+    this.selection = [];
+
+    // methods
+    this.mem = selection_mem;
+    this.search = selection_search;
+    this.search_index = selection_search_index;
+    this.reset = selection_reset;
+    this.to_json = selection_to_json;
+    this.from_json = selection_from_json;
+    this.remove = selection_remove;
+    this.push = selection_push;
+    this.pop = selection_pop;
+    this.change = selection_change;
+    this.get_mode = selection_get_mode;
+    this.change_mode = selection_change_mode;
+};
+
+
 // this is a global feature configuration tree, received from the server
 var global_filename = 'modelnameplaceholder';
 var global_conftree = {};
@@ -49,7 +144,7 @@ var global_uid = '';
 
 // the dictionary containing the set of nodes that are selected by
 // the user by clicking.
-var global_selected_nodes = {};
+var global_selected_nodes = new Selection();
 
 // Sets for nodes and edges of the tree visualization artifact (visjs)
 var nodes = new vis.DataSet([]);
@@ -95,7 +190,6 @@ var options = {
     //     },
     // }
 };
-
 
 // from a node n, returns the edges to root
 function edges_to_root(n){
@@ -192,7 +286,8 @@ function conftree_to_nodes_and_edges(conftree) {
         else if (compare_card(conftree.group_card, [1, 1]))
             gcard = 'Xor';
 
-        var card = conftree.card; // set to the node carinality by default
+        // set to the node carinality by default
+        var card = conftree.card;
         color = '';
         if (! compare_card(conftree.card, [1,1]))
             color = '#ffffff';
@@ -219,8 +314,8 @@ function conftree_to_nodes_and_edges(conftree) {
         };
         };
         console.log(global_selected_nodes);
-        if (conftree.uid in global_selected_nodes) {
-            switch (global_selected_nodes[conftree.uid][0]) {
+        if (global_selected_nodes.mem(conftree.uid)) {
+            switch (global_selected_nodes.get_mode(conftree.uid)) {
             case 'selected': {
                 color = '#00cc00';
                 card = [1,1];
@@ -368,7 +463,7 @@ function handleFileSelect(evt) {
             response = JSON.parse(xhr.responseText);
             global_conftree = response['tree'];
             global_uid = response['uid'];
-            global_selected_nodes = {};
+            global_selected_nodes.reset();
             draw_conftree(global_conftree);
         }
         else {
@@ -404,7 +499,7 @@ function send_configured_features() {
     xhr.send(JSON.stringify({
         'filename': global_filename,
         'uid': global_uid,
-        'feature_selection': global_selected_nodes,
+        'feature_selection': global_selected_nodes.to_json(),
     }));
 };
 
@@ -446,7 +541,7 @@ function load_configured_model(uid) {
             global_conftree = response['conftree'];
             global_uid = response['uid'];
             global_filename = response['filename'];
-            global_selected_nodes = response['configs'];
+            global_selected_nodes.from_json(response['configs']);
             draw_conftree(global_conftree);
             var editor_source = ace.edit("editor_source");
             editor_source.setValue(response['source']);
@@ -458,8 +553,8 @@ function load_configured_model(uid) {
         }
     };
     if (uid == null) {
-	var e = document.getElementById("db_models");
-	var uid = e.options[e.selectedIndex].value;
+        var e = document.getElementById("db_models");
+        var uid = e.options[e.selectedIndex].value;
     }
     xhr.send(JSON.stringify({'model_uid': uid}));
 };
@@ -490,18 +585,18 @@ function download() {
 function circle_selection(data) {
     var thenode = find_uid_conftree(global_conftree, data);
 
-    if (thenode.uid in global_selected_nodes) {
-        switch (global_selected_nodes[thenode.uid][0]) {
+    if (global_selected_nodes.mem(thenode.uid)) {
+        switch (global_selected_nodes.get_mode(thenode.uid)) {
         case 'selected': {
-            global_selected_nodes[thenode.uid][0] = 'rejected';
+            global_selected_nodes.change_mode(thenode.uid, 'rejected');
             return;
         };
         case 'rejected': {
-            delete global_selected_nodes[thenode.uid];
+            global_selected_nodes.remove(thenode.uid);
             return;
         };
         case 'unconfigured': {
-            global_selected_nodes[thenode.uid][0] = 'selected';
+            global_selected_nodes.change_mode(thenode.uid, 'selected');
             return;
         };
         };
@@ -521,7 +616,7 @@ function circle_selection(data) {
         alert('weird');
     };
     case 'UNCONFIGURED': {
-        global_selected_nodes[data] = ['selected', path_to_uid(global_conftree, data, '')];
+        global_selected_nodes.push(thenode.uid, 'selected', path_to_uid(global_conftree, data, ''));
         return;
     };
     default: {
