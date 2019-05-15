@@ -326,10 +326,6 @@ function conftree_to_nodes_and_edges(conftree) {
                 card = [0,0];
                 break;
             };
-            case 'unconfigured': {
-                color = '#ffffff';
-                break;
-            };
             };
         }
         var node1 = {
@@ -593,10 +589,6 @@ function circle_selection(data) {
         };
         case 'rejected': {
             global_selected_nodes.remove(thenode.uid);
-            return;
-        };
-        case 'unconfigured': {
-            global_selected_nodes.change_mode(thenode.uid, 'selected');
             return;
         };
         };
