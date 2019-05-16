@@ -425,6 +425,7 @@ def load_model_from_db():
         'uid': model['uid'],
         'source': model['source'],
         'filename': model['filename'],
+        'date': model['date'],
         'conftree': conftree,
         'configs': configs,
         'configs_pp': selected_features_to_constraints(configs),

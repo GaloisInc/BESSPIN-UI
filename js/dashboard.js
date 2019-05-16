@@ -24,7 +24,7 @@ function refresh_db_models() {
                 cell_number.innerHTML = "<a href=\"/configurator/" + value['uid'] + "\">" + String(row_index) + "</a>";
                 cell_filename.innerHTML = value['filename'];
                 cell_start.innerHTML = value['date'];
-                cell_last.innerHTML = "";
+                cell_last.innerHTML = value['last_update'];
                 cell_nb_features_selected.innerHTML = value['nb_features_selected'];
                 row_index += 1;
             });
