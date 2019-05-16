@@ -124,6 +124,19 @@ function selection_change_mode(uid, mode){
     this.selection[index]['content']['mode'] = mode;
 };
 
+function selection_change_validated(uid, is_validated){
+    var index = this.search_index(uid);
+    this.selection[index]['content']['validated'] = is_validated;
+};
+
+function selection_all_validated(){
+    var index = this.selection.findIndex( entry => entry['content']['validated'] == false);
+    if (index == -1)
+        return true;
+    else
+        return false;
+}
+
 function Selection() {
     // instance variable
     this.selection = [];
@@ -143,6 +156,8 @@ function Selection() {
     this.get_mode = selection_get_mode;
     this.get_validated = selection_get_validated;
     this.change_mode = selection_change_mode;
+    this.change_validated = selection_change_validated;
+    this.all_validated = selection_all_validated;
 };
 
 
@@ -284,6 +299,22 @@ function compare_card(arr1, arr2){
     return false;
 };
 
+function set_validate_button_success(){
+    var validate_button = $('#validate-features-button');
+    validate_button.removeClass("btn-primary");
+    validate_button.addClass("btn-success");
+};
+
+function set_validate_button_active(){
+    var validate_button = $('#validate-features-button');
+    validate_button.removeClass("btn-success");
+    validate_button.addClass("btn-primary");
+};
+
+function update_validate_button(){
+    set_validate_button_active();
+};
+
 // returns the list of nodes and edges from a node d
 function conftree_to_nodes_and_edges(conftree) {
     if (conftree.hasOwnProperty('ident')) {
@@ -303,11 +334,11 @@ function conftree_to_nodes_and_edges(conftree) {
             color = '#ffffff';
         switch (conftree.selection_state) {
         case 'FORCEDON': {
-            color = '#aaffaa';
+            color = '#ddffdd';
             break;
         };
         case 'FORCEDOFF': {
-            color = '#ffaaaa';
+            color = '#ffdddd';
             break;
         };
         case 'USERSELECTED': {
@@ -328,17 +359,17 @@ function conftree_to_nodes_and_edges(conftree) {
             switch (global_selected_nodes.get_mode(conftree.uid)) {
             case 'selected': {
                 if (global_selected_nodes.get_validated(conftree.uid))
-                    color = '#00cc00';
+                    color = '#99ff99';
                 else
-                    color = '#007700';
+                    color = '#00dd00';
                 card = [1,1];
                 break;
             };
             case 'rejected': {
                 if (global_selected_nodes.get_validated(conftree.uid))
-                    color = '#cc0000';
+                    color = '#ff9999';
                 else
-                    color = '#770000';
+                    color = '#dd0000';
                 card = [0,0];
                 break;
             };
@@ -375,8 +406,7 @@ function conftree_to_nodes_and_edges(conftree) {
 
 function draw_conftree(conftree){
     var ch = conftree_to_nodes_and_edges(conftree);
-    //console.log('done converting to nodes and edges');
-    //console.log(JSON.stringify(ch));
+    update_validate_button();
     nodes.clear();
     edges.clear();
     nodes.add(ch.nodes);
@@ -486,7 +516,7 @@ function handleFileSelect(evt) {
     xhr.send(file);
 };
 
-function send_configured_features() {
+function validate_features() {
     /* Ajax in pure javascript instead of jQuery */
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/configurator/configure/');
@@ -503,6 +533,7 @@ function send_configured_features() {
 
             global_selected_nodes.from_json(response['validated_features']);
             draw_conftree(global_conftree);
+            set_validate_button_success();
         }
         else {
             alert('Request failed.  Returned status of ' + xhr.status);
@@ -603,6 +634,7 @@ function circle_selection(data) {
         switch (global_selected_nodes.get_mode(thenode.uid)) {
         case 'selected': {
             global_selected_nodes.change_mode(thenode.uid, 'rejected');
+            global_selected_nodes.change_validated(thenode.uid, false);
             return;
         };
         case 'rejected': {
