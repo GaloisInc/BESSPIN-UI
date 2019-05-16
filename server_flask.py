@@ -452,5 +452,12 @@ def monitor(uid=None):
     """
     return render_template('monitor.html', uid=uid)
 
+@app.route('/metrics/')
+@app.route('/metrics/<string:uid>')
+def metrics(uid=None):
+    """
+    endpoint for the configurator app
+    """
+    return render_template('metrics.html', uid=uid)
 
 app.run('localhost', port=3784, debug=True)

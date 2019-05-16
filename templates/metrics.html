@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>BESSPIN UI</title>
+  <title>Configurator</title>
   <script type="text/JavaScript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js"
@@ -18,6 +18,10 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
           integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
           crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay"
+        crossorigin="anonymous">
 
   <style type="text/css">
     h1 { text-align: center; padding: 30px }
@@ -67,47 +71,8 @@
     body {
         background-color: #6994bb; /* #2d78bd */
     }
-    #network{
-        position: relative;
-        width: 900px;
-        height: 600px;
-        /*right: 100px;
-        left: 100px;*/
-        top: 5px;
-        border: 5px solid black;
-        background-color: white;
-    }
-
     .grid {
         display: flex;
-    }
-    .editor {
-        flex: 1;
-        height: 250px;
-    }
-
-    #db_table_info {
-	background-color: white;
-    }
-  </style>
-  <style type="text/css" media="screen">
-    #ed_source_div {
-        position: relative;
-        top: 20px;
-        //right: 0;
-        //bottom: 0;
-        //left: 100px;
-        width: 800;
-        height: 600;
-    }
-    #ed_configs_div {
-        position: relative;
-        top: 20px;
-        //right: 0;
-        //bottom: 0;
-        left: 10px;
-        width: 400;
-        height: 200;
     }
   </style>
 </head>
@@ -117,7 +82,7 @@
 <div class="container">
 
 <div class="page-header">
-  <h1>Dashboard</h1>
+  <h1>Metrics</h1>
 </div>
 
 <!-- Side navigation -->
@@ -128,26 +93,72 @@
   <a href="/metrics">Metrics</a>
 </div>
 
-
 <div class="main">
 
-<table class="table table-striped table-bordered" id="db_table_info">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Filename</th>
-      <th scope="col">Date</th>
-      <th scope="col">Last update</th>
-      <th scope="col"># Nb of features</th>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
-</table>
 
-</main>
+  <form>
+    <div class="form-group row">
+      <label for="model-name" class="col-sm-2 col-form-label">Source</label>
+      <div class="col-sm-8">
+        <input class="form-control" type="text" value="filename.cfr" id="model-name" readonly>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="model-date" class="col-sm-2 col-form-label">Date</label>
+      <div class="col-sm-8">
+        <input class="form-control" type="text" value="1972" id="model-date" readonly>
+      </div>
+    </div>
+  </form>
+
+  <hr />
+
+  <h4>CPU_power</h4>
+  <button type="button" class="btn btn-primary btn-striped btn-animated"> 15 </button>
+  <br />
+
+  <h4>CPU_Performance</h4>
+  <button type="button" class="btn btn-warning"> 1.3 GHz </button>
+  <br />
+
+  <h4>CPU_area</h4>
+  <button type="button" class="btn btn-warning"> 200 </button>
+  <br />
+
+
+  <h4>CPU_security</h4>
+  <button type="button" class="btn btn-success"> 100 </button>
+  <br />
+
+
+{% if uid %}
+<script>
+function load_model_metrics(uid) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/configurator/load_from_db/');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            console.log('Response from server: ' + xhr.responseText);
+            response = JSON.parse(xhr.responseText);
+            var e = document.getElementById("model-name");
+            e.value = response['filename'];
+            var e = document.getElementById("model-date");
+            e.value = response['date'];
+        }
+        else {
+            alert('Request failed.  Returned status of ' + xhr.status);
+        }
+    };
+    xhr.send(JSON.stringify({'model_uid': uid}));
+};
+
+
+load_model_metrics("{{ uid }}");
+</script>
+{% endif %}
+
+</div> <!-- main -->
 </body>
-
-<script src="/script/dashboard"></script>
 
 </html>
