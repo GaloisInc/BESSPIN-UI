@@ -61,21 +61,19 @@ function selection_search(uid){
 
 function selection_search_index(uid){
     var index = this.selection.findIndex( entry => entry['uid'] == uid);
-    console.log('Index');
-    console.log(index);
     return index;
 };
 
 
 function selection_from_json(content){
     if (! Array.isArray(content))
-        alert("selection not an array");
+        alert("from json: selection not an array");
     this.selection = content;
 };
 
 function selection_to_json(){
     if (! Array.isArray(this.selection))
-        alert("selection not an array");
+        alert("to_json: selection not an array");
     return this.selection;
 };
 
@@ -87,12 +85,13 @@ function selection_reset(uid){
     this.selection = [];
 };
 
-function selection_push(uid, mode, other){
+function selection_push(uid, mode, other, isvalid){
     this.selection.push(
         { 'uid': uid,
           'content': {
               'mode': mode,
               'other': other,
+              'validated': isvalid,
           },
         });
 };
@@ -113,6 +112,11 @@ function selection_change(uid, content){
 function selection_get_mode(uid){
     var index = this.search_index(uid);
     return this.selection[index]['content']['mode'];
+};
+
+function selection_get_validated(uid){
+    var index = this.search_index(uid);
+    return this.selection[index]['content']['validated'];
 };
 
 function selection_change_mode(uid, mode){
@@ -137,6 +141,7 @@ function Selection() {
     this.pop = selection_pop;
     this.change = selection_change;
     this.get_mode = selection_get_mode;
+    this.get_validated = selection_get_validated;
     this.change_mode = selection_change_mode;
 };
 
@@ -322,12 +327,18 @@ function conftree_to_nodes_and_edges(conftree) {
         if (global_selected_nodes.mem(conftree.uid)) {
             switch (global_selected_nodes.get_mode(conftree.uid)) {
             case 'selected': {
-                color = '#00cc00';
+                if (global_selected_nodes.get_validated(conftree.uid))
+                    color = '#00cc00';
+                else
+                    color = '#007700';
                 card = [1,1];
                 break;
             };
             case 'rejected': {
-                color = '#cc0000';
+                if (global_selected_nodes.get_validated(conftree.uid))
+                    color = '#cc0000';
+                else
+                    color = '#770000';
                 card = [0,0];
                 break;
             };
@@ -490,6 +501,8 @@ function send_configured_features() {
             var editor_configs = ace.edit("editor_configs");
             editor_configs.setValue(response['server_constraints']);
 
+            global_selected_nodes.from_json(response['validated_features']);
+            draw_conftree(global_conftree);
         }
         else {
             alert('Request failed.  Returned status of ' + xhr.status);
@@ -613,7 +626,7 @@ function circle_selection(data) {
         alert('weird');
     };
     case 'UNCONFIGURED': {
-        global_selected_nodes.push(thenode.uid, 'selected', path_to_uid(global_conftree, data, ''));
+        global_selected_nodes.push(thenode.uid, 'selected', path_to_uid(global_conftree, data, ''), false);
         return;
     };
     default: {
@@ -631,7 +644,7 @@ function undo_selection(data) {
 function redo_selection(data) {
     var elm = global_redo_selection.pop();
     if (elm != undefined && ! global_selected_nodes.mem(elm['uid']))
-	global_selected_nodes.push_elm(elm);
+        global_selected_nodes.push_elm(elm);
     draw_conftree(global_conftree);
 };
 

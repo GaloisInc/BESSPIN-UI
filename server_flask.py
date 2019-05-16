@@ -273,6 +273,14 @@ def selected_features_to_constraints(feats):
             res += "[ !" + sel_str + " ]" + "\n"
     return res
 
+def configuration_algo(conftree, feature_selection):
+    """
+    A mock configuration algorithon. Says yes to everything
+    """
+    for e in feature_selection:
+        e['content']['validated'] = True
+
+    return feature_selection
 
 
 @app.route('/script/dashboard')
@@ -382,8 +390,13 @@ def configure_features():
     filename = data['filename']
     uid = data['uid']
     feature_selection = data['feature_selection']
+    entry = retrieve_model_from_db_by_uid(uid)
     file_content = retrieve_model_from_db_by_uid(uid)['source']
-    update_config_db(uid, feature_selection)
+    validated_features = configuration_algo(
+        entry['conftree'],
+        feature_selection,
+    )
+    update_config_db(uid, validated_features)
     constraints = selected_features_to_constraints(feature_selection)
 
     # pylint: disable=line-too-long
@@ -394,7 +407,8 @@ def configure_features():
 
     response = {
         'server_source': file_content,
-        'server_constraints': constraints
+        'server_constraints': constraints,
+        'validated_features': validated_features,
     }
     return json.dumps(response)
 
