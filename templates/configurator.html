@@ -146,7 +146,7 @@
 
 <div class="main">
 
-<label for="upload-row">New file</label>
+<label for="upload-row">Add model</label>
 <div class="row" id="upload-row">
   <div class="col-lg-6">
     <div class="input-group">
@@ -170,19 +170,19 @@
             id="inputGroupFileAddon01"
             onclick="handleFileSelect()">
       <i class="fas fa-plus"></i>
-      Load
+      Add Model
     </button>
   </div>
 </div>
 
 <br />
 
-<label for="restore-row">Choose session</label>
+<label for="restore-row">Choose previous model</label>
 <div class="row" id="restore-row">
   <div class="col-lg-6">
     <div class="input-group">
       <select class="custom-select" id="db_models">
-        <option>sessions</option>
+        <option></option>
       </select>
       <div class="input-group-append">
         <button id="refresh_model_button"
@@ -198,7 +198,7 @@
             class="btn btn-light btn-outline-secondary"
             onclick="load_configured_model(null)">
       <i class="fas fa-cloud-download-alt"></i>
-      Restore Session
+      Choose Model
     </button>
   </div>
 </div>
