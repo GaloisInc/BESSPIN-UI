@@ -443,5 +443,13 @@ def load_example():
     app.logger.debug(str(t.to_json()))
     return json.dumps(t.to_json())
 
+@app.route('/monitor/')
+@app.route('/monitor/<string:uid>')
+def monitor(uid=None):
+    """
+    endpoint for the configurator app
+    """
+    return render_template('monitor.html', uid=uid)
+
 
 app.run('localhost', port=3784, debug=True)
