@@ -1,3 +1,14 @@
+
+function make_fas(symb){
+    return "<i class=\"fas fa-" + symb + "\"></i>";
+
+}
+
+function make_hyperlink(path, id, cont){
+    // <a href="path/id"> cont </a>
+    return "<a href=\"/" + path + "/" + id + "\">" + cont + "</a>";
+}
+
 function refresh_db_models() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/dashboard/get_db_models');
@@ -21,7 +32,11 @@ function refresh_db_models() {
                 var cell_start = row.insertCell(2);
                 var cell_last = row.insertCell(3);
                 var cell_nb_features_selected = row.insertCell(4);
-                cell_number.innerHTML = "<a href=\"/configurator/" + value['uid'] + "\">" + String(row_index) + "</a>";
+                cell_number.innerHTML =
+		    make_hyperlink("configurator", value['uid'], String(row_index)) + " " +
+		    make_hyperlink("configurator", value['uid'], make_fas("cog")) + " " +
+		    make_hyperlink("monitor", value['uid'], make_fas("tasks")) + " " +
+		    make_hyperlink("metrics", value['uid'], make_fas("chart-bar"));
                 cell_filename.innerHTML = value['filename'];
                 cell_start.innerHTML = value['date'];
                 cell_last.innerHTML = value['last_update'];
