@@ -8,7 +8,11 @@ import subprocess
 import tempfile
 from uuid import uuid4
 from flask import Flask
-from flask import request
+from flask import (
+    request,
+    send_from_directory,
+    render_template,
+)
 from flask.logging import default_handler
 from database import (
     list_models_from_db,
@@ -255,53 +259,100 @@ def selected_features_to_constraints(feats):
     :return: str
     """
     res = ""
-    for _, sel in feats.items():
+    for sel in feats:
         # delete leading artificial feature path artificially injected
         # when there are several features at top level
         prefix = TOP_LEVEL_FEATURE_IDENT + '.'
-        sel_str = sel[1][len(prefix):] if sel[1].startswith(prefix) else sel[1]
+        path = sel['content']['other']
+        sel_str = path[len(prefix):] if path.startswith(prefix) else path
 
-        if sel[0] == 'selected':
-            res += "\n" + "[ " + sel_str + " ]"
-        elif sel[0] == 'rejected':
-            res += "\n" + "[ !" + sel_str + " ]"
+        mode = sel['content']['mode']
+        if mode == 'selected':
+            res += "[ " + sel_str + " ]" + "\n"
+        elif mode == 'rejected':
+            res += "[ !" + sel_str + " ]" + "\n"
     return res
 
-@app.route('/')
-def feature_configurator():
+def configuration_algo(conftree, feature_selection):
     """
-    endpoint for the configurator app
+    A mock configuration algorithon. Says yes to everything
+    """
+    for e in feature_selection:
+        e['content']['validated'] = True
+
+    return feature_selection
+
+
+@app.route('/script/dashboard')
+def script_dashboard():
+    """
+    Endpoint serving the dashboard script
+    """
+    return send_from_directory(
+        os.path.join(CODE_DIR, 'js'),
+        'dashboard.js',
+        mimetype='application/javascript'
+    )
+
+@app.route('/script/configurator')
+def script_configurator():
+    """
+    Endpoint serving the configurator script
+    """
+    return send_from_directory(
+        os.path.join(CODE_DIR, 'js'),
+        'configurator.js',
+        mimetype='application/javascript'
+    )
+
+
+@app.route('/')
+def root_page():
+    """
+    Endpoint for root app.
+    Currently set to the dashboard.
     """
     app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'user_ui.html')
+    filepath = os.path.join(CODE_DIR, 'dashboard.html')
     with open(filepath) as f:
         page = f.read()
         app.logger.debug(page)
     return page
 
-@app.route('/uploadold/', methods=['POST'])
-def uploadold_file():
+
+@app.route('/dashboard/')
+def dashboard():
     """
-    upload a clafer file
+    endpoint for the dashboard
     """
-    app.logger.debug('load file')
-
-    # TODO: save to a filename that depends on user token
-    filename = os.path.join(WORK_DIR, 'generated_file')
-    filename_cfr = filename + '.cfr'
-    filename_json = filename + '.json'
-    with open(filename_cfr, 'wb') as f:
-        f.write(request.data)
-
-    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
-    app.logger.info('Clafer output: ' + str(cp.stdout))
-    d = load_json(filename_json)
-    t = ClaferModule(d).to_conftree()
-    app.logger.debug('tree to respond: ' + str(t.to_json()))
-    return json.dumps(t.to_json())
+    app.logger.info('feature configurator')
+    filepath = os.path.join(CODE_DIR, 'dashboard.html')
+    with open(filepath) as f:
+        page = f.read()
+        app.logger.debug(page)
+    return page
 
 
-@app.route('/upload/<string:name>', methods=['POST'])
+@app.route('/dashboard/get_db_models/', methods=['GET'])
+def get_db_models():
+    """
+    list db models
+    """
+    app.logger.debug('list_db_models')
+    models = list_models_from_db()
+    return json.dumps(models)
+
+
+@app.route('/configurator/')
+@app.route('/configurator/<string:uid>')
+def feature_configurator(uid=None):
+    """
+    endpoint for the configurator app
+    """
+    return render_template('configurator.html', uid=uid)
+
+
+@app.route('/configurator/upload/<string:name>', methods=['POST'])
 def upload_file(name):
     """
     upload a clafer file
@@ -327,7 +378,8 @@ def upload_file(name):
     app.logger.debug('tree to respond: ' + str(tree))
     return json.dumps({'uid': uid, 'tree': tree})
 
-@app.route('/configure/', methods=['POST'])
+
+@app.route('/configurator/configure/', methods=['POST'])
 def configure_features():
     """
     process feature configurations
@@ -338,8 +390,13 @@ def configure_features():
     filename = data['filename']
     uid = data['uid']
     feature_selection = data['feature_selection']
+    entry = retrieve_model_from_db_by_uid(uid)
     file_content = retrieve_model_from_db_by_uid(uid)['source']
-    update_config_db(uid, feature_selection)
+    validated_features = configuration_algo(
+        entry['conftree'],
+        feature_selection,
+    )
+    update_config_db(uid, validated_features)
     constraints = selected_features_to_constraints(feature_selection)
 
     # pylint: disable=line-too-long
@@ -350,12 +407,13 @@ def configure_features():
 
     response = {
         'server_source': file_content,
-        'server_constraints': constraints
+        'server_constraints': constraints,
+        'validated_features': validated_features,
     }
     return json.dumps(response)
 
 
-@app.route('/list_db_models/', methods=['GET'])
+@app.route('/configurator/list_db_models/', methods=['GET'])
 def list_db_models():
     """
     list db models
@@ -365,7 +423,7 @@ def list_db_models():
     return json.dumps(models)
 
 
-@app.route('/load_from_db/', methods=['POST'])
+@app.route('/configurator/load_from_db/', methods=['POST'])
 def load_model_from_db():
     """
     Load model from db
@@ -381,6 +439,7 @@ def load_model_from_db():
         'uid': model['uid'],
         'source': model['source'],
         'filename': model['filename'],
+        'date': model['date'],
         'conftree': conftree,
         'configs': configs,
         'configs_pp': selected_features_to_constraints(configs),
@@ -399,5 +458,20 @@ def load_example():
     app.logger.debug(str(t.to_json()))
     return json.dumps(t.to_json())
 
+@app.route('/monitor/')
+@app.route('/monitor/<string:uid>')
+def monitor(uid=None):
+    """
+    endpoint for the configurator app
+    """
+    return render_template('monitor.html', uid=uid)
+
+@app.route('/metrics/')
+@app.route('/metrics/<string:uid>')
+def metrics(uid=None):
+    """
+    endpoint for the configurator app
+    """
+    return render_template('metrics.html', uid=uid)
 
 app.run('localhost', port=3784, debug=True)

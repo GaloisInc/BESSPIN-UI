@@ -1,28 +1,51 @@
-# Feature Model Configurator UI
+# BESSPIN UI
 
-![alt text](images/screenshot_configurator_ui.png "Screenshot configurator UI")
+![alt text](images/screenshot_UI.png "Screenshot UI")
+
+The UI consists of several components:
+
+- Dashboard: a table visualization of models currently entered into
+  the system. Each model has hyperlinks available to other parts of
+  the UI described below.
+
+- Configurator: this component is the UI to configure and explore the
+  configuration of models.
+
+- Monitor: provides a visualization and commands related to the
+  testing pipeline for models
+
+- Metrics: provides a visualization and commands related to the
+  evaluation of models
 
 
-The UI provides several features listed below. The list describes a
-typical workflow with the UI:
+## Configurator UI
 
-- *Load a feature model*: from the local file system. The file is
+The Configurator UI has some features listed below:
+
+- *Load a new feature model*: from the local file system. The file is
   parsed using Clafer in the backend and then displayed to the user in
   a graphical tree-like structure. Some examples of feature models are
-  provided in the `examples/` folder of the repo.
+  provided in the `examples` folder.
 
-- *Select features*: by clicking on the different features. It is
-  possible to `select`, `unselect`, or `unconfigure` features. By
-  default features are unconfigured, shown in blank nodes. Once
-  selected or unselected, the feature is colored green or red.
+- *Continue configuring feature model*. Choose a model from the list
+   of models previously entered in the system and continue exploring
+   and exploring their configuration.
 
-- *Process configurations*: once a round of feature selection is done,
-  process the selection by pressing the corresponding button. The
-  backend analyzes the selection with according to the feature model
-  and returns the model with additional *constraints* encoding the
-  selection of features. This is shown in the text editor at the
-  bottom of the webpage, ready for review. Currently, the constraints
-  are inserted at the end of the file.
+- *Model visualization*: A model is translated into a graphical
+   tree-like structure -- *configuration tree* -- with nodes
+   representing features and indicating possible feature
+   configurations.
+
+- *Select features by clicking*: It is possible to `select`, explicit
+  ly `unselected`, or leave as `unconfigured` the features of a model.
+  The status of the features is translated into color, green for
+  selected, red for unselected and blank for unconfigured. A set of
+  convenience buttons are provided to facilitate the selection.
+
+- *Validate configurations*: once a round of feature selection is
+  done, process the selection by clicking the button. The backend
+  analyzes the selection and returns the model, validating the feature
+  selection and returning a new configuration tree.
 
 - *Download configured model*: by clicking on the button, save the
   configured model (model + constraints) to a filesystem.
@@ -32,26 +55,29 @@ typical workflow with the UI:
 
 - python3
 - pip3
-- The `flask` web server:
+- `flask`, a Restful microframework:
 ```
 pip3 install flask
 ```
-- a web browser
+- `clafer` version 0.5
+- web browser, tested with Chrome and Firefox.
 
-## Running the configurator
+## Start the configurator
 
 To start the feature model configurator, first start the web server:
-using one of the following command:
-
 ```
 python3 server_flask.py
+```
+
+It is also possible to indicate a specific version of Clafer to use, by
+setting the environment variable `BESSPIN_CLAFER`:
+
+```
 BESSPIN_CLAFER=<path-to-clafer> python3 server_flask.py
 ```
 
-The second command is to indicate a specfic version of `clafer`,
-otherwise it will use whatever version of clafer is in the `PATH`.
 
-User starts the UI by going to:
+The UI is accessible at the url:
 ```
 http://localhost:3784/
 ```
@@ -59,6 +85,5 @@ http://localhost:3784/
 
 # Future work
 
-- save and restore working session
 - integrate a configurator algorithm
 - enhance user interactions to facilitate exploration of feature selections
