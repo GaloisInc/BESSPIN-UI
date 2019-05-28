@@ -283,14 +283,14 @@ def configuration_algo(conftree, feature_selection):
     return feature_selection
 
 
-@app.route('/script/dashboard')
-def script_dashboard():
+@app.route('/script/overview')
+def script_overview():
     """
-    Endpoint serving the dashboard script
+    Endpoint serving the overview script
     """
     return send_from_directory(
         os.path.join(CODE_DIR, 'js'),
-        'dashboard.js',
+        'overview.js',
         mimetype='application/javascript'
     )
 
@@ -310,30 +310,20 @@ def script_configurator():
 def root_page():
     """
     Endpoint for root app.
-    Currently set to the dashboard.
+    Currently set to the overview.
     """
-    app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'dashboard.html')
-    with open(filepath) as f:
-        page = f.read()
-        app.logger.debug(page)
-    return page
+    return render_template('overview.html')
 
 
-@app.route('/dashboard/')
-def dashboard():
+@app.route('/overview/')
+def overview():
     """
-    endpoint for the dashboard
+    endpoint for the overview
     """
-    app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'dashboard.html')
-    with open(filepath) as f:
-        page = f.read()
-        app.logger.debug(page)
-    return page
+    return render_template('overview.html')
 
 
-@app.route('/dashboard/get_db_models/', methods=['GET'])
+@app.route('/overview/get_db_models/', methods=['GET'])
 def get_db_models():
     """
     list db models

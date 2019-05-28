@@ -11,7 +11,7 @@ function make_hyperlink(path, id, cont){
 
 function refresh_db_models() {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/dashboard/get_db_models');
+    xhr.open('GET', '/overview/get_db_models');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function() {
         if (xhr.status === 200) {
