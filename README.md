@@ -82,6 +82,20 @@ The UI is accessible at the url:
 http://localhost:3784/
 ```
 
+## Architecture
+
+Server side:
+
+- Database
+- Configurator
+- REST API
+
+Client Side:
+- Overview UI
+- Configurator UI
+- Dashboard UI
+
+![alt text](images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
 
 # Future work
 
