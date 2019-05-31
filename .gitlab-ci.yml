@@ -1,0 +1,17 @@
+variables:
+  BLABLA: blablabla
+
+before_script:
+  - docker info
+
+build_image:
+  script:
+    - docker build -t besspin-ui-docker-image .
+  tags:
+    - "besspin-ui-tag"
+
+test:
+  script:
+    - docker run besspin-ui-docker-image nosetests /besspin-ui/test_server.py
+  tags:
+    - "besspin-ui-tag"
