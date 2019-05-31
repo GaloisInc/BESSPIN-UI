@@ -4,18 +4,15 @@
 
 The UI consists of several components:
 
-- Dashboard: a table visualization of models currently entered into
+- Overview: a table visualization of models currently entered into
   the system. Each model has hyperlinks available to other parts of
   the UI described below.
 
 - Configurator: this component is the UI to configure and explore the
   configuration of models.
 
-- Monitor: provides a visualization and commands related to the
-  testing pipeline for models
-
-- Metrics: provides a visualization and commands related to the
-  evaluation of models
+- Dashboard: provides a visualization and commands related to the
+  testing pipeline and the evaluation results.
 
 
 ## Configurator UI
@@ -93,11 +90,8 @@ Server side:
 Client Side:
 - Overview UI
 - Configurator UI
+- Pipeline UI
 - Dashboard UI
 
 ![alt text](images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
 
-# Future work
-
-- integrate a configurator algorithm
-- enhance user interactions to facilitate exploration of feature selections
