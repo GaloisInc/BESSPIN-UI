@@ -427,24 +427,6 @@ function path_to_uid(tree, uid, path) {
 }
 
 
-function load_example() {
-    /* Ajax in pure javascript instead of jQuery */
-    var xhr = new XMLHttpRequest();
-    xhr.open('PUT', '/loadexample/');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            console.log('Response from server: ' + xhr.responseText);
-            var conftree = JSON.parse(xhr.responseText);
-            draw_conftree(conftree);
-        }
-        else {
-            alert('Request failed.  Returned status of ' + xhr.status);
-        }
-    };
-    xhr.send(JSON.stringify([]));
-};
-
 function handleFileSelect(evt) {
     /* snippet from https://blog.garstasio.com/you-dont-need-jquery/ajax/
        The second one was chosen. */

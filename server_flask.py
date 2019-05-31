@@ -26,6 +26,7 @@ from database import (
 
 
 CODE_DIR = os.path.dirname(__file__)
+EXAMPLES_DIR = os.path.join(CODE_DIR, 'examples')
 
 if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
     WORK_DIR_OBJ = tempfile.TemporaryDirectory()
@@ -337,6 +338,13 @@ def overview():
     """
     return render_template('overview.html')
 
+@app.route('/testconfig/')
+def testconfig_page():
+    """
+    endpoint for testconfig
+    """
+    return render_template('testconfig.html')
+
 
 @app.route('/overview/get_db_models/', methods=['GET'])
 def get_db_models():
@@ -451,17 +459,22 @@ def load_model_from_db():
     })
 
 
-@app.route('/loadexample/', methods=['PUT'])
-def load_example():
+@app.route('/testconfig/configure/', methods=['POST'])
+def testconfig_configure():
     """
-    load example file
+    load test config
     """
-    app.logger.debug('load example file')
-    tempfilepath = os.path.join(CODE_DIR, 'secure_cpu_example_flattened.json')
-    d = load_json(tempfilepath)
-    t = ClaferModule(d).to_conftree()
-    app.logger.debug(str(t.to_json()))
-    return json.dumps(t.to_json())
+    filename = os.path.join(EXAMPLES_DIR, 'bof')
+    filename_cfr = filename + '.cfr'
+    filename_json = filename + '.json'
+
+    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
+    app.logger.info('Clafer output: ' + str(cp.stdout))
+    d = load_json(filename_json)
+    imodule = ClaferModule(d)
+    tree = imodule.build_conftree().to_json()
+    return json.dumps({'uid': 'BLABLA', 'tree': tree})
+
 
 @app.route('/pipeline/')
 @app.route('/pipeline/<string:uid>')

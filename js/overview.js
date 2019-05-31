@@ -9,6 +9,10 @@ function make_hyperlink(path, id, cont){
     return "<a href=\"/" + path + "/" + id + "\">" + cont + "</a>";
 }
 
+function make_button(path, id, cont){
+    return "<a href=\"/"+ path + "/" + id + "\"" + " class=\"btn btn-info\" role=\"button\">" + cont + "</a>";
+}
+
 function refresh_db_models() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/overview/get_db_models');
@@ -32,15 +36,21 @@ function refresh_db_models() {
                 var cell_start = row.insertCell(2);
                 var cell_last = row.insertCell(3);
                 var cell_nb_features_selected = row.insertCell(4);
+                var cell_configure = row.insertCell(5);
+                var cell_testconfig = row.insertCell(6);
+                var cell_run = row.insertCell(7);
                 cell_number.innerHTML =
-		    make_hyperlink("configurator", value['uid'], String(row_index)) + " " +
-		    make_hyperlink("configurator", value['uid'], make_fas("cog")) + " " +
-		    make_hyperlink("pipeline", value['uid'], make_fas("tasks")) + " " +
-		    make_hyperlink("dashboard", value['uid'], make_fas("chart-bar"));
+                    make_hyperlink("configurator", value['uid'], String(row_index)) + " " +
+                    make_hyperlink("configurator", value['uid'], make_fas("cog")) + " " +
+                    make_hyperlink("pipeline", value['uid'], make_fas("tasks")) + " " +
+                    make_hyperlink("dashboard", value['uid'], make_fas("chart-bar"));
                 cell_filename.innerHTML = value['filename'];
                 cell_start.innerHTML = value['date'];
                 cell_last.innerHTML = value['last_update'];
                 cell_nb_features_selected.innerHTML = value['nb_features_selected'];
+                cell_configure.innerHTML = make_button("configurator", value['uid'], "CONF");
+                cell_testconfig.innerHTML = make_button("testconfig", "", "TEST");
+                cell_run.innerHTML = make_button("testconfig", value['uid'], "RUN");
                 row_index += 1;
             });
         }
