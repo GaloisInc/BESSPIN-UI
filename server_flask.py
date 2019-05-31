@@ -448,20 +448,20 @@ def load_example():
     app.logger.debug(str(t.to_json()))
     return json.dumps(t.to_json())
 
-@app.route('/monitor/')
-@app.route('/monitor/<string:uid>')
-def monitor(uid=None):
+@app.route('/pipeline/')
+@app.route('/pipeline/<string:uid>')
+def pipeline(uid=None):
     """
-    endpoint for the configurator app
+    endpoint for the pipeline
     """
-    return render_template('monitor.html', uid=uid)
+    return render_template('pipeline.html', uid=uid)
 
-@app.route('/metrics/')
-@app.route('/metrics/<string:uid>')
-def metrics(uid=None):
+@app.route('/dashboard/')
+@app.route('/dashboard/<string:uid>')
+def dashboard(uid=None):
     """
     endpoint for the configurator app
     """
-    return render_template('metrics.html', uid=uid)
+    return render_template('dashboard.html', uid=uid)
 
 app.run('localhost', port=3784, debug=True)

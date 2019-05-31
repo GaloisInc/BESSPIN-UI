@@ -82,15 +82,15 @@
 <div class="container">
 
 <div class="page-header">
-  <h1>Metrics</h1>
+  <h1>Dashboard</h1>
 </div>
 
 <!-- Side navigation -->
 <div class="sidenav">
   <a href="/overview">Overview</a>
   <a href="/configurator">Configurator</a>
-  <a href="/monitor">Monitor</a>
-  <a href="/metrics">Metrics</a>
+  <a href="/pipeline">Pipeline</a>
+  <a href="/dashboard">Dashboard</a>
 </div>
 
 <div class="main">
@@ -133,7 +133,7 @@
 
 {% if uid %}
 <script>
-function load_model_metrics(uid) {
+function load_model_dashboard(uid) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/configurator/load_from_db/');
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -154,7 +154,7 @@ function load_model_metrics(uid) {
 };
 
 
-load_model_metrics("{{ uid }}");
+load_model_dashboard("{{ uid }}");
 </script>
 {% endif %}
 

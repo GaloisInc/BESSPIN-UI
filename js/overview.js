@@ -35,8 +35,8 @@ function refresh_db_models() {
                 cell_number.innerHTML =
 		    make_hyperlink("configurator", value['uid'], String(row_index)) + " " +
 		    make_hyperlink("configurator", value['uid'], make_fas("cog")) + " " +
-		    make_hyperlink("monitor", value['uid'], make_fas("tasks")) + " " +
-		    make_hyperlink("metrics", value['uid'], make_fas("chart-bar"));
+		    make_hyperlink("pipeline", value['uid'], make_fas("tasks")) + " " +
+		    make_hyperlink("dashboard", value['uid'], make_fas("chart-bar"));
                 cell_filename.innerHTML = value['filename'];
                 cell_start.innerHTML = value['date'];
                 cell_last.innerHTML = value['last_update'];
