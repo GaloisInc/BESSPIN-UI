@@ -39,14 +39,14 @@
   <h1>Overview</h1>
 </div>
 
-<!-- Side navigation -->
-<div class="sidenav">
-  <a href="/overview">Overview</a>
-  <a href="/configurator">Configurator</a>
-  <a href="/pipeline">Pipeline</a>
-  <a href="/dashboard">Dashboard</a>
-</div>
 
+<!-- Sidebar Navigation -->
+<script>
+    $(function(){
+      $("#includedContent").load("/sidebar");
+    });
+</script>
+<div id="includedContent"></div>
 
 <div class="main">
 

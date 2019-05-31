@@ -33,15 +33,13 @@
   <h1>Pipeline</h1>
 </div>
 
-<!-- Side navigation -->
-<div class="sidenav">
-  <a href="/overview">Overview</a>
-  <a href="/configurator">Configurator</a>
-  <a href="/piepline">Pipeline</a>
-  <a href="/dashboard">Dashboard</a>
-</div>
-
-
+<!-- Sidebar Navigation -->
+<script>
+    $(function(){
+      $("#includedContent").load("/sidebar");
+    });
+</script>
+<div id="includedContent"></div>
 
 <div class="main">
 
@@ -59,7 +57,7 @@
       </div>
     </div>
   </form>
-  
+
   <hr />
   Progress (fictitious)
   <div class="progress">
@@ -85,7 +83,7 @@ function load_model_pipeline(uid) {
 	    var e = document.getElementById("model-name");
 	    e.value = response['filename'];
 	    var e = document.getElementById("model-date");
-	    e.value = response['date'];            
+	    e.value = response['date'];
         }
         else {
             alert('Request failed.  Returned status of ' + xhr.status);
@@ -94,7 +92,7 @@ function load_model_pipeline(uid) {
     xhr.send(JSON.stringify({'model_uid': uid}));
 };
 
-  
+
 load_model_pipeline("{{ uid }}");
 </script>
 {% endif %}

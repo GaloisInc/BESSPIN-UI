@@ -253,39 +253,6 @@ function shade_edges(){
     }
 };
 
-function tryAjax (){
-    var nodes_ids = nodes.getIds();
-    var arr_nodes = [];
-
-    for (idn in nodes_ids){
-        arr_nodes.push({
-            id: nodes_ids[idn],
-            label: nodes.get(nodes_ids[idn])["label"]
-        });
-    }
-    console.log("array of nodes: " + JSON.stringify(arr_nodes));
-
-    /* Ajax with JQuery */
-    $.ajax(
-        "/refine",
-        { headers: {"Content-Type": "application/json"},
-          data: JSON.stringify(arr_nodes),
-          type: 'put',
-          dataType: 'json' }
-    ).then(
-        function success(changes) {
-            console.log("Response changes: " + JSON.stringify(changes));
-            for (var i in changes) {
-                console.log('received id:' + changes[i]);
-                nodes.update({id:changes[i]['id'], label: changes[i]['label'] + 'A'});
-            }
-        },
-        function error(err) {
-            console.log("The error is :" + err);
-        }
-    );
-};
-
 function compare_card(arr1, arr2){
     if (arr1.length != arr2.length)
         return false;

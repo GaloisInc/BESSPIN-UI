@@ -322,6 +322,13 @@ def root_page():
     """
     return render_template('overview.html')
 
+@app.route('/sidebar/')
+def sidebar():
+    """
+    endpoint for delivering the sidebar
+    """
+    return render_template('sidebar.html')
+
 
 @app.route('/overview/')
 def overview():

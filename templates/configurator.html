@@ -69,29 +69,23 @@
 <div class="page-header">
   <h1>Configurator</h1>
 </div>
-<!--
-<input type="button" onclick="tryAjax()" value="rename ALL nodes"> <br />
--->
+
 <!--
 <input type="button" onclick="load_example()" value="Load example"> <br />
 -->
-
 
 <!-- Reference for loading file, the page contains fancier file
  loading modes: https://www.html5rocks.com/en/tutorials/file/dndfiles/
  https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Unique_file_type_specifiers
   -->
 
-
-
-<!-- Side navigation -->
-<div class="sidenav">
-  <a href="/overview">Overview</a>
-  <a href="/configurator">Configurator</a>
-  <a href="/pipeline">Pipeline</a>
-  <a href="/dashboard">Dashboard</a>
-</div>
-
+<!-- Sidebar Navigation -->
+<script>
+    $(function(){
+      $("#includedContent").load("/sidebar");
+    });
+</script>
+<div id="includedContent"></div>
 
 
 <div class="main">
