@@ -283,6 +283,14 @@ def configuration_algo(conftree, feature_selection):
     return feature_selection
 
 
+@app.route('/css/main')
+def css_main():
+    """
+    Endpoint serving the main css
+    """
+    return render_template('main.css')
+
+
 @app.route('/script/overview')
 def script_overview():
     """
