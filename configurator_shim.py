@@ -18,8 +18,8 @@ else:
     WORK_DIR = '.'
 
 CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
-
 TOP_LEVEL_FEATURE_IDENT = 'Features'
+FORMAT_VERSIONS = [1]
 
 def load_json(filename):
     """
@@ -41,6 +41,10 @@ def convert_model_to_json(source):
     cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
     logging.debug('Clafer output: ' + str(cp.stdout))
     json_feat_model = load_json(filename_json)
+    version = json_feat_model['version']['base']
+    if version not in FORMAT_VERSIONS:
+        logging.debug(version)
+        raise RuntimeError('unsupported json format version {}'.format(version))
     return json_feat_model
 
 def selected_features_to_constraints(feats):

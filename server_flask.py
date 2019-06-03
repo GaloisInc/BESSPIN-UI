@@ -7,6 +7,7 @@ import json
 from flask import Flask
 from flask import (
     request,
+    abort,
     send_from_directory,
     render_template,
 )
@@ -33,7 +34,6 @@ EXAMPLES_DIR = os.path.join(CODE_DIR, 'examples')
 app = Flask(__name__)
 
 default_handler.setLevel(logging.DEBUG)
-
 
 @app.route('/css/main')
 def css_main():
@@ -64,7 +64,6 @@ def script_configurator():
         'configurator.js',
         mimetype='application/javascript'
     )
-
 
 @app.route('/')
 def root_page():
@@ -121,7 +120,11 @@ def upload_file(name):
     """
     upload a clafer file
     """
-    json_feat_model = convert_model_to_json(request.data)
+    try:
+        json_feat_model = convert_model_to_json(request.data)
+    except RuntimeError as err:
+        app.logger.info(str(err))
+        return abort(500, str(err))
     uid = insert_feature_model_db(name, request.data.decode('utf8'), json_feat_model)
     return json.dumps({'uid': uid, 'tree': json_feat_model})
 
@@ -202,8 +205,12 @@ def testconfig_configure():
     filename_cfr = filename + '.cfr'
     with open(filename_cfr) as f:
         source = f.read().encode()
-    json_feat_model = convert_model_to_json(source)
-    return json.dumps({'uid': 'BLABLA', 'tree': json_feat_model})
+    try:
+        json_feat_model = convert_model_to_json(request.data)
+    except RuntimeError as err:
+        app.logger.info(str(err))
+        return abort(500, str(err))
+    return json.dumps({'uid': 'NotAvailable', 'tree': json_feat_model})
 
 
 @app.route('/pipeline/')
