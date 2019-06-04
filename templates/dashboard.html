@@ -22,59 +22,7 @@
         href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
         integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay"
         crossorigin="anonymous">
-
-  <style type="text/css">
-    h1 { text-align: center; padding: 30px }
-
-
-    /* The sidebar menu */
-    .sidenav {
-        height: 100%; /* Full-height: remove this if you want "auto" height */
-        width: 200px; /* Set the width of the sidebar */
-        position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-        z-index: 1; /* Stay on top */
-        top: 0; /* Stay at the top */
-        left: 0;
-        background-color: #3974ab; /* Black */
-        overflow-x: hidden; /* Disable horizontal scroll */
-        padding-top: 100px;
-        border-right: 2px solid black;
-    }
-
-    /* The navigation menu links */
-    .sidenav a {
-        padding: 6px 8px 6px 16px;
-        text-decoration: none;
-        font-size: 25px;
-        color: #111;
-        display: block;
-    }
-
-    /* When you mouse over the navigation links, change their color */
-    .sidenav a:hover {
-        color: #f1f1f1;
-    }
-
-    /* Style page content */
-    .main {
-        margin-left: 200px; /* Same as the width of the sidebar */
-        padding: 0px 10px;
-    }
-
-    /* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
-    @media screen and (max-height: 450px) {
-        .sidenav {padding-top: 15px;}
-        .sidenav a {font-size: 18px;}
-    }
-
-
-    body {
-        background-color: #6994bb; /* #2d78bd */
-    }
-    .grid {
-        display: flex;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/main">
 </head>
 
 <body>
@@ -82,19 +30,20 @@
 <div class="container">
 
 <div class="page-header">
-  <h1>Metrics</h1>
+  <h1>Dashboard</h1>
 </div>
 
-<!-- Side navigation -->
-<div class="sidenav">
-  <a href="/dashboard">Dashboard</a>
-  <a href="/configurator">Configurator</a>
-  <a href="/monitor">Monitor</a>
-  <a href="/metrics">Metrics</a>
-</div>
+
+<!-- Sidebar Navigation -->
+<script>
+    $(function(){
+      $("#includedContent").load("/sidebar");
+    });
+</script>
+<div id="includedContent"></div>
+
 
 <div class="main">
-
 
   <form>
     <div class="form-group row">
@@ -133,7 +82,7 @@
 
 {% if uid %}
 <script>
-function load_model_metrics(uid) {
+function load_model_dashboard(uid) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/configurator/load_from_db/');
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -154,7 +103,7 @@ function load_model_metrics(uid) {
 };
 
 
-load_model_metrics("{{ uid }}");
+load_model_dashboard("{{ uid }}");
 </script>
 {% endif %}
 

@@ -26,6 +26,7 @@ from database import (
 
 
 CODE_DIR = os.path.dirname(__file__)
+EXAMPLES_DIR = os.path.join(CODE_DIR, 'examples')
 
 if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
     WORK_DIR_OBJ = tempfile.TemporaryDirectory()
@@ -283,14 +284,22 @@ def configuration_algo(conftree, feature_selection):
     return feature_selection
 
 
-@app.route('/script/dashboard')
-def script_dashboard():
+@app.route('/css/main')
+def css_main():
     """
-    Endpoint serving the dashboard script
+    Endpoint serving the main css
+    """
+    return render_template('main.css')
+
+
+@app.route('/script/overview')
+def script_overview():
+    """
+    Endpoint serving the overview script
     """
     return send_from_directory(
         os.path.join(CODE_DIR, 'js'),
-        'dashboard.js',
+        'overview.js',
         mimetype='application/javascript'
     )
 
@@ -310,30 +319,34 @@ def script_configurator():
 def root_page():
     """
     Endpoint for root app.
-    Currently set to the dashboard.
+    Currently set to the overview.
     """
-    app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'dashboard.html')
-    with open(filepath) as f:
-        page = f.read()
-        app.logger.debug(page)
-    return page
+    return render_template('overview.html')
 
-
-@app.route('/dashboard/')
-def dashboard():
+@app.route('/sidebar/')
+def sidebar():
     """
-    endpoint for the dashboard
+    endpoint for delivering the sidebar
     """
-    app.logger.info('feature configurator')
-    filepath = os.path.join(CODE_DIR, 'dashboard.html')
-    with open(filepath) as f:
-        page = f.read()
-        app.logger.debug(page)
-    return page
+    return render_template('sidebar.html')
 
 
-@app.route('/dashboard/get_db_models/', methods=['GET'])
+@app.route('/overview/')
+def overview():
+    """
+    endpoint for the overview
+    """
+    return render_template('overview.html')
+
+@app.route('/testconfig/')
+def testconfig_page():
+    """
+    endpoint for testconfig
+    """
+    return render_template('testconfig.html')
+
+
+@app.route('/overview/get_db_models/', methods=['GET'])
 def get_db_models():
     """
     list db models
@@ -446,32 +459,37 @@ def load_model_from_db():
     })
 
 
-@app.route('/loadexample/', methods=['PUT'])
-def load_example():
+@app.route('/testconfig/configure/', methods=['POST'])
+def testconfig_configure():
     """
-    load example file
+    load test config
     """
-    app.logger.debug('load example file')
-    tempfilepath = os.path.join(CODE_DIR, 'secure_cpu_example_flattened.json')
-    d = load_json(tempfilepath)
-    t = ClaferModule(d).to_conftree()
-    app.logger.debug(str(t.to_json()))
-    return json.dumps(t.to_json())
+    filename = os.path.join(EXAMPLES_DIR, 'bof')
+    filename_cfr = filename + '.cfr'
+    filename_json = filename + '.json'
 
-@app.route('/monitor/')
-@app.route('/monitor/<string:uid>')
-def monitor(uid=None):
+    cp = subprocess.run([CLAFER, filename_cfr, '-m=json'], capture_output=True)
+    app.logger.info('Clafer output: ' + str(cp.stdout))
+    d = load_json(filename_json)
+    imodule = ClaferModule(d)
+    tree = imodule.build_conftree().to_json()
+    return json.dumps({'uid': 'BLABLA', 'tree': tree})
+
+
+@app.route('/pipeline/')
+@app.route('/pipeline/<string:uid>')
+def pipeline(uid=None):
+    """
+    endpoint for the pipeline
+    """
+    return render_template('pipeline.html', uid=uid)
+
+@app.route('/dashboard/')
+@app.route('/dashboard/<string:uid>')
+def dashboard(uid=None):
     """
     endpoint for the configurator app
     """
-    return render_template('monitor.html', uid=uid)
-
-@app.route('/metrics/')
-@app.route('/metrics/<string:uid>')
-def metrics(uid=None):
-    """
-    endpoint for the configurator app
-    """
-    return render_template('metrics.html', uid=uid)
+    return render_template('dashboard.html', uid=uid)
 
 app.run('localhost', port=3784, debug=True)

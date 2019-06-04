@@ -253,39 +253,6 @@ function shade_edges(){
     }
 };
 
-function tryAjax (){
-    var nodes_ids = nodes.getIds();
-    var arr_nodes = [];
-
-    for (idn in nodes_ids){
-        arr_nodes.push({
-            id: nodes_ids[idn],
-            label: nodes.get(nodes_ids[idn])["label"]
-        });
-    }
-    console.log("array of nodes: " + JSON.stringify(arr_nodes));
-
-    /* Ajax with JQuery */
-    $.ajax(
-        "/refine",
-        { headers: {"Content-Type": "application/json"},
-          data: JSON.stringify(arr_nodes),
-          type: 'put',
-          dataType: 'json' }
-    ).then(
-        function success(changes) {
-            console.log("Response changes: " + JSON.stringify(changes));
-            for (var i in changes) {
-                console.log('received id:' + changes[i]);
-                nodes.update({id:changes[i]['id'], label: changes[i]['label'] + 'A'});
-            }
-        },
-        function error(err) {
-            console.log("The error is :" + err);
-        }
-    );
-};
-
 function compare_card(arr1, arr2){
     if (arr1.length != arr2.length)
         return false;
@@ -459,24 +426,6 @@ function path_to_uid(tree, uid, path) {
     return;
 }
 
-
-function load_example() {
-    /* Ajax in pure javascript instead of jQuery */
-    var xhr = new XMLHttpRequest();
-    xhr.open('PUT', '/loadexample/');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            console.log('Response from server: ' + xhr.responseText);
-            var conftree = JSON.parse(xhr.responseText);
-            draw_conftree(conftree);
-        }
-        else {
-            alert('Request failed.  Returned status of ' + xhr.status);
-        }
-    };
-    xhr.send(JSON.stringify([]));
-};
 
 function handleFileSelect(evt) {
     /* snippet from https://blog.garstasio.com/you-dont-need-jquery/ajax/

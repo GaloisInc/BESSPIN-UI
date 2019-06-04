@@ -67,7 +67,7 @@
 <div class="container">
 
 <div class="page-header">
-  <h1>Configurator</h1>
+  <h1>Test Configurator</h1>
 </div>
 
 <!-- Reference for loading file, the page contains fancier file
@@ -86,63 +86,6 @@
 
 <div class="main">
 
-<label for="upload-row">Add model</label>
-<div class="row" id="upload-row">
-  <div class="col-lg-6">
-    <div class="input-group">
-      <div class="custom-file">
-        <input type="file"
-               class="custom-file-input"
-               id="cfr_file"
-               aria-describedby="inputGroupFileAddon01"
-               accept=".cfr"
-               onchange="$('#blablabla').html(this.files[0].name)">
-        <label class="custom-file-label" for="cfr_file" id="blablabla">Choose file</label>
-      </div>
-    </div>
-    <!--
-        <label for="cfr_file" > Upload Model </label>
-        <input type="file" id="cfr_file" class="form-control-file" accept=".cfr" /> -->
-  </div>
-
-  <div class="col-lg-3">
-    <button class="btn btn-light btn-outline-secondary"
-            id="inputGroupFileAddon01"
-            onclick="handleFileSelect()">
-      <i class="fas fa-plus"></i>
-      Add Model
-    </button>
-  </div>
-</div>
-
-<br />
-
-<label for="restore-row">Choose previous model</label>
-<div class="row" id="restore-row">
-  <div class="col-lg-6">
-    <div class="input-group">
-      <select class="custom-select" id="db_models">
-        <option></option>
-      </select>
-      <div class="input-group-append">
-        <button id="refresh_model_button"
-                class="btn btn-light"
-                onclick="refresh_db_models()">
-          <i class="fas fa-sync"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-  <div class="col-lg-3">
-    <button id="db_model_button"
-            class="btn btn-light btn-outline-secondary"
-            onclick="load_configured_model(null)">
-      <i class="fas fa-cloud-download-alt"></i>
-      Choose Model
-    </button>
-  </div>
-</div>
-<hr />
 
 <label for="action-buttons">Actions</label>
 <div class="btn-toolbar justify-content-between" role="toolbar" id="action-buttons">
@@ -201,11 +144,31 @@
 
 <script src="/script/configurator"></script>
 
-{% if uid %}
 <script>
-  load_configured_model("{{ uid }}");
+  function load_testconfig() {
+    global_filename = "NOFILE";
+    xhr = new XMLHttpRequest();
+    xhr.open('POST', '/testconfig/configure/');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            console.log('Response from server: ' + xhr.responseText);
+            response = JSON.parse(xhr.responseText);
+            global_conftree = response['tree'];
+            global_uid = response['uid'];
+            global_selected_nodes.reset();
+            draw_conftree(global_conftree);
+        }
+        else {
+            alert('Request failed.  Returned status of ' + xhr.status);
+        }
+    };
+    xhr.send("");
+  };
+
+  load_testconfig();
 </script>
-{% endif %}
+
 
 </div> <!-- main -->
 </body>
