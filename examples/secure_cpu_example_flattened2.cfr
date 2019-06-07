@@ -4,42 +4,29 @@
 // @depends nothing
 
 abstract IP_block
-  power -> integer
-  performance -> integer
-  area -> integer
-  security -> integer
-  [ 0 < power
-    0 < performance
-    0 < area
-    0 < security ]
 
 abstract Secure_CPU
-  or Randomness 0..2
+  or Randomness
      or Pseudo_RNG
           Hash_DRBG : IP_block
           HMAC_DRBG : IP_block
           CTR_DRBG : IP_block
      True_RNG : IP_block
          Metastable_RNG : IP_block
-  or Hash 0..2
+  or Hash
        SHA2 : IP_block
        SHA3 : IP_block
        MD5 : IP_block
-  or Symmetric_Cipher 0..2
+  or Symmetric_Cipher
        AES : IP_block
        Triple_DES : IP_block
        Simon : IP_block
        Speck : IP_block
-  or Asymmetric_Cipher 0..2
+  or Asymmetric_Cipher
        RSA : IP_block
        ElGamal : IP_block
   [ Hash_DRBG => SHA2
     HMAC_DRBG => Hash
     CTR_DRBG => Symmetric_Cipher ]
-
-  CPU_power -> integer = sum IP_block.power
-  CPU_performance -> integer = sum IP_block.performance / # IP_block
-  CPU_area -> integer = sum IP_block.area
-  CPU_security -> integer = min IP_block.security
 
 a_secure_cpu : Secure_CPU

@@ -45,8 +45,6 @@ console.log('The GUID is '+ guid);
 
 function selection_mem(uid){
     var sel = this.selection.find(entry => entry['uid'] == uid);
-    console.log('the sel is:');
-    console.log(sel);
     if (sel == undefined) {
         return false;
     } else {
@@ -63,7 +61,6 @@ function selection_search_index(uid){
     var index = this.selection.findIndex( entry => entry['uid'] == uid);
     return index;
 };
-
 
 function selection_from_json(content){
     if (! Array.isArray(content))
@@ -135,7 +132,7 @@ function selection_all_validated(){
         return true;
     else
         return false;
-}
+};
 
 function Selection() {
     // instance variable
@@ -284,91 +281,75 @@ function update_validate_button(){
 
 // returns the list of nodes and edges from a node d
 function conftree_to_nodes_and_edges(conftree) {
-    if (conftree.hasOwnProperty('ident')) {
-        var n = new Array();
-        var e = new Array();
+    console.assert(conftree.hasOwnProperty('features'));
 
-        var gcard = '';
-        if (compare_card(conftree.group_card, [1, -1]))
-            gcard = 'Or';
-        else if (compare_card(conftree.group_card, [1, 1]))
-            gcard = 'Xor';
+    var n = new Array();
+    var e = new Array();
 
-        // set to the node carinality by default
-        var card = conftree.card;
-        color = '';
-        if (! compare_card(conftree.card, [1,1]))
-            color = '#ffffff';
-        switch (conftree.selection_state) {
-        case 'FORCEDON': {
+    var features = conftree.features;
+    for (var feature in features) {
+        var fields = features[feature];
+        var card = fields.card;
+        var color = '';
+
+        switch (card) {
+        case 'on': {
             color = '#ddffdd';
             break;
         };
-        case 'FORCEDOFF': {
+        case 'off': {
             color = '#ffdddd';
             break;
         };
-        case 'USERSELECTED': {
-            color = '#00AA00';
-            break;
-        };
-        case 'USERREJECTED': {
-            color = '#AA0000';
-            break;
-        };
-        case 'UNCONFIGURED': {
+        case 'opt': {
             color = '#ffffff';
             break;
         };
         };
-        console.log(global_selected_nodes);
-        if (global_selected_nodes.mem(conftree.uid)) {
-            switch (global_selected_nodes.get_mode(conftree.uid)) {
+
+        if (global_selected_nodes.mem(feature)) {
+            switch (global_selected_nodes.get_mode(feature)) {
             case 'selected': {
-                if (global_selected_nodes.get_validated(conftree.uid))
+                if (global_selected_nodes.get_validated(feature))
                     color = '#99ff99';
                 else
                     color = '#00dd00';
-                card = [1,1];
+                card = "on";
                 break;
             };
             case 'rejected': {
-                if (global_selected_nodes.get_validated(conftree.uid))
+                if (global_selected_nodes.get_validated(feature))
                     color = '#ff9999';
                 else
                     color = '#dd0000';
-                card = [0,0];
+                card = "off";
                 break;
             };
             };
         }
+
         var node1 = {
-            'id': conftree.uid,
-            'label': conftree.ident + '\n [' + card + ']\n ' + gcard,
+            'id': feature,
+            'label': feature + '\n [' + card + ']\n ' + 'gcard: ' + fields.gcard,
             'shape': 'box',
             'color': color,
         };
-        n = n.concat([node1]);
+        n = n.concat(node1)
 
-        for (var i in conftree['group']) {
-            var d1 = conftree['group'][i];
-            var r = conftree_to_nodes_and_edges(d1);
-            n = n.concat(r.nodes);
-            var isdashes = !(compare_card(card, [1,1]) &&
-                             compare_card(r.topnodecard, [1,1]));
+        for (var i in fields.children) {
+            var d1 = fields.children[i];
+
             e = e.concat([{
-                'id': conftree.uid + d1['uid'],
+                'id': feature + d1,
                 'label': '',
-                'from': conftree.uid,
-                'to': d1['uid'],
-                'dashes': isdashes,
+                'from': feature,
+                'to': d1,
+                'dashes': false,
+                'color': '#fff',
             }]);
-            e = e.concat(r.edges);
         }
-        return {'nodes': n, 'edges': e, 'topnodecard': card};
-    }else{
-        return {'nodes': [], 'edges': [], 'topnodecard': null};
     }
+    return {'nodes': n, 'edges': e, 'topnodecard': card};
 };
 
 function draw_conftree(conftree){
@@ -394,37 +375,24 @@ function update_conftree(tree, uid, key, value) {
     return;
 };
 
-function find_uid_conftree(tree, uid) {
-    if (tree['uid'] == uid) {
-        return tree;
-    }
-    var res;
-    for (var elem in tree['group']) {
-        res = find_uid_conftree(tree['group'][elem], uid);
-        if (res != null)
-            return res;
-    }
-    return;
+function find_feature_conftree(tree, name) {
+    console.assert('features' in tree, Object.keys(tree));
+    console.assert(name in tree.features, name, Object.keys(tree.features));
+    return tree.features[name];
 };
 
-function path_to_uid(tree, uid, path) {
-    var new_path;
-    if (path == '')
-        new_path = path + tree['ident'];
-    else
-        new_path = path + '.' + tree['ident'];
-
-    if (tree['uid'] == uid) {
-        return new_path;
+function path_to_feature(tree, name) {
+    var path = "";
+    var cur_name = name;
+    while (! tree.roots.includes(cur_name)) {
+        if (path == "") path = cur_name; else path = cur_name + "." + path;
+        var parent = tree.features[cur_name].parent;
+        if (parent == undefined)
+            alert("wrong path leading to the sky");
+        cur_name = parent;
     }
-    var res;
-    for (var elem in tree['group']) {
-        res = path_to_uid(tree['group'][elem], uid, new_path);
-        if (res != null)
-            return res;
-    }
-    return;
-}
+    return path;
+};
 
 
 function handleFileSelect(evt) {
@@ -576,38 +544,32 @@ function download() {
     }
 };
 
-function circle_selection(data) {
-    var thenode = find_uid_conftree(global_conftree, data);
+function circle_selection(name) {
+    var thenode = find_feature_conftree(global_conftree, name);
 
-    if (global_selected_nodes.mem(thenode.uid)) {
-        switch (global_selected_nodes.get_mode(thenode.uid)) {
+    if (global_selected_nodes.mem(name)) {
+        switch (global_selected_nodes.get_mode(name)) {
         case 'selected': {
-            global_selected_nodes.change_mode(thenode.uid, 'rejected');
-            global_selected_nodes.change_validated(thenode.uid, false);
+            global_selected_nodes.change_mode(name, 'rejected');
+            global_selected_nodes.change_validated(name, false);
             return;
         };
         case 'rejected': {
-            global_selected_nodes.remove(thenode.uid);
+            global_selected_nodes.remove(name);
             return;
         };
         };
     }
 
-    switch (thenode.selection_state) {
-    case 'FORCEDON': {
+    switch (thenode.card) {
+    case 'on': {
         return;
     };
-    case 'FORCEDOFF': {
+    case 'off': {
         return;
     };
-    case 'USERSELECTED': {
-        alert('weird');
-    };
-    case 'USERREJECTED': {
-        alert('weird');
-    };
-    case 'UNCONFIGURED': {
-        global_selected_nodes.push(thenode.uid, 'selected', path_to_uid(global_conftree, data, ''), false);
+    case 'opt': {
+        global_selected_nodes.push(name, 'selected', path_to_feature(global_conftree, name), false);
         return;
     };
     default: {
