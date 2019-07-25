@@ -118,13 +118,18 @@ def feature_configurator(uid=None):
 @app.route('/configurator/upload/<string:name>', methods=['POST'])
 def upload_file(name):
     """
-    upload a clafer file
+    upload a clafer or fm.json file
     """
-    try:
-        json_feat_model = convert_model_to_json(request.data)
-    except RuntimeError as err:
-        app.logger.info(str(err))
-        return abort(500, str(err))
+    if name.endswith('.cfr'):
+        try:
+            json_feat_model = convert_model_to_json(request.data)
+        except RuntimeError as err:
+            app.logger.info(str(err))
+            return abort(500, str(err))
+    elif name.endswith('.fm.json'):
+         json_feat_model = json.loads(request.data)
+    else:
+        return abort(400, 'Unsupported file extension for filename: ' + name)
     uid = insert_feature_model_db(name, request.data.decode('utf8'), json_feat_model)
     return json.dumps({'uid': uid, 'tree': json_feat_model})
 
