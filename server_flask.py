@@ -65,6 +65,17 @@ def script_configurator():
         mimetype='application/javascript'
     )
 
+@app.route('/script/pipeline')
+def script_pipeline():
+    """
+    Endpoint serving the configurator script
+    """
+    return send_from_directory(
+        os.path.join(CODE_DIR, 'js'),
+        'pipeline.js',
+        mimetype='application/javascript'
+    )
+
 @app.route('/')
 def root_page():
     """

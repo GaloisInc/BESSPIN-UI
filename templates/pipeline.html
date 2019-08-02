@@ -23,6 +23,22 @@
         integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay"
         crossorigin="anonymous">
   <link rel="stylesheet" href="/css/main">
+  <style type="text/css">
+    .editor {
+        flex: 1;
+        height: 250px;
+    }
+
+    #ed_pipeline_div {
+        position: relative;
+        top: 20px;
+        //right: 0;
+        //bottom: 0;
+        //left: 100px;
+        width: 800;
+        height: 600;
+    }
+  </style>
 </head>
 
 <body>
@@ -71,7 +87,11 @@
          aria-valuemax="100"
          style="width: 75%">
     </div>
-</div>
+  </div>
+  <div id="ed_pipeline_div">
+    <label for="editor_pipeline">shell view</label>
+    <div class="editor" id="editor_pipeline"></div>
+  </div>
 
 {% if uid %}
 <script>
@@ -100,6 +120,7 @@ load_model_pipeline("{{ uid }}");
 </script>
 {% endif %}
 
+<script src="/script/pipeline"></script>
 </div> <!-- main -->
 </body>
 
