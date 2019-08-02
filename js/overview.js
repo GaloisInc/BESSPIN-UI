@@ -39,12 +39,10 @@ function refresh_db_models() {
                 var cell_configure = row.insertCell(5);
                 var cell_testconfig = row.insertCell(6);
                 var cell_run = row.insertCell(7);
-                cell_number.innerHTML =
-                    make_hyperlink("configurator", value['uid'], String(row_index)) + " " +
-                    make_hyperlink("configurator", value['uid'], make_fas("cog")) + " " +
-                    make_hyperlink("pipeline", value['uid'], make_fas("tasks")) + " " +
-                    make_hyperlink("dashboard", value['uid'], make_fas("chart-bar"));
+                var cell_uid = row.insertCell(8);
+                cell_number.innerHTML = make_hyperlink("configurator", value['uid'], String(row_index));
                 cell_filename.innerHTML = value['filename'];
+                cell_uid.innerHTML = value['uid'];
                 cell_start.innerHTML = value['date'];
                 cell_last.innerHTML = value['last_update'];
                 cell_nb_features_selected.innerHTML = value['nb_features_selected'];
