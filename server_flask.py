@@ -99,13 +99,6 @@ def overview():
     """
     return render_template('overview.html')
 
-@app.route('/testconfig/')
-def testconfig_page():
-    """
-    endpoint for testconfig
-    """
-    return render_template('testconfig.html')
-
 
 @app.route('/overview/get_db_models/', methods=['GET'])
 def get_db_models():
@@ -225,23 +218,6 @@ def load_model_from_db():
         'configs': configs,
         'configs_pp': selected_features_to_constraints(configs),
     })
-
-
-@app.route('/testconfig/configure/', methods=['POST'])
-def testconfig_configure():
-    """
-    load test config
-    """
-    filename = os.path.join(EXAMPLES_DIR, 'bof')
-    filename_cfr = filename + '.cfr'
-    with open(filename_cfr) as f:
-        source = f.read().encode()
-    try:
-        json_feat_model = convert_model_to_json(request.data)
-    except RuntimeError as err:
-        app.logger.info(str(err))
-        return abort(500, str(err))
-    return json.dumps({'uid': 'NotAvailable', 'tree': json_feat_model})
 
 
 @app.route('/pipeline/')
