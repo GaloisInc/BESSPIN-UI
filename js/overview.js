@@ -9,8 +9,8 @@ function make_hyperlink(path, id, cont){
     return "<a href=\"/" + path + "/" + id + "\">" + cont + "</a>";
 }
 
-function make_button(path, id, cont){
-    return "<a href=\"/"+ path + "/" + id + "\"" + " class=\"btn btn-info\" role=\"button\">" + cont + "</a>";
+function make_button(path, subpath, cont){
+    return "<a href=\"/"+ path + "/" + subpath + "\"" + " class=\"btn btn-info\" role=\"button\">" + cont + "</a>";
 }
 
 function refresh_db_models() {
@@ -48,9 +48,9 @@ function refresh_db_models() {
                 cell_start.innerHTML = value['date'];
                 cell_last.innerHTML = value['last_update'];
                 cell_nb_features_selected.innerHTML = value['nb_features_selected'];
-                cell_configure.innerHTML = make_button("configurator", value['uid'], "CONF");
-                cell_testconfig.innerHTML = make_button("testconfig", "", "TEST");
-                cell_run.innerHTML = make_button("testconfig", value['uid'], "RUN");
+                cell_configure.innerHTML = make_button("configurator", 'cpu' + '/' + value['uid'], "CONF");
+                cell_testconfig.innerHTML = make_button("configurator", 'test' + '/' + value['uid'], "TEST");
+                cell_run.innerHTML = make_button("pipeline", value['uid'], "RUN");
                 row_index += 1;
             });
         }

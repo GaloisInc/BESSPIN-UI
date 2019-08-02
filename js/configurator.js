@@ -394,8 +394,10 @@ function path_to_feature(tree, name) {
     return path;
 };
 
+var global_var_cpu = "cpu";
+var global_var_test = "test";
 
-function handleFileSelect(evt) {
+function handleFileSelect(evt, cfg_type) {
     /* snippet from https://blog.garstasio.com/you-dont-need-jquery/ajax/
        The second one was chosen. */
 
@@ -411,9 +413,10 @@ function handleFileSelect(evt) {
     var file = document.getElementById('cfr_file').files[0];
     console.log(file);
     console.log(file.name);
+    console.log("cfr_file" + cfg_type);
     global_filename = file.name;
     xhr = new XMLHttpRequest();
-    var route = '/configurator/upload/' + file.name;
+    var route = '/configurator/upload/' + file.name + '/' + cfg_type;
     xhr.open('POST', route);
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.onload = function() {

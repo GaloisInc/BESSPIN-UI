@@ -107,19 +107,33 @@ def get_db_models():
 
 
 @app.route('/configurator/')
-@app.route('/configurator/<string:uid>')
-def feature_configurator(uid=None):
+@app.route('/configurator/<path:subpath>')
+def feature_configurator(subpath=None):
     """
     endpoint for the configurator app
     """
-    return render_template('configurator.html', uid=uid)
+    if subpath is None:
+        cfg_type, uid = 'cpu', None
+    else:
+        args = subpath.split('/')
+        if len(args) == 1:
+            cfg_type, uid = args[0], None
+            uid = None
+        else:
+            cfg_type, uid = args[0], args[1]
+
+    # The global variables are defined in the javascript code
+    cfg_type = 'global_var_cpu' if cfg_type == 'cpu' else 'global_var_test'
+    return render_template('configurator.html', uid=uid, cfg_type=cfg_type)
 
 
-@app.route('/configurator/upload/<string:name>', methods=['POST'])
-def upload_file(name):
+@app.route('/configurator/upload/<path:subpath>', methods=['POST'])
+def upload_file(subpath):
     """
     upload a clafer or fm.json file
     """
+    name, cfg_type = subpath.split('/')
+    app.logger.debug('name is: '+ name)
     if name.endswith('.cfr'):
         try:
             json_feat_model = convert_model_to_json(request.data)
@@ -187,6 +201,7 @@ def load_model_from_db():
 
     data = json.loads(request.data)
     uid = data['model_uid']
+    app.logger.debug('load from db with uid: ' + uid)
     model = retrieve_model_from_db_by_uid(uid)
     configs = model['configs']
     conftree = model['conftree']
