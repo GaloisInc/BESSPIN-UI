@@ -2,62 +2,71 @@
 
 ![alt text](images/screenshot_UI.png "Screenshot UI")
 
-The UI consists of several components:
+*Disclaimer: this UI is under development is considered a
+ proof-of-concept towards a prototype.*
 
-- Overview: a table visualization of models currently entered into
-  the system. Each model has hyperlinks available to other parts of
-  the UI described below.
+The UI is made of several main components depicted in the screenshots
+above. The components listed below:
 
-- Configurator: this component is the UI to configure and explore the
-  configuration of models.
+- Overview: tables summarizing the CPUs configured, the tests
+  configured, the build processes and the results of testing CPUs.
 
-- Dashboard: provides a visualization and commands related to the
-  testing pipeline and the evaluation results.
+- CPU Configurator: UI to configure and explore the configuration of
+  CPUs.
 
+- Tests Configurator: UI to configure and explore the configuration of
+  Tests.
+
+- Pipeline: views and controls of build processes for CPUs, Tests
+  and running tests against CPUs.
+
+- Dashboard: views, visualizations and controls related to the CPUs
+  tests and results.
+
+These components are accessible from the sidebar of the UI.
 
 ## Configurator UI
 
-The Configurator UI has some features listed below:
+A common UI is used for configuring both CPUs and tests. The current
+features of the configurator are:
 
-- *Load a new feature model*: from the local file system. The file is
-  parsed using Clafer in the backend and then displayed to the user in
-  a graphical tree-like structure. Some examples of feature models are
-  provided in the `examples` folder.
-
-- *Continue configuring feature model*. Choose a model from the list
-   of models previously entered in the system and continue exploring
-   and exploring their configuration.
+- *Load a new feature model*: from the local filesystem. The supported
+  formats for feature models are Clafer files `.cfr` or fm-json format
+  `.fm.json`. Some examples of feature models are provided in the
+  `examples` folder.
 
 - *Model visualization*: A model is translated into a graphical
-   tree-like structure -- *configuration tree* -- with nodes
-   representing features and indicating possible feature
-   configurations.
+   tree-like structure where every feature is represented as a node
+   and indicating its selection.
 
-- *Select features by clicking*: It is possible to `select`, explicit
-  ly `unselected`, or leave as `unconfigured` the features of a model.
-  The status of the features is translated into color, green for
-  selected, red for unselected and blank for unconfigured. A set of
-  convenience buttons are provided to facilitate the selection.
+- *Feature selection by clicking*: Features in a model can be turned
+  `on`, `off`, or `opt` by simply clicking.  This status of the
+  selection is translated into colors: green, red, or blank, with
+  various shades based on the history or selection or constraints of
+  the model.
 
-- *Validate configurations*: once a round of feature selection is
-  done, process the selection by clicking the button. The backend
-  analyzes the selection and returns the model, validating the feature
-  selection and returning a new configuration tree.
+- *Validate configurations*: A button is provided to validate the
+  current feature selection. This is done by the backend -- it
+  validates the feature selection and returns an updated feature model.
 
-- *Download configured model*: by clicking on the button, save the
-  configured model (model + constraints) to a filesystem.
+- *Download configured model*: button to download the configured model
+  (model + constraints) into the filesystem of the client.
 
+
+- *Continue configuring feature model*. When a model is already in the
+   system and to change the set of features selected, click on
+   "Overview" in the sidebar and select the model to configure.
 
 ## Requirements
 
-- python3
-- pip3
-- `flask`, a Restful microframework:
+- `python3`
+- `pip3`
+- `flask`, restful APIs framework:
 ```
 pip3 install flask
 ```
-- `clafer` version 0.5
-- web browser, tested with Chrome and Firefox.
+- `clafer` version 0.5, with fm-json
+- web browser: Chrome or Firefox.
 
 ## Start the configurator
 
@@ -89,7 +98,7 @@ Server side:
 
 Client Side:
 - Overview UI
-- Configurator UI
+- Configurator UI for CPUs and Tests
 - Pipeline UI
 - Dashboard UI
 
