@@ -65,6 +65,17 @@ def script_configurator():
         mimetype='application/javascript'
     )
 
+@app.route('/script/pipeline')
+def script_pipeline():
+    """
+    Endpoint serving the configurator script
+    """
+    return send_from_directory(
+        os.path.join(CODE_DIR, 'js'),
+        'pipeline.js',
+        mimetype='application/javascript'
+    )
+
 @app.route('/')
 def root_page():
     """
@@ -88,13 +99,6 @@ def overview():
     """
     return render_template('overview.html')
 
-@app.route('/testconfig/')
-def testconfig_page():
-    """
-    endpoint for testconfig
-    """
-    return render_template('testconfig.html')
-
 
 @app.route('/overview/get_db_models/', methods=['GET'])
 def get_db_models():
@@ -107,19 +111,33 @@ def get_db_models():
 
 
 @app.route('/configurator/')
-@app.route('/configurator/<string:uid>')
-def feature_configurator(uid=None):
+@app.route('/configurator/<path:subpath>')
+def feature_configurator(subpath=None):
     """
     endpoint for the configurator app
     """
-    return render_template('configurator.html', uid=uid)
+    if subpath is None:
+        cfg_type, uid = 'cpu', None
+    else:
+        args = subpath.split('/')
+        if len(args) == 1:
+            cfg_type, uid = args[0], None
+            uid = None
+        else:
+            cfg_type, uid = args[0], args[1]
+
+    # The global variables are defined in the javascript code
+    cfg_type = 'global_var_cpu' if cfg_type == 'cpu' else 'global_var_test'
+    return render_template('configurator.html', uid=uid, cfg_type=cfg_type)
 
 
-@app.route('/configurator/upload/<string:name>', methods=['POST'])
-def upload_file(name):
+@app.route('/configurator/upload/<path:subpath>', methods=['POST'])
+def upload_file(subpath):
     """
     upload a clafer or fm.json file
     """
+    name, cfg_type = subpath.split('/')
+    app.logger.debug('name is: '+ name)
     if name.endswith('.cfr'):
         try:
             json_feat_model = convert_model_to_json(request.data)
@@ -187,6 +205,7 @@ def load_model_from_db():
 
     data = json.loads(request.data)
     uid = data['model_uid']
+    app.logger.debug('load from db with uid: ' + uid)
     model = retrieve_model_from_db_by_uid(uid)
     configs = model['configs']
     conftree = model['conftree']
@@ -199,23 +218,6 @@ def load_model_from_db():
         'configs': configs,
         'configs_pp': selected_features_to_constraints(configs),
     })
-
-
-@app.route('/testconfig/configure/', methods=['POST'])
-def testconfig_configure():
-    """
-    load test config
-    """
-    filename = os.path.join(EXAMPLES_DIR, 'bof')
-    filename_cfr = filename + '.cfr'
-    with open(filename_cfr) as f:
-        source = f.read().encode()
-    try:
-        json_feat_model = convert_model_to_json(request.data)
-    except RuntimeError as err:
-        app.logger.info(str(err))
-        return abort(500, str(err))
-    return json.dumps({'uid': 'NotAvailable', 'tree': json_feat_model})
 
 
 @app.route('/pipeline/')

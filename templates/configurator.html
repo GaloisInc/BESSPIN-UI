@@ -67,7 +67,13 @@
 <div class="container">
 
 <div class="page-header">
-  <h1>Configurator</h1>
+
+  {% if cfg_type == 'global_var_cpu' %}
+  <h1>Configure CPU </h1>
+  {% endif %}
+  {% if cfg_type == 'global_var_test' %}
+  <h1>Configure Test </h1>
+  {% endif %}
 </div>
 
 <!-- Reference for loading file, the page contains fancier file
@@ -108,7 +114,9 @@
   <div class="col-lg-3">
     <button class="btn btn-light btn-outline-secondary"
             id="inputGroupFileAddon01"
-            onclick="handleFileSelect()">
+            onclick="
+		     {% if cfg_type %}handleFileSelect({{ cfg_type }}){% endif %}"
+	    >
       <i class="fas fa-plus"></i>
       Add Model
     </button>

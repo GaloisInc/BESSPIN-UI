@@ -33,7 +33,7 @@ abstract BOF
       Continuous
       Discrete
 
-  Consequences
+  or Consequences
     InformationChangeLoss
     IncorrectResults
     AlteredControlFlow
