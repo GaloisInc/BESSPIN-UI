@@ -185,7 +185,8 @@ var options = {
             direction: "LR",
             sortMethod: "directed",
             nodeSpacing: 70,
-            levelSeparation: 300,
+            levelSeparation: 200,
+            treeSpacing: 80,
         }
     },
     interaction: {
