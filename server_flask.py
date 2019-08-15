@@ -1,6 +1,7 @@
 """
-A feature model configurator web app
+BESSPIN UI web app server
 """
+
 import os
 import logging
 import json
@@ -22,6 +23,7 @@ from database import (
 from configurator_shim import (
     convert_model_to_json,
     selected_features_to_constraints,
+    combine_featmodel_cfgs,
     configuration_algo,
 )
 # pylint: disable=invalid-name
@@ -149,7 +151,11 @@ def upload_file(subpath):
     else:
         return abort(400, 'Unsupported file extension for filename: ' + name)
     uid = insert_feature_model_db(name, request.data.decode('utf8'), json_feat_model)
-    return json.dumps({'uid': uid, 'tree': json_feat_model})
+    return json.dumps({
+        'uid': uid,
+        'tree': json_feat_model,
+        'configured_feature_model': combine_featmodel_cfgs(json_feat_model, []),
+    })
 
 
 @app.route('/configurator/configure/', methods=['POST'])
@@ -164,7 +170,9 @@ def configure_features():
     uid = data['uid']
     feature_selection = data['feature_selection']
     entry = retrieve_model_from_db_by_uid(uid)
-    file_content = retrieve_model_from_db_by_uid(uid)['source']
+    file_content = entry['source']
+    conftree = entry['conftree']
+    configs = feature_selection
     validated_features = configuration_algo(
         entry['conftree'],
         feature_selection,
@@ -182,6 +190,7 @@ def configure_features():
         'server_source': file_content,
         'server_constraints': constraints,
         'validated_features': validated_features,
+        'configured_feature_model': combine_featmodel_cfgs(conftree, configs)
     }
     return json.dumps(response)
 
@@ -217,6 +226,7 @@ def load_model_from_db():
         'conftree': conftree,
         'configs': configs,
         'configs_pp': selected_features_to_constraints(configs),
+        'configured_feature_model': combine_featmodel_cfgs(conftree, configs)
     })
 
 

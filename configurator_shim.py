@@ -6,6 +6,7 @@ import logging
 import json
 import subprocess
 import tempfile
+import copy
 
 # pylint: disable=invalid-name
 
@@ -18,7 +19,6 @@ else:
     WORK_DIR = '.'
 
 CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
-TOP_LEVEL_FEATURE_IDENT = 'Features'
 FORMAT_VERSIONS = [1]
 
 def load_json(filename):
@@ -55,11 +55,7 @@ def selected_features_to_constraints(feats):
     """
     res = ""
     for sel in feats:
-        # delete leading artificial feature path artificially injected
-        # when there are several features at top level
-        prefix = TOP_LEVEL_FEATURE_IDENT + '.'
-        path = sel['content']['other']
-        sel_str = path[len(prefix):] if path.startswith(prefix) else path
+        sel_str = sel['content']['other']
 
         mode = sel['content']['mode']
         if mode == 'selected':
@@ -67,6 +63,42 @@ def selected_features_to_constraints(feats):
         elif mode == 'rejected':
             res += "[ !" + sel_str + " ]" + "\n"
     return res
+
+def combine_featmodel_cfgs(model, cfgs):
+    """
+    Combine a feature model with configurations
+    :param model:
+    :param cfgs:
+
+    :return: feature model in fm.json format
+    """
+    assert 'constraints' in model
+    cfg_model = copy.deepcopy(model)
+    for sel in cfgs:
+        sel_str = sel['content']['other']
+        mode = sel['content']['mode']
+        if mode == 'selected':
+            cfg_model['constraints'].append({
+                'kind': 'feat',
+                'name': sel_str,
+            })
+        elif mode == 'rejected':
+            cfg_model['constraints'].append({
+                'kind': 'op',
+                'op': 'not',
+                'args': [
+                    {
+                        'kind': 'feat',
+                        'name': sel_str,
+                    },
+                ]
+            })
+        else:
+             raise RuntimeError('feature selection is neither selected or rejected')
+    return cfg_model
+
+
+
 
 def configuration_algo(conftree, feature_selection):
     """
