@@ -162,6 +162,7 @@ function Selection() {
 var global_filename = 'modelnameplaceholder';
 var global_conftree = {};
 var global_uid = '';
+var global_configured_feature_model = {};
 
 // the dictionary containing the set of nodes that are selected by
 // the user by clicking.
@@ -185,7 +186,8 @@ var options = {
             direction: "LR",
             sortMethod: "directed",
             nodeSpacing: 70,
-            levelSeparation: 300,
+            levelSeparation: 200,
+            treeSpacing: 80,
         }
     },
     interaction: {
@@ -381,6 +383,7 @@ function find_feature_conftree(tree, name) {
     return tree.features[name];
 };
 
+// This function seems deadcode. TODO: delete it if not useful.
 function path_to_feature(tree, name) {
     var path = "";
     var cur_name = name;
@@ -424,6 +427,7 @@ function handleFileSelect(evt, cfg_type) {
             console.log('Response from server: ' + xhr.responseText);
             response = JSON.parse(xhr.responseText);
             global_conftree = response['tree'];
+            global_configured_feature_model = response['configured_feature_model'];
             global_uid = response['uid'];
             global_selected_nodes.reset();
             draw_conftree(global_conftree);
@@ -452,6 +456,7 @@ function validate_features() {
             editor_configs.setValue(response['server_constraints']);
 
             global_selected_nodes.from_json(response['validated_features']);
+            global_configured_feature_model = response['configured_feature_model'];
             draw_conftree(global_conftree);
             set_validate_button_success();
         }
@@ -505,6 +510,7 @@ function load_configured_model(uid) {
             response = JSON.parse(xhr.responseText);
             global_conftree = response['conftree'];
             global_uid = response['uid'];
+            global_configured_feature_model = response['configured_feature_model'];
             global_filename = response['filename'];
             global_selected_nodes.from_json(response['configs']);
             draw_conftree(global_conftree);
@@ -525,12 +531,8 @@ function load_configured_model(uid) {
 };
 
 function download() {
-    var editor_source = ace.edit("editor_source");
-    var data = editor_source.getValue();
-    var editor_configs = ace.edit("editor_configs");
-    data = data + editor_configs.getValue();
     var type = "text/plain";
-    var file = new Blob([data], {type: type});
+    var file = new Blob([JSON.stringify(global_configured_feature_model, null, 2)], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
     else { // Others
@@ -572,7 +574,7 @@ function circle_selection(name) {
         return;
     };
     case 'opt': {
-        global_selected_nodes.push(name, 'selected', path_to_feature(global_conftree, name), false);
+        global_selected_nodes.push(name, 'selected', name, false);
         return;
     };
     default: {
