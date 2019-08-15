@@ -1,0 +1,303 @@
+{
+    "roots": [
+        "CSR_REGFILE_MIN",
+        "EXTERNAL_DEBUG_MODULE",
+        "FABRIC32",
+        "FABRIC64",
+        "HTIF_MEMORY",
+        "INCLUDE_ACCEL0",
+        "INCLUDE_CAMERA_MODEL",
+        "INCLUDE_GDB_CONTROL",
+        "INCLUDE_INITIAL_MEMZERO",
+        "INCLUDE_TANDEM_VERIF",
+        "ISA_A",
+        "ISA_C",
+        "ISA_FD",
+        "ISA_F_OR_D",
+        "ISA_N",
+        "ISA_PRIV_S",
+        "ISA_PRIV_U",
+        "IVERILOG",
+        "Near_Mem_Caches",
+        "Near_Mem_TCM",
+        "RV128",
+        "RV32",
+        "RV64",
+        "SHIFT_MULT",
+        "SV34",
+        "Sv32",
+        "grp_1",
+        "ISA_M-parent",
+        "ISA_F"
+    ],
+    "version": {
+        "base": 1
+    },
+    "constraints": [],
+    "features": {
+        "ISA_FD": {
+            "gcard": "opt",
+            "name": "ISA_FD",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "INCLUDE_TANDEM_VERIF": {
+            "gcard": "opt",
+            "name": "INCLUDE_TANDEM_VERIF",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "Near_Mem_Caches": {
+            "gcard": "opt",
+            "name": "Near_Mem_Caches",
+            "parent": null,
+            "children": [],
+            "card": "on"
+        },
+        "ISA_FD_DIV": {
+            "gcard": "opt",
+            "name": "ISA_FD_DIV",
+            "parent": "ISA_D-parent",
+            "children": [],
+            "card": "opt"
+        },
+        "SHIFT_SERIAL": {
+            "gcard": "opt",
+            "name": "SHIFT_SERIAL",
+            "parent": "grp_1",
+            "children": [],
+            "card": "opt"
+        },
+        "SHIFT_MULT": {
+            "gcard": "opt",
+            "name": "SHIFT_MULT",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "SHIFT_BARREL": {
+            "gcard": "opt",
+            "name": "SHIFT_BARREL",
+            "parent": "grp_1",
+            "children": [],
+            "card": "opt"
+        },
+        "FABRIC32": {
+            "gcard": "opt",
+            "name": "FABRIC32",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "IVERILOG": {
+            "gcard": "opt",
+            "name": "IVERILOG",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "RV128": {
+            "gcard": "opt",
+            "name": "RV128",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "HTIF_MEMORY": {
+            "gcard": "opt",
+            "name": "HTIF_MEMORY",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "grp_1": {
+            "gcard": "mux",
+            "name": "grp_1",
+            "parent": null,
+            "children": [
+                "SHIFT_BARREL",
+                "SHIFT_SERIAL"
+            ],
+            "card": "on"
+        },
+        "EXTERNAL_DEBUG_MODULE": {
+            "gcard": "opt",
+            "name": "EXTERNAL_DEBUG_MODULE",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "ISA_A": {
+            "gcard": "opt",
+            "name": "ISA_A",
+            "parent": null,
+            "children": [],
+            "card": "opt"
+        },
+        "ISA_F": {
+            "gcard": "opt",
+            "name": "ISA_F",
+            "parent": null,
+            "children": [
+                "ISA_D-parent"
+            ],
+            "card": "opt"
+        },
+        "ISA_C": {
+            "gcard": "opt",
+            "name": "ISA_C",
+            "parent": null,
+            "children": [],
+            "card": "opt"
+        },
+        "INCLUDE_GDB_CONTROL": {
+            "gcard": "opt",
+            "name": "INCLUDE_GDB_CONTROL",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "ISA_M-parent": {
+            "gcard": "xor",
+            "name": "ISA_M-parent",
+            "parent": null,
+            "children": [
+                "MULT_SERIAL",
+                "MULT_SYNTH"
+            ],
+            "card": "opt"
+        },
+        "Near_Mem_TCM": {
+            "gcard": "opt",
+            "name": "Near_Mem_TCM",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "MULT_SERIAL": {
+            "gcard": "opt",
+            "name": "MULT_SERIAL",
+            "parent": "ISA_M-parent",
+            "children": [],
+            "card": "opt"
+        },
+        "CSR_REGFILE_MIN": {
+            "gcard": "opt",
+            "name": "CSR_REGFILE_MIN",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "SV34": {
+            "gcard": "opt",
+            "name": "SV34",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "SV39": {
+            "gcard": "opt",
+            "name": "SV39",
+            "parent": "ISA_PRIV_S",
+            "children": [],
+            "card": "on"
+        },
+        "RV64": {
+            "gcard": "opt",
+            "name": "RV64",
+            "parent": null,
+            "children": [],
+            "card": "on"
+        },
+        "RV32": {
+            "gcard": "opt",
+            "name": "RV32",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "FABRIC64": {
+            "gcard": "opt",
+            "name": "FABRIC64",
+            "parent": null,
+            "children": [],
+            "card": "on"
+        },
+        "Sv32": {
+            "gcard": "opt",
+            "name": "Sv32",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "INCLUDE_CAMERA_MODEL": {
+            "gcard": "opt",
+            "name": "INCLUDE_CAMERA_MODEL",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "INCLUDE_ACCEL0": {
+            "gcard": "opt",
+            "name": "INCLUDE_ACCEL0",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "ISA_PRIV_U": {
+            "gcard": "opt",
+            "name": "ISA_PRIV_U",
+            "parent": null,
+            "children": [],
+            "card": "opt"
+        },
+        "ISA_F_OR_D": {
+            "gcard": "opt",
+            "name": "ISA_F_OR_D",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "ISA_N": {
+            "gcard": "opt",
+            "name": "ISA_N",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "ISA_D-parent": {
+            "gcard": "opt",
+            "name": "ISA_D-parent",
+            "parent": "ISA_F",
+            "children": [
+                "ISA_FD_DIV"
+            ],
+            "card": "on"
+        },
+        "INCLUDE_INITIAL_MEMZERO": {
+            "gcard": "opt",
+            "name": "INCLUDE_INITIAL_MEMZERO",
+            "parent": null,
+            "children": [],
+            "card": "off"
+        },
+        "ISA_PRIV_S": {
+            "gcard": "opt",
+            "name": "ISA_PRIV_S",
+            "parent": null,
+            "children": [
+                "SV39"
+            ],
+            "card": "opt"
+        },
+        "MULT_SYNTH": {
+            "gcard": "opt",
+            "name": "MULT_SYNTH",
+            "parent": "ISA_M-parent",
+            "children": [],
+            "card": "opt"
+        }
+    }
+}
