@@ -36,7 +36,7 @@ DB_INSERT = """INSERT INTO feature_models VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
 
 DB_SELECT = """SELECT * FROM feature_models"""
 
-DB_UPDATE = """UPDATE feature_models SET configs = :config, last_update = :last_update WHERE uid = :uid"""
+DB_UPDATE = """UPDATE feature_models SET configs = :configs, last_update = :last_update WHERE uid = :uid"""
 
 def initialize_db():
     """
@@ -96,18 +96,18 @@ def insert_feature_model_db(filename, content, conftree):
     conn.close()
     return uid
 
-def update_config_db(uid, cfg):
+def update_configs_db(uid, cfgs):
     """
-    Insert feature mode in db
+    Update configurations in db
 
-    :param filename:
-    :param content:
+    :param uid:
+    :param cfgs:
     """
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    enc_cfg = encode_json_db(cfg)
+    enc_cfgs = encode_json_db(cfgs)
     last_update = str(datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
-    c.execute(DB_UPDATE, {'uid': uid, 'config': enc_cfg, 'last_update': last_update})
+    c.execute(DB_UPDATE, {'uid': uid, 'configs': enc_cfgs, 'last_update': last_update})
     conn.commit()
     conn.close()
 

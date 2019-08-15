@@ -15,7 +15,7 @@ from flask.logging import default_handler
 from database import (
     list_models_from_db,
     insert_feature_model_db,
-    update_config_db,
+    update_configs_db,
     retrieve_feature_models_db,
     retrieve_model_from_db_by_uid
 )
@@ -169,7 +169,7 @@ def configure_features():
         entry['conftree'],
         feature_selection,
     )
-    update_config_db(uid, validated_features)
+    update_configs_db(uid, validated_features)
     constraints = selected_features_to_constraints(feature_selection)
 
     # pylint: disable=line-too-long
