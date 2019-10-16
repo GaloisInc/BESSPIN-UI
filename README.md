@@ -103,6 +103,8 @@ able to expose the service externally.
 There are a few environment variables that can be set to configure how it runs:
 
  * PORT: the port to expose (this should map to the first port mentioned in the `-p` argument to docker)
+ * HOST: the host to run flask on (defaults to `0.0.0.0` so you can access the server within docker)
+ * DEBUG: flag to run flask in debug mode (defaults to `True`)
 
 ## Architecture
 
