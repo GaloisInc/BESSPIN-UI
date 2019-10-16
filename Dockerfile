@@ -1,10 +1,11 @@
-FROM python:3 AS builder
+FROM ubuntu:bionic
 
-WORKDIR /
+RUN apt-get update
+RUN apt-get install -y python3-pip sqlite3
+RUN pip3 install flask nose
 
-RUN pip3 install flask
-
-COPY . .
+WORKDIR /besspin-ui
+COPY . /besspin-ui
 
 ENV PORT 3784
 EXPOSE 3784
