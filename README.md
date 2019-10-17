@@ -82,11 +82,29 @@ setting the environment variable `BESSPIN_CLAFER`:
 BESSPIN_CLAFER=<path-to-clafer> python3 server_flask.py
 ```
 
-
 The UI is accessible at the url:
 ```
 http://localhost:3784/
 ```
+
+### Running in Docker
+
+There is an included `Dockerfile` for spinning up a containerized instance:
+
+```
+$ docker run -it --rm -p3784:3784 --name besspin-ui galois:besspin-ui
+```
+
+*NOTE:* you need to run with the host `0.0.0.0` in order for Docker to be
+able to expose the service externally.
+
+#### ENV vars
+
+There are a few environment variables that can be set to configure how it runs:
+
+ * PORT: the port to expose (this should map to the first port mentioned in the `-p` argument to docker)
+ * HOST: the host to run flask on (defaults to `0.0.0.0` so you can access the server within docker)
+ * DEBUG: flag to run flask in debug mode (defaults to `True`)
 
 ## Architecture
 

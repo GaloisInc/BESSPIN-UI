@@ -246,4 +246,10 @@ def dashboard(uid=None):
     """
     return render_template('dashboard.html', uid=uid)
 
-app.run('localhost', port=3784, debug=True)
+
+port = os.getenv('PORT', 3784)
+debug = os.getenv('DEBUG', True)
+host = os.getenv('HOST', '0.0.0.0')
+
+app.run(host, port, debug)
+
