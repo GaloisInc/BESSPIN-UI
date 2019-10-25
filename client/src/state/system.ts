@@ -5,6 +5,7 @@ export interface ISystemEntry {
     createdAt: string;
     lastUpdate: string;
     featureCount: number;
+    filename: string;
 }
 
 export interface ISystemState {
@@ -17,6 +18,7 @@ export const DEFAULT_STATE: ISystemState = {
         createdAt: Date.now().toString(),
         lastUpdate: Date.now().toString(),
         featureCount: 5,
+        filename: 'foo.fm.json',
     }],
 };
 
@@ -53,7 +55,9 @@ export const fetchSystemsSuccess = (systems: ISystemEntry[]) => {
 };
 
 export type ISystemAction = ReturnType<
-    typeof fetchSystemsSuccess
+    typeof fetchSystems |
+    typeof fetchSystemsSuccess |
+    typeof fetchSystemsFailure
 >;
 
 // Reducers
