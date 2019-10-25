@@ -31,8 +31,8 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
                 </tr>
             </thead>
             <tbody>
-                { props.entries.map(e => (
-                    <tr>
+                { props.entries.map((e, i) => (
+                    <tr key={ `dash-row-${i}`}>
                         <td>{ e.hash }</td>
                         <td>{ e.cpu }</td>
                         <td>{ e.result }</td>
