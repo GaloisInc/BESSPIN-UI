@@ -87,6 +87,20 @@ The UI is accessible at the url:
 http://localhost:3784/
 ```
 
+### Build Docker image
+
+To build the docker image, you need to provide some `personal access
+token` credentials to access the gitlab repos. This is done by
+providing the environment variables to the docker `docker build`
+command:
+
+- `TOKEN_NAME` for the name of the personal access token
+- `PRIVATE_TOKEN` the private token value
+
+```
+docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
+```
+
 ### Running in Docker
 
 There is an included `Dockerfile` for spinning up a containerized instance:
@@ -121,4 +135,3 @@ Client Side:
 - Dashboard UI
 
 ![alt text](images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
-
