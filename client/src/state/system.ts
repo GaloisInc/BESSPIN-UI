@@ -28,6 +28,9 @@ export enum SystemActionTypes {
     FETCH_TEST_SYSTEMS = 'system/fetch',
     FETCH_TEST_SYSTEMS_FAILURE = 'system/fetch/failure',
     FETCH_TEST_SYSTEMS_SUCCESS = 'system/fetch/success',
+    SUBMIT_TEST_SYSTEM = 'system/submit',
+    SUBMIT_TEST_SYSTEMS_FAILURE = 'system/submit/failure',
+    SUBMIT_TEST_SYSTEMS_SUCCESS = 'system/submit/success',
 }
 
 export const fetchSystems = () => {
@@ -54,10 +57,38 @@ export const fetchSystemsSuccess = (systems: ISystemEntry[]) => {
     } as const;
 };
 
+export const submitSystem = (systemName: string, systemJsonString: string) => {
+    return {
+        type: SystemActionTypes.SUBMIT_TEST_SYSTEM,
+        data: {
+            systemName,
+            systemJsonString,
+        },
+    } as const;
+}
+
+export const submitSystemFailure = (errors: string[]) => {
+    return {
+        type: SystemActionTypes.SUBMIT_TEST_SYSTEMS_FAILURE,
+        data: {
+            errors,
+        },
+    } as const;
+};
+
+export const submitSystemSuccess = () => {
+    return {
+        type: SystemActionTypes.SUBMIT_TEST_SYSTEMS_SUCCESS,
+    } as const;
+};
+
 export type ISystemAction = ReturnType<
     typeof fetchSystems |
     typeof fetchSystemsSuccess |
-    typeof fetchSystemsFailure
+    typeof fetchSystemsFailure |
+    typeof submitSystem |
+    typeof submitSystemSuccess |
+    typeof submitSystemFailure
 >;
 
 // Reducers
