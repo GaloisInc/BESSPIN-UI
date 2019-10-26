@@ -1,25 +1,36 @@
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 import { match } from 'react-router-dom';
 
 import {
+    Button,
+    Col,
     Container,
+    Form,
 } from 'react-bootstrap';
 
 import { IState } from '../state';
-import { ISystemEntry, getSystems } from '../state/system';
+import {
+    ISystemEntry,
+    getSystems,
+    submitSystem,
+} from '../state/system';
 
 import Header from '../components/Header';
 import { Graph } from '../components/Graph';
 
 import '../style/ConfigureCpu.scss';
 
+type onSubmitConfiguratorCallback = (name: string, json: string) => void;
+
 export interface IConfigureCpuProps {
-    systemHash?: string;
+    onConfiguratorSubmit: onSubmitConfiguratorCallback;
     system?: ISystemEntry;
+    systemHash: string;
 }
 
-export const ConfigureCpu: React.FC<IConfigureCpuProps> = (props) => {
+export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({ onConfiguratorSubmit, system, systemHash }) => {
     const treeData = {
         "name": "flare",
         "children": [{
@@ -778,14 +789,51 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = (props) => {
         }]
     };
 
-  return (
-    <Container className='ConfigureCpu'>
-        <Header />
-        <h1>Configure CPU</h1>
-        <code>{ JSON.stringify(props, null, 4) }</code>
-        <Graph data={ treeData } />
-    </Container>
-  );
+    const fileInputRef = useRef(null);
+    const [configuratorModel, setConfiguratorModel] = useState('');
+    const [modelName, setModelName] = useState('');
+    const modelInputCallback = useCallback(() => {
+        // @ts-ignore
+        const fileToRead = fileInputRef.current.files[0];
+
+        if (fileToRead) {
+            setModelName(fileToRead.name);
+
+            const reader = new FileReader();
+            reader.readAsText(fileToRead);
+            reader.onload = (e) => {
+                const configuratorModel = e && e.target ? e.target.result as string : null;
+                if (configuratorModel) {
+                    setConfiguratorModel(configuratorModel);
+                }
+            };
+        }
+    }, [configuratorModel]);
+
+    const onSubmitHandler = useCallback(() => {
+        if (configuratorModel) {
+            onConfiguratorSubmit(modelName, configuratorModel);
+        }
+    }, [modelName, configuratorModel]);
+
+    return (
+        <Container className='ConfigureCpu'>
+            <Header />
+            <h1>Configure CPU</h1>
+            <Form inline={ true }>
+                <Form.Row>
+                    <Col>
+                        <Form.Group>
+                            <Form.Label>Add Model:</Form.Label>
+                            <Form.Control as='input' type='file' onChange={ modelInputCallback } ref={ fileInputRef } />
+                            <Button size='sm' onClick={ onSubmitHandler }>Submit</Button>
+                        </Form.Group>
+                    </Col>
+                </Form.Row>
+            </Form>
+            <Graph data={ treeData } />
+        </Container>
+    );
 }
 
 type TParams = { systemHash?: string };
@@ -795,12 +843,19 @@ interface IConfigureCpuMapProps extends IConfigureCpuProps {
 }
 
 const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigureCpuProps => {
-    const systemHash = props.match.params.systemHash;
+    const systemHash = props.match.params.systemHash || '';
     const systems = getSystems(state);
     return {
+        ...props,
         systemHash,
         system: systems.find(s => s.hash === systemHash),
     };
 };
 
-export const ConnectedConfigureCpu = connect(mapStateToProps)(ConfigureCpu);
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return {
+        onConfiguratorSubmit: (uid: string, name: string, json: string) => dispatch(submitSystem(uid, name, json)),
+    };
+};
+
+export const ConnectedConfigureCpu = connect(mapStateToProps, mapDispatchToProps)(ConfigureCpu);
