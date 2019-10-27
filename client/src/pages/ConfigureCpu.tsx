@@ -11,13 +11,14 @@ import {
 } from 'react-bootstrap';
 
 import { IState } from '../state';
+
 import {
     ISystemEntry,
     getSystems,
     submitSystem,
 } from '../state/system';
 
-import Header from '../components/Header';
+import { Header } from '../components/Header';
 import { Graph } from '../components/Graph';
 
 import '../style/ConfigureCpu.scss';

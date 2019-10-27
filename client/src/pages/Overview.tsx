@@ -8,10 +8,20 @@ import {
 } from 'react-bootstrap';
 
 import { IState } from '../state';
-import { getSystems, ISystemEntry, ISystemAction, fetchSystems } from '../state/system';
-import { getIsLoading, getDataRequested } from '../state/ui';
 
-import Header from '../components/Header';
+import {
+  getSystems,
+  ISystemEntry,
+  ISystemAction,
+  fetchSystems,
+} from '../state/system';
+
+import {
+  getIsLoading,
+  getDataRequested,
+} from '../state/ui';
+
+import { Header } from '../components/Header';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 
 import '../style/Overview.scss';

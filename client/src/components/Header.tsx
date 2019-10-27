@@ -9,7 +9,7 @@ import {
 
 import '../style/Header.scss';
 
-const Header: React.FC = () => {
+export const Header: React.FC = () => {
   return (
       <Navbar className='Header' variant='dark'>
           <Navbar.Brand className='logo'>BESSPIN</Navbar.Brand>
@@ -27,5 +27,3 @@ const Header: React.FC = () => {
       </Navbar>
   );
 }
-
-export default Header;

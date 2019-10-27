@@ -2,7 +2,10 @@ import React, { useRef, useEffect, RefObject } from 'react';
 
 import '../style/Graph.scss';
 
-import { graphSimple, ITreeNode } from './graph-helper';
+import {
+    graphSimple,
+    ITreeNode
+} from './graph-helper';
 
 export interface IGraphProps {
     data?: ITreeNode;

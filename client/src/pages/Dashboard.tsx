@@ -7,9 +7,13 @@ import {
 } from 'react-bootstrap';
 
 import { IState } from '../state';
-import { ITestEntry, getEntries } from '../state/test-results';
 
-import Header from '../components/Header';
+import {
+    ITestEntry,
+    getEntries
+} from '../state/test-results';
+
+import { Header } from '../components/Header';
 
 import '../style/Dashboard.scss';
 
