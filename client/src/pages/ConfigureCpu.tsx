@@ -809,13 +809,13 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({ onConfiguratorSubmi
                 }
             };
         }
-    }, [configuratorModel]);
+    }, []);
 
     const onSubmitHandler = useCallback(() => {
         if (configuratorModel) {
             onConfiguratorSubmit(modelName, configuratorModel);
         }
-    }, [modelName, configuratorModel]);
+    }, [modelName, configuratorModel, onConfiguratorSubmit]);
 
     return (
         <Container className='ConfigureCpu'>
