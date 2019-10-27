@@ -855,7 +855,7 @@ const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigur
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
     return {
-        onConfiguratorSubmit: (uid: string, name: string, json: string) => dispatch(submitSystem(uid, name, json)),
+        onConfiguratorSubmit: (name: string, json: string) => dispatch(submitSystem(name, json)),
     };
 };
 
