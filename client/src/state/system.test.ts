@@ -44,7 +44,6 @@ describe('systems', () => {
             it('should generate an action with no data', () => {
 
                 expect(fetchSystems()).toEqual({
-                    data: null,
                     type: SystemActionTypes.FETCH_TEST_SYSTEMS,
                 });
             });
@@ -56,9 +55,9 @@ describe('systems', () => {
 
                 expect(fetchSystemsFailure(['TEST ERROR'])).toEqual({
                     data: {
-                        error: 'TEST ERROR',
+                        errors: ['TEST ERROR'],
                     },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS,
+                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_FAILURE,
                 });
             });
         });
@@ -71,7 +70,7 @@ describe('systems', () => {
                     data: {
                         systems: [],
                     },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS,
+                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
                 });
             });
 
@@ -82,7 +81,7 @@ describe('systems', () => {
                     data: {
                         systems: [testSystem],
                     },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS,
+                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
                 });
             });
         });
