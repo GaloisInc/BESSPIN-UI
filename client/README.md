@@ -27,6 +27,11 @@ You will also see any lint errors in the console.
 Launches the test runner in the interactive watch mode.<br />
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
+### `npm run test:coverage`
+
+Runs the unit tests with coverage enabled. Once complete, you can open
+[the coverage report](file://./coverage/lcov-report/index.html) to see the results in a browser.
+
 ### `npm run build`
 
 Builds the app for production to the `build` folder.<br />
@@ -72,7 +77,7 @@ There is already a `ui.ts` module for managing basic UI state (i.e. whether app 
 
 ### Define the "actions"
 
-[Redux](https://react-redux.js.org/) uses an "action", "action-creator", "reducer" model whereby an "action-create" fires off an "action" which is listened for by a "reducer" (an possibly a "saga") which then updates the application state appropriately. The ideal here is that this creates a uni-directional state-flow whereby mutations to the application state follow a well-defined path, making it both easier to reason about as well as reducing the bugs that come from distributed state mutations.
+[Redux](https://react-redux.js.org/) uses an "action", "action-creator", "reducer" model whereby an "action-creator" fires off an "action" which is listened for by a "reducer" (and possibly a "saga" if there are side-effects such as network calls) which then updates the application state appropriately. The ideal here is that this creates a uni-directional state-flow whereby mutations to the application state follow a well-defined path, making it both easier to reason about as well as reducing the bugs that come from distributed state mutations.
 
 To defined an [action](https://redux.js.org/basics/actions), you simply create a constant like:
 
@@ -139,17 +144,24 @@ In order to do this, you need to map your state to the relevant [React props](ht
 
 ```javascript
 import { connect } from 'react-redux';
-import { getIsLoading } from '../state/ui';
+import { getIsLoading, doFoo } from '../state/ui';
 
 // some definition of the stateless Foo...
 
-function mapStateToProps(state) {
+const mapStateToProps = (state) =>{
     return {
         isLoading: getIsLoading(state),
     };
 }
 
-export ConnectedFoo = connect(mapStateToProps)(Foo);
+// if your component needs to handle user interactions which change the state of the application, then you can pass in your action-creators using mapDispathToProps
+const mapStateToDispatch = (dispatch) => {
+    return {
+        onSomeUiEvent: (someArg) => dispatch(doFoo(someArg)),
+    };
+};
+
+export ConnectedFoo = connect(mapStateToProps, mapDispatchToProps)(Foo);
 ```
 
 # Learn More
