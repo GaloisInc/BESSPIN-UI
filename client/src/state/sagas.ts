@@ -38,6 +38,8 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
         const response = yield call(submitConfigurator, action.data.systemName, action.data.systemJsonString);
         console.log(response);
         yield put(submitSystemSuccess());
+
+        yield call(fetchSystems);
     } catch (e) {
         console.error(e);
         yield put(submitSystemFailure(e.message));
