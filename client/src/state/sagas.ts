@@ -44,6 +44,7 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
     }
 }
 
+// Register all the actions that should trigger our sagas
 export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_TEST_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEMS, fetchSystems);
