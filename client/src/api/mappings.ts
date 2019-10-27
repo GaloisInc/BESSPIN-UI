@@ -1,5 +1,12 @@
-import { IConfigurator } from ".";
 import { ISystemEntry } from "../state/system";
+
+export interface IConfigurator {
+    uid: string,
+    filename: string,
+    date: string,
+    last_update: string,
+    nb_features_selected: number;
+}
 
 export const mapConfiguratorsToSystems = (configurators: IConfigurator[]): ISystemEntry[] => {
     return configurators.map((c: IConfigurator) => ({
