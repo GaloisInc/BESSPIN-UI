@@ -790,11 +790,14 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({ onConfiguratorSubmi
         }]
     };
 
+    // NOTE: I prefer functional components and use React Hooks to manage form
+    //       state. However, this makes testing interactions that use state
+    //       very difficult
     const fileInputRef = useRef(null);
     const [configuratorModel, setConfiguratorModel] = useState('');
     const [modelName, setModelName] = useState('');
     const modelInputCallback = useCallback(() => {
-        // @ts-ignore
+        // @ts-ignore - typescript does not like the ref, so I gave up and just ignore this line
         const fileToRead = fileInputRef.current.files[0];
 
         if (fileToRead) {
@@ -837,6 +840,8 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({ onConfiguratorSubmi
     );
 }
 
+// NOTE: If you add more path-parameters to the <Route>, you will need to add
+//       the parameters here
 type TParams = { systemHash?: string };
 
 interface IConfigureCpuMapProps extends IConfigureCpuProps {

@@ -696,8 +696,8 @@ const setTextAnchor = (d: CustomTreeNode) => d.children || d._children ? 'end' :
 
 export const graphSimple = (ref: SVGSVGElement, treeData: ITreeNode) => {
     // Set the dimensions and margins of the diagram
-    const width = ref.width.baseVal.value;
-    const height = ref.height.baseVal.value;
+    const width = ref.width ? ref.width.baseVal.value : 0;
+    const height = ref.height ? ref.height.baseVal.value : 0;
 
     const zoomHandler = () => {
         // D3 uses live-binding to attach an event object to "d3"
