@@ -14,10 +14,13 @@ export const DEFAULT_STATE = {
 
 // Actions
 
-export const IS_LOADING = 'ui/is-loading';
+export enum UiActionTypes {
+    IS_LOADING = 'is/is-loading',
+}
+
 export const isLoading = () => {
     return {
-        type: IS_LOADING,
+        type: UiActionTypes.IS_LOADING,
         data: false,
     } as const;
 };
@@ -42,7 +45,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
                 ...state,
                 isLoading: false,
             };
-        case IS_LOADING:
+        case UiActionTypes.IS_LOADING:
             return {
                 ...state,
                 isLoading: action.data,
