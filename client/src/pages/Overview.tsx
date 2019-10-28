@@ -35,6 +35,7 @@ export interface IOverviewProps {
 
 export const Overview: React.FC<IOverviewProps> = ({ dataRequested, dispatch, isLoading, systems }) => {
 
+  // useEffect is a way for us to trigger side-effects to load systems
   useEffect(() => {
     dataRequested || (dispatch && dispatch(fetchSystems()));
   });
@@ -55,7 +56,7 @@ export const Overview: React.FC<IOverviewProps> = ({ dataRequested, dispatch, is
             </thead>
             <tbody>
                 { systems && systems.map((s, i) => (
-                    <tr key={ `system-${i}`}>
+                    <tr className='system-row' key={ `system-${i}`}>
                         <td>{ s.hash }</td>
                         <td>{ s.createdAt }</td>
                         <td>{ s.lastUpdate }</td>
