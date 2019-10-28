@@ -29,6 +29,8 @@ services:
     restart: always
     networks:
       - internal-service-layer
+    volumes: # this is also only for development
+      - '~/.local/share/besspin:/root/.local/share/besspin'
     environment:
       HOST: 0.0.0.0
       PORT: 3784
