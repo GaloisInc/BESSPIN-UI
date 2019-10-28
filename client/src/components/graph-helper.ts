@@ -1,5 +1,7 @@
 import * as d3 from 'd3';
 
+// NOTE: this function ("graphScrollable") is here as a reference. It came from an example of
+//       d3 that supported zoom/pan. However, it is based on outdated version of D3
 // @ts-ignore
 export const graphScrollable = (treeData) => {
     // Calculate total nodes, max label length;
