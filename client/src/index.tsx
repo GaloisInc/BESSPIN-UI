@@ -13,9 +13,9 @@ import { ConnectedOverview } from './pages/Overview';
 
 import { store } from './state';
 
-import './style/index.scss';
-
 import * as serviceWorker from './serviceWorker';
+
+import './style/index.scss';
 
 ReactDOM.render(
     <Provider store={store}>
