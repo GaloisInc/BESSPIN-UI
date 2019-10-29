@@ -7,10 +7,14 @@ import {
     ISystemEntry,
 } from './system';
 
+const genDate = (): string => {
+    return new Date(Date.now()).toISOString();
+};
+
 const DEFAULT_SYSTEM: ISystemEntry = {
     hash: 'TEST-HASH',
-    createdAt: Date.now().toLocaleString(),
-    lastUpdate: Date.now().toLocaleString(),
+    createdAt: genDate(),
+    lastUpdate: genDate(),
     filename: 'TEST.fm.json',
     featureCount: 6,
 };
