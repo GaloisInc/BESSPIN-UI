@@ -1,0 +1,14 @@
+$body-bg: #2d78bd;
+$body-color: white;
+$table-color: black;
+
+/* import the necessary Bootstrap files */
+@import '../../node_modules/bootstrap/scss/functions';
+@import '../../node_modules/bootstrap/scss/variables';
+
+$theme-colors: (
+  primary: $orange
+);
+
+/* finally, import Bootstrap */
+@import '../../node_modules/bootstrap/scss/bootstrap';

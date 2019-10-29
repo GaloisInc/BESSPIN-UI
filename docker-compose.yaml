@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  client:
+    networks:
+      - proxy-layer
+      - internal-service-layer
+    depends_on:
+      - server
+    command: npm run start:debug
+    build: # this is only for development, we should use when we are ready for production
+      context: .
+      dockerfile: client/Dockerfile
+    volumes: # this is only for development mode to allow changes to the src to be picked up in the container without a restart
+      - './client/src:/besspin-ui/client/src'
+    ports:
+      - '3000:3000'
+      - '9229:9229' # this is only for development mode when the debugger is running
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 3000
+
+  server:
+    build: # this is only for development, we should use when we are ready for production
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - internal-service-layer
+    volumes: # this is also only for development
+      - '~/.local/share/besspin:/root/.local/share/besspin'
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3784
+
+networks:
+  proxy-layer:
+  internal-service-layer:

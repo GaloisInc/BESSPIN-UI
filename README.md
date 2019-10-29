@@ -57,11 +57,16 @@ features of the configurator are:
    system and to change the set of features selected, click on
    "Overview" in the sidebar and select the model to configure.
 
+### Note on UI
+
+The UI has it's own [README.md](./client/README.md) that details it's structure
+
 ## Requirements
 
 - `python3`
 - `pip3`
 - `flask`, restful APIs framework:
+- `nodejs`
 ```
 pip3 install flask
 ```
@@ -103,18 +108,15 @@ docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAM
 
 ### Running in Docker
 
-There is an included `Dockerfile` for spinning up a containerized instance:
+There is an included `docker-compose` for spinning up a containerized instance of the server and UI:
 
 ```
-$ docker run -it --rm -p3784:3784 --name besspin-ui galois:besspin-ui
+$ docker-compose up
 ```
-
-*NOTE:* you need to run with the host `0.0.0.0` in order for Docker to be
-able to expose the service externally.
 
 #### ENV vars
 
-There are a few environment variables that can be set to configure how it runs:
+There are a few environment variables that can be set to configure how the server runs:
 
  * PORT: the port to expose (this should map to the first port mentioned in the `-p` argument to docker)
  * HOST: the host to run flask on (defaults to `0.0.0.0` so you can access the server within docker)
