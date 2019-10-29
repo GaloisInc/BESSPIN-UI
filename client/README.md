@@ -44,7 +44,7 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 ### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+**Note: this is a one-way operation. Once you `eject`, you can’t go back! (this is not likely something you will need, but is mentioned for completeness)**
 
 If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
@@ -90,7 +90,6 @@ This is simply a unique identifirer for an action which will trigger some change
 You then define an [action-creator](https://redux.js.org/basics/actions#action-creators) like:
 
 ```javascript
-export const isLoading = (isLoading=false) => {
 export const fetchSystemsSuccess = (systems: ISystemEntry[]) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
