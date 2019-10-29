@@ -1,17 +1,18 @@
 variables:
-  BLABLA: blablabla
+  GITLAB_PERSO_ACCESS_TOKEN_NAME: "VM-UI-TokenTil2020"
+  GITLAB_PERSO_ACCESS_TOKEN_PATH: "/home/gitlab-runner/.gitlabcredentials/PERSO_ACCESS_TOKEN.txt"
 
 before_script:
   - docker info
 
 build_image:
   script:
-    - docker build -t besspin-ui-docker-image .
+    - docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
   tags:
     - "besspin-ui-tag"
 
 test:
   script:
-    - docker run besspin-ui-docker-image nosetests /besspin-ui/test_server.py
+    - docker run besspin-ui:latest nosetests /besspin-ui/test_server.py
   tags:
     - "besspin-ui-tag"
