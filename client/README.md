@@ -91,9 +91,12 @@ You then define an [action-creator](https://redux.js.org/basics/actions#action-c
 
 ```javascript
 export const isLoading = (isLoading=false) => {
+export const fetchSystemsSuccess = (systems: ISystemEntry[]) => {
     return {
-        type: IS_LOADING,
-        data: isLoading,
+        type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
+        data: {
+            systems,
+        },
     } as const;
 };
 ```
@@ -114,10 +117,10 @@ If there is actual change to the state, you then need to add code in your [reduc
 ```typescript
 export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
     switch (action.type) {
-        case IS_LOADING:
+        case SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS:
             return {
                 ...state,
-                isLoading: action.data,
+                systems: action.data.systems,
             };
         default:
             return state;
@@ -130,9 +133,11 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
 Rather than directly acccessing data within state, this project has been set up to use [Reselect](https://github.com/reduxjs/reselect) for creating "selectors" for accessing deeper properties within your state. Basically, these are memoized functions which allow for specifying upstream dependencies on your data.
 
 ```javascript
-const export getIsLoading = createSelector(
-    [getUiState],
-    (uiState) => uiState.isLoading,
+export const getSystem = (state: IState) => state.system;
+
+export const getSystems = createSelector(
+    [getSystem],
+    (system) => system.systems,
 );
 ```
 
@@ -170,9 +175,10 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
-<style>
-  .code.highlight {
-    background-color: black;
-    color: white;
-  }
-</style>
+## Additional reading for this project
+
+In addition to [React](https://reactjs.org/), this project leverages the following technologies:
+ - [Redux](https://redux.js.org/) - State management (also see [react-redux](https://react-redux.js.org/) for information specific to its usage in [React](https://reactjs.org/))
+ - [Sagas](https://redux-saga.js.org/) - Coordination of multi-step asynchronous actions within [Redux](https://redux.js.org/)
+ - [react-bootstrap](https://react-bootstrap.github.io/) - [React](https://reactjs.org/) implementations of [Bootstrap](https://getbootstrap.com/) components
+ - [D3](https://d3js.org/) - visualization library
