@@ -4,6 +4,10 @@ import { MemoryRouter } from 'react-router';
 
 import { Overview } from './Overview';
 
+const genDate = (): string => {
+    return new Date(Date.now()).toISOString();
+};
+
 describe('Overview', () => {
 
   it('renders without crashing', () => {
@@ -20,15 +24,15 @@ describe('Overview', () => {
     const systems = [
       {
         hash: 'TEST-HASH-1',
-        createdAt: Date.now().toLocaleString(),
-        lastUpdate: Date.now().toLocaleString(),
+        createdAt: genDate(),
+        lastUpdate: genDate(),
         filename: 'TEST-FILE.fm.json',
         featureCount: 5,
       },
       {
         hash: 'TEST-HASH-2',
-        createdAt: Date.now().toLocaleString(),
-        lastUpdate: Date.now().toLocaleString(),
+        createdAt: genDate(),
+        lastUpdate: genDate(),
         filename: 'TEST-FILE2.fm.json',
         featureCount: 4,
       },
