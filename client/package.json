@@ -59,6 +59,19 @@
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.1"
   },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!/node_modules/",
+      "!WE-EXCLUDE-THE-BELOW-BECAUSE-THEY-ARE-MEANINGLESS/DIFFICULT-TO-TEST",
+      "!src/index.tsx",
+      "!src/serviceWorker.ts",
+      "!src/state/index.ts",
+      "!src/state/sagas.ts",
+      "!src/pages/App.tsx",
+      "!src/react-app-env.d.ts"
+    ]
+  },
   "_NOTE": "the below is set to 'server' which is in the docker-compose.yaml",
   "proxy": "http://server:3784/"
 }

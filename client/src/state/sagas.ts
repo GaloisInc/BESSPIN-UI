@@ -7,7 +7,7 @@ import {
 import {
     fetchConfigurators,
     submitConfigurator,
-} from '../api';
+} from '../api/api';
 
 import {
     mapConfiguratorsToSystems,

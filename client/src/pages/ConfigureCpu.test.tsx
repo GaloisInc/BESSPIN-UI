@@ -4,13 +4,17 @@ import { mount } from 'enzyme';
 
 import { ConfigureCpu } from './ConfigureCpu';
 
+const genDate = (): string => {
+    return new Date(Date.now()).toISOString();
+};
+
 describe('ConfigureCpu', () => {
 
     it('renders without crashing', () => {
         const testSystem = {
             hash: 'TEST-HASH',
-            createdAt: Date.now().toLocaleString(),
-            lastUpdate: Date.now().toLocaleString(),
+            createdAt: genDate(),
+            lastUpdate: genDate(),
             featureCount: 42,
             filename: 'TEST.fm.json',
         };
