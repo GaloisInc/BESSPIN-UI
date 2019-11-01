@@ -28,10 +28,16 @@ services:
       dockerfile: Dockerfile
     restart: always
     networks:
+      - proxy-layer
       - internal-service-layer
     volumes: # this is also only for development
       - '~/.local/share/besspin:/root/.local/share/besspin'
+      - '~/.local/bin:/root/.local/bin'
+    ports:
+      - '3784:3784'
     environment:
+      XDG_BASE_DATA: /root/.local/share
+      BESSPIN_CLAFER: /root/.local/bin
       HOST: 0.0.0.0
       PORT: 3784
 
