@@ -20,7 +20,7 @@ export const App: React.FC = () => {
             <Router>
                 <Switch>
                     <Route path='/dashboard' component={ ConnectedDashboard } />
-                    <Route path='/configure-cpu/:systemHash?' component={ ConnectedConfigureCpu } />
+                    <Route path='/configure-cpu/:systemUid?' component={ ConnectedConfigureCpu } />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>
             </Router>
