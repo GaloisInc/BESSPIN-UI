@@ -1,30 +1,43 @@
 import { createSelector } from 'reselect';
+import { IFeatureModel } from '../components/graph-helper';
 
 export interface ISystemEntry {
-    hash: string;
+    configs?: string; // base64-encoded JSON string
+    conftree?: IFeatureModel;
     createdAt: string;
-    lastUpdate: string;
     featureCount: number;
     filename: string;
+    lastUpdate: string;
+    source?: string; // base64-encoded JSON string
+    uid: string;
+}
+
+export interface ISystemMap {
+    [uid: string]: ISystemEntry
 }
 
 export interface ISystemState {
-    systems: ISystemEntry[];
+    systems: ISystemMap;
 }
 
 export const DEFAULT_STATE: ISystemState = {
-    systems: [{
-        hash: 'TEST-HASH-123892347ADFECB',
-        createdAt: Date.now().toString(),
-        lastUpdate: Date.now().toString(),
-        featureCount: 5,
-        filename: 'foo.fm.json',
-    }],
+    systems: {
+        'TEST-HASH-123892347ADFECB' : {
+            uid: 'TEST-HASH-123892347ADFECB',
+            createdAt: Date.now().toString(),
+            lastUpdate: Date.now().toString(),
+            featureCount: 5,
+            filename: 'foo.fm.json',
+        },
+    },
 };
 
 // Actions
 
 export enum SystemActionTypes {
+    FETCH_TEST_SYSTEM = 'system/fetch-one',
+    FETCH_TEST_SYSTEM_FAILURE = 'system/fetch-one/failure',
+    FETCH_TEST_SYSTEM_SUCCESS = 'system/fetch-one/success',
     FETCH_TEST_SYSTEMS = 'system/fetch',
     FETCH_TEST_SYSTEMS_FAILURE = 'system/fetch/failure',
     FETCH_TEST_SYSTEMS_SUCCESS = 'system/fetch/success',
@@ -32,6 +45,33 @@ export enum SystemActionTypes {
     SUBMIT_TEST_SYSTEMS_FAILURE = 'system/submit/failure',
     SUBMIT_TEST_SYSTEMS_SUCCESS = 'system/submit/success',
 }
+
+export const fetchSystem = (systemUid: string) => {
+    return {
+        type: SystemActionTypes.FETCH_TEST_SYSTEM,
+        data: {
+            systemUid,
+        },
+    } as const;
+};
+
+export const fetchSystemFailure = (errors: string[]) => {
+    return {
+        type: SystemActionTypes.FETCH_TEST_SYSTEM_FAILURE,
+        data: {
+            errors,
+        },
+    } as const;
+};
+
+export const fetchSystemSuccess = (system: ISystemEntry) => {
+    return {
+        type: SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS,
+        data: {
+            system,
+        },
+    } as const;
+};
 
 export const fetchSystems = () => {
     return {
@@ -48,7 +88,7 @@ export const fetchSystemsFailure = (errors: string[]) => {
     } as const;
 };
 
-export const fetchSystemsSuccess = (systems: ISystemEntry[]) => {
+export const fetchSystemsSuccess = (systems: ISystemMap) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
         data: {
@@ -76,13 +116,19 @@ export const submitSystemFailure = (errors: string[]) => {
     } as const;
 };
 
-export const submitSystemSuccess = () => {
+export const submitSystemSuccess = (system: ISystemEntry) => {
     return {
         type: SystemActionTypes.SUBMIT_TEST_SYSTEMS_SUCCESS,
+        data: {
+            system,
+        }
     } as const;
 };
 
 export type ISystemAction = ReturnType<
+    typeof fetchSystem |
+    typeof fetchSystemSuccess |
+    typeof fetchSystemFailure |
     typeof fetchSystems |
     typeof fetchSystemsSuccess |
     typeof fetchSystemsFailure |
@@ -99,6 +145,15 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
             return {
                 ...state,
                 systems: action.data.systems,
+            };
+        case SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS:
+        case SystemActionTypes.SUBMIT_TEST_SYSTEMS_SUCCESS:
+            return {
+                ...state,
+                systems: {
+                    ...state.systems,
+                    [action.data.system.uid]: action.data.system,
+                },
             };
         default:
             return state;
