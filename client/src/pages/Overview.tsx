@@ -57,7 +57,7 @@ export const Overview: React.FC<IOverviewProps> = ({ dataRequested, dispatch, is
             <tbody>
                 { systems && systems.map((s, i) => (
                     <tr className='system-row' key={ `system-${i}`}>
-                        <td>{ s.hash }</td>
+                        <td>{ s.uid }</td>
                         <td>{ s.createdAt }</td>
                         <td>{ s.lastUpdate }</td>
                         <td>{ s.featureCount }</td>
@@ -73,7 +73,7 @@ const mapStateToProps = (state: IState): Partial<IOverviewProps> => {
   return {
     dataRequested: getDataRequested(state),
     isLoading: getIsLoading(state),
-    systems: getSystems(state),
+    systems: Object.values(getSystems(state)),
   };
 };
 
