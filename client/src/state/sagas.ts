@@ -5,15 +5,20 @@ import {
 } from 'redux-saga/effects';
 
 import {
+    fetchConfigurator,
     fetchConfigurators,
     submitConfigurator,
 } from '../api/api';
 
 import {
+    mapConfiguratorToSystem,
     mapConfiguratorsToSystems,
 } from '../api/mappings';
 
 import {
+    fetchSystem as fetchSystemAction,
+    fetchSystemFailure,
+    fetchSystemSuccess,
     fetchSystemsFailure,
     fetchSystemsSuccess,
     submitSystemFailure,
@@ -21,6 +26,17 @@ import {
     SystemActionTypes,
     submitSystem as submitSystemAction,
 } from './system';
+
+function* fetchSystem(action: ReturnType<typeof fetchSystemAction>) {
+    try {
+        const configurator = yield call(fetchConfigurator, action.data.systemUid);
+        const mappedConfigurator = mapConfiguratorToSystem(configurator);
+        yield put(fetchSystemSuccess(mappedConfigurator));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchSystemFailure(e.message));
+    }
+}
 
 function* fetchSystems() {
     try {
@@ -35,9 +51,10 @@ function* fetchSystems() {
 
 function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
     try {
-        const response = yield call(submitConfigurator, action.data.systemName, action.data.systemJsonString);
-        console.log(response);
-        yield put(submitSystemSuccess());
+        const configurator = yield call(submitConfigurator, action.data.systemName, action.data.systemJsonString);
+        console.log(configurator);
+        const mappedConfigurator = mapConfiguratorToSystem(configurator);
+        yield put(submitSystemSuccess(mappedConfigurator));
 
         yield call(fetchSystems);
     } catch (e) {
@@ -50,4 +67,5 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
 export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_TEST_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEMS, fetchSystems);
+    yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
 };
