@@ -3,30 +3,29 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import '../style/Graph.scss';
 
 import {
-    graphSimple,
-    ITreeNode
+    graphFeatureModel,
+    IFeatureModel
 } from './graph-helper';
 
 export interface IGraphProps {
-    data?: ITreeNode;
+    data?: IFeatureModel;
 }
 
 export const Graph: React.FC<IGraphProps> = ({ data: treeData }) => {
 
-    const d3Container = useRef(null) as RefObject<SVGSVGElement>;
+    const visContainer = useRef(null) as RefObject<HTMLDivElement>;
 
     useEffect(() => {
-        const ref = d3Container ? d3Container.current : null;
+        const ref = visContainer ? visContainer.current : null;
 
         if (!(treeData && ref)) return;
 
-        graphSimple(ref, treeData);
-    }, [treeData, d3Container]);
+        graphFeatureModel(ref, treeData);
+    }, [treeData, visContainer]);
 
     return (
-        <svg
+        <div
             className='Graph'
-            height='500'
-            ref={ d3Container } />
+            ref={ visContainer } />
     );
 };
