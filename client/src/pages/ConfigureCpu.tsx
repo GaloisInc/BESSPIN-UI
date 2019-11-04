@@ -60,7 +60,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({ onConfiguratorSubmi
         } else if (system && system.conftree) {
             setConfiguratorModel(system.conftree);
         }
-    }, [systemUid, system]);
+    }, [systemUid, fetchSystem, system]);
 
     const modelInputCallback = useCallback(() => {
         // @ts-ignore - typescript does not like the ref, so I gave up and just ignore this line
