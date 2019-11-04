@@ -1,4 +1,3 @@
-
 import {
     DataSet,
     Network,
@@ -48,61 +47,75 @@ interface IVisEdge {
     color: string;
 }
 
+interface IVisSelection {
+    state: SelectionState;
+    validated: boolean;
+}
+
+interface ISelectionMap {
+    [id: string]: IVisSelection;
+}
+
 interface IVisTree {
     nodes: DataSet<IVisNode>;
     edges: DataSet<IVisEdge>;
-    topnodecard: string;
+    selections: ISelectionMap;
 }
+
+enum SelectionState {
+    unselected,
+    selected,
+    rejected,
+}
+
+enum SelectionColors {
+    on = '#ddffdd', // green
+    off = '#ffdddd', // red
+    opt = '#ffffff', // white
+    validSelected = '#99ff99',  // green
+    invalidSelected = '#00dd00', // green
+    validRejected = '#ff9999', // red
+    invalidRejected = '#dd0000', // red
+}
+
+interface ISelectedNode {
+    model: IFeature;
+    state: SelectionState;
+    validated: boolean;
+}
+
+interface ISelectedNodeMap {
+    [id: string]: ISelectedNode;
+}
+
+const SELECTABLE_CARD = 'opt';
+
+const getColor = (card: string): SelectionColors => {
+
+        switch (card) {
+            case 'on':
+                return SelectionColors.on;
+            case 'off': 
+                return SelectionColors.off;
+            case 'opt': 
+                return SelectionColors.opt;
+            default:
+                console.error(`Invalid card"${card}" encountered when trying to set color`);
+                return SelectionColors.opt;
+        }
+};
 
 const mapModelToTree = (featureModel: IFeatureModel): IVisTree => {
 
     const featureIds = Object.keys(featureModel.features);
-    console.log(featureIds);
 
     return featureIds.reduce((acc: IVisTree, featureId: string): IVisTree => {
-        console.log(featureId);
         const feature = featureModel.features[featureId];
 
         if (!feature) return acc;
 
         const card = feature.card;
-        let color = '';
-
-        switch (card) {
-            case 'on':
-                color = '#ddffdd'; // green
-                break;
-            case 'off': 
-                color = '#ffdddd'; // red
-                break;
-            case 'opt': 
-                color = '#ffffff'; // white
-                break;
-        }
-
-        /**
-        TODO: global state...
-        if (global_selected_nodes.mem(feature)) {
-            switch (global_selected_nodes.get_mode(feature)) {
-            case 'selected': {
-                if (global_selected_nodes.get_validated(feature))
-                    color = '#99ff99';
-                else
-                    color = '#00dd00';
-                card = "on";
-                break;
-            };
-            case 'rejected': {
-                if (global_selected_nodes.get_validated(feature))
-                    color = '#ff9999';
-                else
-                    color = '#dd0000';
-                card = "off";
-                break;
-            };
-            };
-        }
-        */
+        const color = getColor(card); 
 
         acc.nodes.add({
             id: featureId,
@@ -118,19 +131,23 @@ const mapModelToTree = (featureModel: IFeatureModel): IVisTree => {
                 from: featureId,
                 to: childId,
                 dashes: false,
-                color: '#ffffff',
+                color: '#dddddd', // light grey
             };
         });
 
-        console.log(edges);
         acc.edges.add(edges);
 
-        return {
-            ...acc,
-            topnodecard: card,
-        };
-    }, { nodes: new DataSet([]), edges: new DataSet([]), topnodecard: '' });
-}
+        // TODO: this should be managed in Redux
+        if (card === SELECTABLE_CARD) {
+            acc.selections[featureId] = {
+                state: SelectionState.unselected,
+                validated: false,
+            };
+        }
+
+        return acc;
+    }, { nodes: new DataSet([]), edges: new DataSet([]), selections: {} });
+};
 
 export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatureModel) => {
     const options = {
@@ -153,6 +170,34 @@ export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatur
     };
 
     const data = mapModelToTree(featureModel);
-    console.log(data);
-    const _network = new Network(domNode, data, options);
+    const network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
+
+    network.on('click', (params) => {
+        const nodeId = network.getNodeAt(params.pointer.DOM);
+
+        if (nodeId == null) return; // short-circuit for non-selection click
+
+        const selectedNode = data.selections[nodeId];
+
+        if (selectedNode) {
+            switch (selectedNode.state) {
+                case SelectionState.unselected:
+                    selectedNode.state = SelectionState.selected;
+                    selectedNode.validated = false;
+                    data.nodes.update({ id: nodeId, color: SelectionColors.on });
+                    return;
+                case SelectionState.selected:
+                    selectedNode.state = SelectionState.rejected;
+                    selectedNode.validated = false;
+                    data.nodes.update({ id: nodeId, color: SelectionColors.invalidRejected });
+                    return;
+                case SelectionState.rejected:
+                    selectedNode.state = SelectionState.unselected;
+                    data.nodes.update({ id: nodeId, color: SelectionColors.opt });
+                    return;
+                default:
+                    console.error(`Unknown selection state (${selectedNode.state})`);
+            }
+        }
+    });
 };
