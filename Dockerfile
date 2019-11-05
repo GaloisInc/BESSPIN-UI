@@ -36,4 +36,4 @@ ENV PORT 3784
 EXPOSE 3784
 
 ENV BESSPIN_CLAFER /root/.local/bin/clafer
-CMD ["python3", "server_flask.py"]
+CMD ["python3", "server/server_flask.py"]

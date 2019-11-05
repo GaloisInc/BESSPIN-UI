@@ -13,14 +13,14 @@ from flask import (
     render_template,
 )
 from flask.logging import default_handler
-from database import (
+from lib.database import (
     list_models_from_db,
     insert_feature_model_db,
     update_configs_db,
     retrieve_feature_models_db,
     retrieve_model_from_db_by_uid
 )
-from configurator_shim import (
+from lib.configurator_shim import (
     convert_model_to_json,
     selected_features_to_constraints,
     combine_featmodel_cfgs,
