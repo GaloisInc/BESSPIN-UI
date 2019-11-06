@@ -12,7 +12,7 @@ const genDate = (): string => {
 };
 
 const DEFAULT_SYSTEM: ISystemEntry = {
-    hash: 'TEST-HASH',
+    uid: 'TEST-HASH',
     createdAt: genDate(),
     lastUpdate: genDate(),
     filename: 'TEST.fm.json',
@@ -21,7 +21,7 @@ const DEFAULT_SYSTEM: ISystemEntry = {
 
 const DEFAULT_STATE = {
     system: {
-        systems: [],
+        systems: {},
     },
 };
 
@@ -70,9 +70,9 @@ describe('systems', () => {
 
             it('should generate an action with empty systems data', () => {
 
-                expect(fetchSystemsSuccess([])).toEqual({
+                expect(fetchSystemsSuccess({})).toEqual({
                     data: {
-                        systems: [],
+                        systems: {},
                     },
                     type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
                 });
@@ -81,9 +81,11 @@ describe('systems', () => {
             it('should generate an action with systems data', () => {
                 const testSystem = generateTestSystem();
 
-                expect(fetchSystemsSuccess([testSystem])).toEqual({
+                expect(fetchSystemsSuccess({ [testSystem.uid]: testSystem })).toEqual({
                     data: {
-                        systems: [testSystem],
+                        systems: {
+                            [testSystem.uid]: testSystem,
+                        },
                     },
                     type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
                 });
@@ -96,9 +98,12 @@ describe('systems', () => {
     });
 
     describe('selectors', () => {
+        const TEST_UID = 'TEST-UID';
         const testState = generateTestState({
             system: {
-                systems: [generateTestSystem()],
+                systems: {
+                    [TEST_UID]: generateTestSystem({ uid: TEST_UID }),
+                },
             },
         }) ;
 

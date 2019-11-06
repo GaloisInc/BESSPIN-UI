@@ -18,7 +18,12 @@ export const Graph: React.FC<IGraphProps> = ({ data: treeData }) => {
     useEffect(() => {
         const ref = visContainer ? visContainer.current : null;
 
-        if (!(treeData && ref)) return;
+        if (!ref) return;
+        if (!treeData) return;
+
+        const hasDataToRender = treeData && treeData.features && Object.keys(treeData.features).length > 0;
+
+        if (!hasDataToRender) return;
 
         graphFeatureModel(ref, treeData);
     }, [treeData, visContainer]);
