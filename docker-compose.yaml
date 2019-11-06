@@ -26,6 +26,9 @@ services:
     build: # this is only for development, we should use when we are ready for production
       context: .
       dockerfile: Dockerfile
+      args:
+        - TOKEN_NAME
+        - PRIVATE_TOKEN
     restart: always
     networks:
       - proxy-layer
