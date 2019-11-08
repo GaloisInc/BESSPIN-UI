@@ -16,8 +16,16 @@ export interface ISystemMap {
     [uid: string]: ISystemEntry
 }
 
+export interface ISelectionType {
+    uid: string,
+    mode: string,
+    other: string,
+    isValid: boolean,
+}
+
 export interface ISystemState {
     systems: ISystemMap;
+    selections: ISelectionType[],
 }
 
 export const DEFAULT_STATE: ISystemState = {
@@ -30,6 +38,7 @@ export const DEFAULT_STATE: ISystemState = {
             filename: 'foo.fm.json',
         },
     },
+    selections: [],
 };
 
 // Actions
@@ -44,6 +53,8 @@ export enum SystemActionTypes {
     SUBMIT_TEST_SYSTEM = 'system/submit',
     SUBMIT_TEST_SYSTEMS_FAILURE = 'system/submit/failure',
     SUBMIT_TEST_SYSTEMS_SUCCESS = 'system/submit/success',
+
+    SELECT_FEATURE = 'system/select/feature',
 }
 
 export const fetchSystem = (systemUid: string) => {
@@ -125,6 +136,15 @@ export const submitSystemSuccess = (system: ISystemEntry) => {
     } as const;
 };
 
+export const selectFeature = (uid: string, mode:string, other: string, isValid: boolean) => {
+    return {
+        type: SystemActionTypes.SELECT_FEATURE,
+        data: {
+            uid, mode, other, isValid
+        }
+    } as const;
+};
+
 export type ISystemAction = ReturnType<
     typeof fetchSystem |
     typeof fetchSystemSuccess |
@@ -134,7 +154,8 @@ export type ISystemAction = ReturnType<
     typeof fetchSystemsFailure |
     typeof submitSystem |
     typeof submitSystemSuccess |
-    typeof submitSystemFailure
+    typeof submitSystemFailure |
+    typeof selectFeature
 >;
 
 // Reducers
@@ -155,6 +176,11 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
                     [action.data.system.uid]: action.data.system,
                 },
             };
+        case SystemActionTypes.SELECT_FEATURE:
+            return {
+                ...state,
+                selections: state.selections.concat(action.data),
+            };
         default:
             return state;
     }
@@ -171,4 +197,9 @@ export const getSystem = (state: IState) => state.system;
 export const getSystems = createSelector(
     [getSystem],
     (system) => system.systems,
+);
+
+export const getSelections = createSelector(
+    [getSystem],
+    (system) => system.selections,
 );

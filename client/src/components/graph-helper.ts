@@ -3,6 +3,10 @@ import {
     Network,
 } from 'vis-network';
 
+import {
+    selectFeatureCallback,
+} from '../pages/ConfigureCpu';
+
 export interface IFeature {
     gcard: string;
     card: string;
@@ -95,9 +99,9 @@ const getColor = (card: string): SelectionColors => {
         switch (card) {
             case 'on':
                 return SelectionColors.on;
-            case 'off': 
+            case 'off':
                 return SelectionColors.off;
-            case 'opt': 
+            case 'opt':
                 return SelectionColors.opt;
             default:
                 console.error(`Invalid card"${card}" encountered when trying to set color`);
@@ -115,7 +119,7 @@ const mapModelToTree = (featureModel: IFeatureModel): IVisTree => {
         if (!feature) return acc;
 
         const card = feature.card;
-        const color = getColor(card); 
+        const color = getColor(card);
 
         acc.nodes.add({
             id: featureId,
@@ -149,7 +153,7 @@ const mapModelToTree = (featureModel: IFeatureModel): IVisTree => {
     }, { nodes: new DataSet([]), edges: new DataSet([]), selections: {} });
 };
 
-export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatureModel) => {
+export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatureModel, selectFeatureCallback: selectFeatureCallback) => {
     const options = {
         layout: {
             hierarchical: {
@@ -173,7 +177,7 @@ export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatur
     const network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
 
     network.on('click', (params) => {
-        const nodeId = network.getNodeAt(params.pointer.DOM);
+        const nodeId = network.getNodeAt(params.pointer.DOM) as string;
 
         if (nodeId == null) return; // short-circuit for non-selection click
 
@@ -185,6 +189,7 @@ export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatur
                     selectedNode.state = SelectionState.selected;
                     selectedNode.validated = false;
                     data.nodes.update({ id: nodeId, color: SelectionColors.on });
+                    selectFeatureCallback(nodeId, 'selected', nodeId, false);
                     return;
                 case SelectionState.selected:
                     selectedNode.state = SelectionState.rejected;

@@ -7,11 +7,18 @@ import {
     IFeatureModel
 } from './graph-helper';
 
+import {
+    selectFeatureCallback,
+} from '../pages/ConfigureCpu';
+
+
 export interface IGraphProps {
     data?: IFeatureModel;
+    selectFeatureCallback: selectFeatureCallback;
 }
 
-export const Graph: React.FC<IGraphProps> = ({ data: treeData }) => {
+
+export const Graph: React.FC<IGraphProps> = ({ data: treeData, selectFeatureCallback }) => {
 
     const visContainer = useRef(null) as RefObject<HTMLDivElement>;
 
@@ -25,8 +32,8 @@ export const Graph: React.FC<IGraphProps> = ({ data: treeData }) => {
 
         if (!hasDataToRender) return;
 
-        graphFeatureModel(ref, treeData);
-    }, [treeData, visContainer]);
+        graphFeatureModel(ref, treeData, selectFeatureCallback);
+    }, [treeData, visContainer, selectFeatureCallback]);
 
     return (
         <div

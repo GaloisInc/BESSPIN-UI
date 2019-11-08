@@ -15,9 +15,12 @@ import { getDataRequested } from '../state/ui';
 
 import {
     ISystemEntry,
+    ISelectionType,
     getSystems,
+    getSelections,
     submitSystem,
     fetchSystem,
+    selectFeature,
 } from '../state/system';
 
 import { Header } from '../components/Header';
@@ -29,13 +32,16 @@ import '../style/ConfigureCpu.scss';
 
 type onSubmitConfiguratorCallback = (name: string, json: string) => void;
 type fetchSystemCallback = (uid: string) => void;
+export type selectFeatureCallback = (uid: string, mode:string, other: string, isValid: boolean) => void;
 
 export interface IConfigureCpuProps {
     dataRequested: boolean;
     onConfiguratorSubmit: onSubmitConfiguratorCallback;
     fetchSystem: fetchSystemCallback;
     system?: ISystemEntry;
+    selections?: ISelectionType[];
     systemUid: string;
+    selectFeature: selectFeatureCallback;
 }
 
 const DEFAULT_FEATURE_MODEL: IFeatureModel = {
@@ -45,7 +51,13 @@ const DEFAULT_FEATURE_MODEL: IFeatureModel = {
     version: { base: 1 },
 };
 
-export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({ onConfiguratorSubmit, fetchSystem, system, systemUid }) => {
+export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
+    onConfiguratorSubmit,
+    fetchSystem,
+    system,
+    selections,
+    systemUid,
+    selectFeature }) => {
 
     // NOTE: I prefer functional components and use React Hooks to manage form
     //       state. However, this makes testing interactions that use state
@@ -116,7 +128,10 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({ onConfiguratorSubmi
                     </Col>
                 </Form.Row>
             </Form>
-            <Graph data={ configuratorModel } />
+            <Graph
+                data={ configuratorModel }
+                selectFeatureCallback={ selectFeature }
+            />
         </Container>
     );
 }
@@ -132,12 +147,14 @@ interface IConfigureCpuMapProps extends IConfigureCpuProps {
 const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigureCpuProps => {
     const systemUid = props.match.params.systemUid || '';
     const systems = getSystems(state);
+    const selections = getSelections(state);
     const dataRequested = getDataRequested(state);
     return {
         ...props,
         dataRequested,
         systemUid,
         system: systems[systemUid],
+        selections,
     };
 };
 
@@ -145,6 +162,9 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
     return {
         onConfiguratorSubmit: (name: string, json: string) => dispatch(submitSystem(name, json)),
         fetchSystem: (uid: string) => dispatch(fetchSystem(uid)),
+        selectFeature: (uid: string, mode:string, other: string, isValid: boolean) => {
+            dispatch(selectFeature(uid, mode, other, isValid))
+        },
     };
 };
 
