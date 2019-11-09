@@ -29,6 +29,10 @@ export interface ISelectionType {
     isValid: boolean,
 }
 
+export interface ISelectionMap {
+    [id: string]: ISelectionType;
+}
+
 export interface ISystemState {
     systems: ISystemMap;
     selections: ISelectionType[],
@@ -200,4 +204,15 @@ export const getSystems = createSelector(
 export const getSelections = createSelector(
     [getSystem],
     (system) => system.selections,
+);
+
+export const getCurrentSelections = createSelector(
+    [getSelections],
+    (selections) => {
+        return selections.reduce<ISelectionMap>((acc, selection) => {
+            if (acc[selection.uid]) return acc;
+            acc[selection.uid] = selection;
+            return acc;
+        }, {});
+    },
 );

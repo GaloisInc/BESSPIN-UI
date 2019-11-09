@@ -3,6 +3,7 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import '../style/Graph.scss';
 
 import {
+    ISelectionMap,
     selectFeature,
 } from '../state/system';
 
@@ -14,12 +15,14 @@ import {
 export interface IGraphProps {
     data?: IFeatureModel;
     selectFeature: typeof selectFeature;
+    currentSelections: ISelectionMap;
 }
 
 
 export const Graph: React.FC<IGraphProps> = ({
     data: treeData,
     selectFeature,
+    currentSelections,
 }) => {
 
     const visContainer = useRef(null) as RefObject<HTMLDivElement>;

@@ -4,6 +4,7 @@ import {
 } from 'vis-network';
 
 import {
+    ISelectionMap,
     SelectionMode,
     selectFeature as selectFeatureCallback,
 } from '../state/system';
@@ -52,25 +53,9 @@ interface IVisEdge {
     color: string;
 }
 
-interface IVisSelection {
-    state: SelectionState;
-    validated: boolean;
-}
-
-interface ISelectionMap {
-    [id: string]: IVisSelection;
-}
-
 interface IVisTree {
     nodes: DataSet<IVisNode>;
     edges: DataSet<IVisEdge>;
-    selections: ISelectionMap;
-}
-
-enum SelectionState {
-    unselected,
-    selected,
-    rejected,
 }
 
 enum SelectionColors {
@@ -81,16 +66,6 @@ enum SelectionColors {
     invalidSelected = '#00dd00', // green
     validRejected = '#ff9999', // red
     invalidRejected = '#dd0000', // red
-}
-
-interface ISelectedNode {
-    model: IFeature;
-    state: SelectionState;
-    validated: boolean;
-}
-
-interface ISelectedNodeMap {
-    [id: string]: ISelectedNode;
 }
 
 const SELECTABLE_CARD = 'opt';
@@ -110,7 +85,7 @@ const getColor = (card: string): SelectionColors => {
         }
 };
 
-const mapModelToTree = (featureModel: IFeatureModel): IVisTree => {
+const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap): IVisTree => {
 
     const featureIds = Object.keys(featureModel.features);
 
@@ -142,22 +117,22 @@ const mapModelToTree = (featureModel: IFeatureModel): IVisTree => {
 
         acc.edges.add(edges);
 
-        // TODO: this should be managed in Redux
-        if (card === SELECTABLE_CARD) {
-            acc.selections[featureId] = {
-                state: SelectionState.unselected,
-                validated: false,
-            };
-        }
-
         return acc;
-    }, { nodes: new DataSet([]), edges: new DataSet([]), selections: {} });
+    }, { nodes: new DataSet([]), edges: new DataSet([]) });
 };
+
+// We need to ensure that redraws don't cause the graph
+// to recenter/resize on any state change (particularly selections)
+// To do that, we ensure that the network is only created once by
+// caching it via closure.
+let network: Network;
+let data: IVisTree
 
 export const graphFeatureModel = (
     domNode: HTMLDivElement,
     featureModel: IFeatureModel,
     selectFeature: typeof selectFeatureCallback,
+    currentSelections: ISelectionMap,
 ) => {
 
     const options = {
@@ -179,36 +154,39 @@ export const graphFeatureModel = (
         },
     };
 
-    const data = mapModelToTree(featureModel);
-    const network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
+    if (network) {
+        Object.values(currentSelections).forEach(s => {
+            data.nodes.update({
+                id: s.uid,
+                color: getColor(featureModel.features[s.uid].card, s.mode),
+            });
+        });
+    } else {
+        data = mapModelToTree(featureModel, currentSelections);
+        network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
+    }
 
-    network.on('click', (params) => {
+    network.once('click', (params) => {
         const nodeId = network.getNodeAt(params.pointer.DOM) as string;
 
         if (nodeId == null) return; // short-circuit for non-selection click
 
-        const selectedNode = data.selections[nodeId];
+        const selectedNode = featureModel.features[nodeId];
 
-        if (selectedNode) {
-            switch (selectedNode.state) {
-                case SelectionState.unselected:
-                    selectedNode.state = SelectionState.selected;
-                    selectedNode.validated = false;
-                    data.nodes.update({ id: nodeId, color: SelectionColors.on });
-                    selectFeature(nodeId, 'selected', nodeId, false);
+        if (selectedNode && selectedNode.card === SELECTABLE_CARD) {
+            const mode = currentSelections[nodeId] ? currentSelections[nodeId].mode : SelectionMode.unselected;
+            switch (mode) {
+                case SelectionMode.unselected:
                     selectFeature(nodeId, SelectionMode.selected, nodeId, false);
                     return;
-                case SelectionState.selected:
-                    selectedNode.state = SelectionState.rejected;
-                    selectedNode.validated = false;
-                    data.nodes.update({ id: nodeId, color: SelectionColors.invalidRejected });
+                case SelectionMode.selected:
+                    selectFeature(nodeId, SelectionMode.rejected, nodeId, false);
                     return;
-                case SelectionState.rejected:
-                    selectedNode.state = SelectionState.unselected;
-                    data.nodes.update({ id: nodeId, color: SelectionColors.opt });
+                case SelectionMode.rejected:
+                    selectFeature(nodeId, SelectionMode.unselected, nodeId, false);
                     return;
                 default:
-                    console.error(`Unknown selection state (${selectedNode.state})`);
+                    console.error(`Unknown selection state (${mode})`);
             }
         }
     });

@@ -33,7 +33,7 @@ export interface IConfigureCpuProps {
     submitSystem: typeof submitSystem;
     fetchSystem: typeof fetchSystem;
     system?: ISystemEntry;
-    selections?: ISelectionType[];
+    currentSelections?: ISelectionMap;
     systemUid: string;
     selectFeature: typeof selectFeature;
 }
@@ -49,7 +49,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     submitSystem,
     fetchSystem,
     system,
-    selections,
+    currentSelections,
     systemUid,
     selectFeature,
 }) => {
@@ -126,6 +126,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
             <Graph
                 data={ configuratorModel }
                 selectFeature={ selectFeature }
+                currentSelections={ currentSelections || {} }
             />
         </Container>
     );
@@ -142,7 +143,7 @@ interface IConfigureCpuMapProps extends IConfigureCpuProps {
 const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigureCpuProps => {
     const systemUid = props.match.params.systemUid || '';
     const systems = getSystems(state);
-    const selections = getSelections(state);
+    const currentSelections = getCurrentSelections(state);
     const dataRequested = getDataRequested(state);
 
     return {
@@ -150,7 +151,7 @@ const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigur
         dataRequested,
         systemUid,
         system: systems[systemUid],
-        selections,
+        currentSelections,
     };
 };
 
