@@ -37,8 +37,8 @@ export const Graph: React.FC<IGraphProps> = ({
 
         if (!hasDataToRender) return;
 
-        graphFeatureModel(ref, treeData, selectFeature);
-    }, [treeData, visContainer, selectFeature]);
+        graphFeatureModel(ref, treeData, selectFeature, currentSelections);
+    }, [treeData, visContainer, selectFeature, currentSelections]);
 
     return (
         <div
