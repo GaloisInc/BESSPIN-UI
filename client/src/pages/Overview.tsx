@@ -2,7 +2,9 @@ import React, { useEffect } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux'
 
+import { LinkContainer } from 'react-router-bootstrap';
 import {
+  Button,
   Container,
   Table,
 } from 'react-bootstrap';
@@ -61,6 +63,11 @@ export const Overview: React.FC<IOverviewProps> = ({ dataRequested, dispatch, is
                         <td>{ s.createdAt }</td>
                         <td>{ s.lastUpdate }</td>
                         <td>{ s.featureCount }</td>
+                        <td>
+                          <LinkContainer to={ `/configure-cpu/${s.uid}` }>
+                            <Button>Configure</Button>
+                          </LinkContainer>
+                        </td>
                     </tr>
                 )) }
             </tbody>
