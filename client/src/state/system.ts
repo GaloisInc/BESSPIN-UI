@@ -16,9 +16,15 @@ export interface ISystemMap {
     [uid: string]: ISystemEntry
 }
 
+export enum SelectionMode {
+    selected = 'selected',
+    unselected = 'unselected',
+    rejected = 'rejected',
+}
+
 export interface ISelectionType {
     uid: string,
-    mode: string,
+    mode: SelectionMode,
     other: string,
     isValid: boolean,
 }
@@ -136,7 +142,7 @@ export const submitSystemSuccess = (system: ISystemEntry) => {
     } as const;
 };
 
-export const selectFeature = (uid: string, mode:string, other: string, isValid: boolean) => {
+export const selectFeature = (uid: string, mode: SelectionMode, other: string, isValid: boolean) => {
     return {
         type: SystemActionTypes.SELECT_FEATURE,
         data: {

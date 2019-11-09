@@ -4,6 +4,7 @@ import {
 } from 'vis-network';
 
 import {
+    SelectionMode,
     selectFeature as selectFeatureCallback,
 } from '../state/system';
 
@@ -195,6 +196,7 @@ export const graphFeatureModel = (
                     selectedNode.validated = false;
                     data.nodes.update({ id: nodeId, color: SelectionColors.on });
                     selectFeature(nodeId, 'selected', nodeId, false);
+                    selectFeature(nodeId, SelectionMode.selected, nodeId, false);
                     return;
                 case SelectionState.selected:
                     selectedNode.state = SelectionState.rejected;
