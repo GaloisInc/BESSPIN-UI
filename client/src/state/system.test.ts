@@ -53,7 +53,7 @@ describe('systems', () => {
             });
         });
 
-        describe('fetchSystemsFailed', () => {
+        describe('fetchSystemsFailure', () => {
 
             it('should generate an action with error data', () => {
 
@@ -66,7 +66,7 @@ describe('systems', () => {
             });
         });
 
-        describe('fetchSystemsSucceeded', () => {
+        describe('fetchSystemsSuccess', () => {
 
             it('should generate an action with empty systems data', () => {
 
@@ -108,8 +108,7 @@ describe('systems', () => {
         }) ;
 
         it('should be able to pull systems out of state', () => {
-            
             expect(getSystems(testState)).toEqual(testState.system.systems);
-        })
+        });
     });
 });
