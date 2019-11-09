@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 import { match } from 'react-router-dom';
 
 import {
@@ -30,18 +29,14 @@ import { IFeatureModel } from '../components/graph-helper';
 
 import '../style/ConfigureCpu.scss';
 
-type onSubmitConfiguratorCallback = (name: string, json: string) => void;
-type fetchSystemCallback = (uid: string) => void;
-export type selectFeatureCallback = (uid: string, mode:string, other: string, isValid: boolean) => void;
-
 export interface IConfigureCpuProps {
     dataRequested: boolean;
-    onConfiguratorSubmit: onSubmitConfiguratorCallback;
-    fetchSystem: fetchSystemCallback;
+    submitSystem: typeof submitSystem;
+    fetchSystem: typeof fetchSystem;
     system?: ISystemEntry;
     selections?: ISelectionType[];
     systemUid: string;
-    selectFeature: selectFeatureCallback;
+    selectFeature: typeof selectFeature;
 }
 
 const DEFAULT_FEATURE_MODEL: IFeatureModel = {
@@ -52,12 +47,13 @@ const DEFAULT_FEATURE_MODEL: IFeatureModel = {
 };
 
 export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
-    onConfiguratorSubmit,
+    submitSystem,
     fetchSystem,
     system,
     selections,
     systemUid,
-    selectFeature }) => {
+    selectFeature,
+}) => {
 
     // NOTE: I prefer functional components and use React Hooks to manage form
     //       state. However, this makes testing interactions that use state
@@ -97,9 +93,9 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     const onSubmitHandler = useCallback(() => {
         if (configuratorModel) {
             // TODO: pass model object rather than string
-            onConfiguratorSubmit(modelName, JSON.stringify(configuratorModel));
+            submitSystem(modelName, JSON.stringify(configuratorModel));
         }
-    }, [modelName, configuratorModel, onConfiguratorSubmit]);
+    }, [modelName, configuratorModel, submitSystem]);
 
     return (
         <Container className='ConfigureCpu'>
@@ -130,7 +126,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
             </Form>
             <Graph
                 data={ configuratorModel }
-                selectFeatureCallback={ selectFeature }
+                selectFeature={ selectFeature }
             />
         </Container>
     );
@@ -158,14 +154,10 @@ const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigur
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => {
-    return {
-        onConfiguratorSubmit: (name: string, json: string) => dispatch(submitSystem(name, json)),
-        fetchSystem: (uid: string) => dispatch(fetchSystem(uid)),
-        selectFeature: (uid: string, mode:string, other: string, isValid: boolean) => {
-            dispatch(selectFeature(uid, mode, other, isValid))
-        },
-    };
+const mapDispatchToProps = {
+    submitSystem,
+    fetchSystem,
+    selectFeature,
 };
 
 export const ConnectedConfigureCpu = connect(mapStateToProps, mapDispatchToProps)(ConfigureCpu);

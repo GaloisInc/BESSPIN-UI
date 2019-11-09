@@ -4,8 +4,8 @@ import {
 } from 'vis-network';
 
 import {
-    selectFeatureCallback,
-} from '../pages/ConfigureCpu';
+    selectFeature as selectFeatureCallback,
+} from '../state/system';
 
 export interface IFeature {
     gcard: string;
@@ -153,7 +153,12 @@ const mapModelToTree = (featureModel: IFeatureModel): IVisTree => {
     }, { nodes: new DataSet([]), edges: new DataSet([]), selections: {} });
 };
 
-export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatureModel, selectFeatureCallback: selectFeatureCallback) => {
+export const graphFeatureModel = (
+    domNode: HTMLDivElement,
+    featureModel: IFeatureModel,
+    selectFeature: typeof selectFeatureCallback,
+) => {
+
     const options = {
         layout: {
             hierarchical: {
@@ -189,7 +194,7 @@ export const graphFeatureModel = (domNode: HTMLDivElement, featureModel: IFeatur
                     selectedNode.state = SelectionState.selected;
                     selectedNode.validated = false;
                     data.nodes.update({ id: nodeId, color: SelectionColors.on });
-                    selectFeatureCallback(nodeId, 'selected', nodeId, false);
+                    selectFeature(nodeId, 'selected', nodeId, false);
                     return;
                 case SelectionState.selected:
                     selectedNode.state = SelectionState.rejected;

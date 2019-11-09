@@ -3,22 +3,24 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import '../style/Graph.scss';
 
 import {
+    selectFeature,
+} from '../state/system';
+
+import {
     graphFeatureModel,
     IFeatureModel
 } from './graph-helper';
 
-import {
-    selectFeatureCallback,
-} from '../pages/ConfigureCpu';
-
-
 export interface IGraphProps {
     data?: IFeatureModel;
-    selectFeatureCallback: selectFeatureCallback;
+    selectFeature: typeof selectFeature;
 }
 
 
-export const Graph: React.FC<IGraphProps> = ({ data: treeData, selectFeatureCallback }) => {
+export const Graph: React.FC<IGraphProps> = ({
+    data: treeData,
+    selectFeature,
+}) => {
 
     const visContainer = useRef(null) as RefObject<HTMLDivElement>;
 
@@ -32,8 +34,8 @@ export const Graph: React.FC<IGraphProps> = ({ data: treeData, selectFeatureCall
 
         if (!hasDataToRender) return;
 
-        graphFeatureModel(ref, treeData, selectFeatureCallback);
-    }, [treeData, visContainer, selectFeatureCallback]);
+        graphFeatureModel(ref, treeData, selectFeature);
+    }, [treeData, visContainer, selectFeature]);
 
     return (
         <div
