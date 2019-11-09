@@ -52,11 +52,10 @@ export enum SystemActionTypes {
     FETCH_TEST_SYSTEMS = 'system/fetch',
     FETCH_TEST_SYSTEMS_FAILURE = 'system/fetch/failure',
     FETCH_TEST_SYSTEMS_SUCCESS = 'system/fetch/success',
+    SELECT_FEATURE = 'system/select/feature',
     SUBMIT_TEST_SYSTEM = 'system/submit',
     SUBMIT_TEST_SYSTEMS_FAILURE = 'system/submit/failure',
     SUBMIT_TEST_SYSTEMS_SUCCESS = 'system/submit/success',
-
-    SELECT_FEATURE = 'system/select/feature',
 }
 
 export const fetchSystem = (systemUid: string) => {
@@ -142,8 +141,11 @@ export const selectFeature = (uid: string, mode: SelectionMode, other: string, i
     return {
         type: SystemActionTypes.SELECT_FEATURE,
         data: {
-            uid, mode, other, isValid
-        }
+            uid,
+            mode,
+            other,
+            isValid,
+        },
     } as const;
 };
 
