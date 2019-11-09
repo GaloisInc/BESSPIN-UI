@@ -24,7 +24,6 @@ import {
 
 import { Header } from '../components/Header';
 import { Graph } from '../components/Graph';
-
 import { IFeatureModel } from '../components/graph-helper';
 
 import '../style/ConfigureCpu.scss';
@@ -145,6 +144,7 @@ const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigur
     const systems = getSystems(state);
     const selections = getSelections(state);
     const dataRequested = getDataRequested(state);
+
     return {
         ...props,
         dataRequested,
