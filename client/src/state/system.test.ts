@@ -7,6 +7,7 @@ import {
     ISystemEntry,
     selectFeature,
     SelectionMode,
+    getCurrentSelections,
 } from './system';
 
 const genDate = (): string => {
@@ -124,11 +125,23 @@ describe('systems', () => {
                 systems: {
                     [TEST_UID]: generateTestSystem({ uid: TEST_UID }),
                 },
+                selections: [
+                    { uid: 'TEST-UID-1', mode: SelectionMode.rejected, other: 'TEST-UID-1', isValid: true },
+                    { uid: 'TEST-UID-1', mode: SelectionMode.selected, other: 'TEST-UID-1', isValid: true },
+                    { uid: 'TEST-UID-2', mode: SelectionMode.selected, other: 'TEST-UID-2', isValid: false },
+                ],
             },
         }) ;
 
         it('should be able to pull systems out of state', () => {
             expect(getSystems(testState)).toEqual(testState.system.systems);
+        });
+
+        it('should be able to pull current selections', () => {
+            expect(getCurrentSelections(testState)).toEqual({
+                'TEST-UID-1': { uid: 'TEST-UID-1', mode: SelectionMode.rejected, other: 'TEST-UID-1', isValid: true },
+                'TEST-UID-2': { uid: 'TEST-UID-2', mode: SelectionMode.selected, other: 'TEST-UID-2', isValid: false },
+            });
         });
     });
 });
