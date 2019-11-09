@@ -5,6 +5,8 @@ import {
     getSystems,
     SystemActionTypes,
     ISystemEntry,
+    selectFeature,
+    SelectionMode,
 } from './system';
 
 const genDate = (): string => {
@@ -22,6 +24,7 @@ const DEFAULT_SYSTEM: ISystemEntry = {
 const DEFAULT_STATE = {
     system: {
         systems: {},
+        selections: [],
     },
 };
 
@@ -88,6 +91,23 @@ describe('systems', () => {
                         },
                     },
                     type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
+                });
+            });
+        });
+
+        describe('selectFeature', () => {
+            const TEST_UID = 'TEST-UID';
+            const TEST_MODE = SelectionMode.rejected;
+
+            it('should generate an action with selection data', () => {
+                expect(selectFeature(TEST_UID, TEST_MODE, TEST_UID, false)).toEqual({
+                    data: {
+                        uid: TEST_UID,
+                        mode: TEST_MODE,
+                        other: TEST_UID,
+                        isValid: false,
+                    },
+                    type: SystemActionTypes.SELECT_FEATURE,
                 });
             });
         });
