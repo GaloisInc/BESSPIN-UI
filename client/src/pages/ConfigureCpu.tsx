@@ -13,13 +13,13 @@ import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
 
 import {
-    ISystemEntry,
-    ISelectionType,
-    getSystems,
-    getSelections,
-    submitSystem,
     fetchSystem,
+    getCurrentSelections,
+    getSystems,
+    ISelectionMap,
+    ISystemEntry,
     selectFeature,
+    submitSystem,
 } from '../state/system';
 
 import { Header } from '../components/Header';
