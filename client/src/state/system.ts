@@ -183,7 +183,8 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
         case SystemActionTypes.SELECT_FEATURE:
             return {
                 ...state,
-                selections: state.selections.concat(action.data),
+                // keep track of selections as stack (going back in time)
+                selections: [action.data].concat(state.selections),
             };
         default:
             return state;

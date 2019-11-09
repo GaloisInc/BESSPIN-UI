@@ -8,6 +8,7 @@ import {
     selectFeature,
     SelectionMode,
     getCurrentSelections,
+    reducer,
 } from './system';
 
 const genDate = (): string => {
@@ -116,6 +117,49 @@ describe('systems', () => {
 
     describe('reducer', () => {
 
+        describe('selections', () => {
+            const TEST_UID = 'TEST-UID-2';
+            const TEST_MODE = SelectionMode.rejected;
+
+            describe('adding first selection', () => {
+
+                it('should add the selection', () => {
+                    expect(reducer(undefined, selectFeature(TEST_UID, TEST_MODE, TEST_UID, false))).toEqual({
+                        systems: {},
+                        selections: [
+                            { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false },
+                        ],
+                    });
+                });
+            });
+
+            describe('adding nth selection', () => {
+
+                it('should add the selection', () => {
+                    const testState = generateTestState({
+                        system: {
+                            systems: {},
+                            selections: [
+                                { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
+                                { uid: 'TEST-UID-2', mode: SelectionMode.selected, offer: 'TEST-UID-2', isValid: false },
+                                { uid: 'TEST-UID-1', mode: SelectionMode.selected, offer: 'TEST-UID-1', isValid: false },
+                            ],
+                        },
+                    });
+
+                    const reducedState = reducer(testState.system, selectFeature(TEST_UID, TEST_MODE, TEST_UID, false));
+                    expect(reducedState).toEqual({
+                        systems: {},
+                        selections: [
+                            { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false },
+                            { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
+                            { uid: 'TEST-UID-2', mode: SelectionMode.selected, offer: 'TEST-UID-2', isValid: false },
+                            { uid: 'TEST-UID-1', mode: SelectionMode.selected, offer: 'TEST-UID-1', isValid: false },
+                        ],
+                    });
+                });
+            });
+        });
     });
 
     describe('selectors', () => {
