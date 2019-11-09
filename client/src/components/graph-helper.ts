@@ -70,19 +70,29 @@ enum SelectionColors {
 
 const SELECTABLE_CARD = 'opt';
 
-const getColor = (card: string): SelectionColors => {
-
-        switch (card) {
-            case 'on':
-                return SelectionColors.on;
-            case 'off':
-                return SelectionColors.off;
-            case 'opt':
-                return SelectionColors.opt;
+const getColor = (card: string, mode?: SelectionMode): SelectionColors => {
+    if (mode) {
+        switch (mode) {
+            case SelectionMode.selected:
+                return SelectionColors.validSelected;
+            case SelectionMode.rejected:
+                return SelectionColors.validRejected;
             default:
-                console.error(`Invalid card"${card}" encountered when trying to set color`);
                 return SelectionColors.opt;
         }
+    }
+
+    switch (card) {
+        case 'on':
+            return SelectionColors.on;
+        case 'off':
+            return SelectionColors.off;
+        case 'opt':
+            return SelectionColors.opt;
+        default:
+            console.error(`Invalid card"${card}" encountered when trying to set color`);
+            return SelectionColors.opt;
+    }
 };
 
 const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap): IVisTree => {
@@ -94,8 +104,9 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap):
 
         if (!feature) return acc;
 
+        const mode = selections[featureId] ? selections[featureId].mode : undefined;
         const card = feature.card;
-        const color = getColor(card);
+        const color = getColor(card, mode);
 
         acc.nodes.add({
             id: featureId,
