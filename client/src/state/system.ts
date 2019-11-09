@@ -35,15 +35,7 @@ export interface ISystemState {
 }
 
 export const DEFAULT_STATE: ISystemState = {
-    systems: {
-        'TEST-HASH-123892347ADFECB' : {
-            uid: 'TEST-HASH-123892347ADFECB',
-            createdAt: Date.now().toString(),
-            lastUpdate: Date.now().toString(),
-            featureCount: 5,
-            filename: 'foo.fm.json',
-        },
-    },
+    systems: {},
     selections: [],
 };
 
