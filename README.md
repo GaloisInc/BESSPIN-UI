@@ -61,6 +61,10 @@ features of the configurator are:
 
 The UI has it's own [README.md](./client/README.md) that details it's structure
 
+## Configurator API
+
+All api routes are prefixed with `/api`. You can access an interactive Swagger UI to explore the API via `http://0.0.0.0:3784/api/doc`
+
 ## Requirements
 
 - `python3`
