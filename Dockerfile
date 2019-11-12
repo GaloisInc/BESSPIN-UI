@@ -5,7 +5,7 @@ RUN apt-get update && \
     add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ bionic universe multiverse"
 
 RUN apt-get install -y python3-pip sqlite3 ssh git curl
-RUN pip3 install flask nose
+RUN pip3 install flask nose Flask-RestPlus
 
 ARG TOKEN_NAME
 ARG PRIVATE_TOKEN
