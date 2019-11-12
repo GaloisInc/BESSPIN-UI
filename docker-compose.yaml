@@ -26,14 +26,19 @@ services:
     build: # this is only for development, we should use when we are ready for production
       context: .
       dockerfile: Dockerfile
+      args:
+        - TOKEN_NAME
+        - PRIVATE_TOKEN
     restart: always
     networks:
       - internal-service-layer
       - proxy-layer
     ports:
       - '3784:3784'
+      - '5000:5000'
     volumes: # this is also only for development
       - '~/.local/share/besspin:/root/.local/share/besspin'
+      - './server:/besspin-ui/server'
     environment:
       HOST: 0.0.0.0
       PORT: 3784
