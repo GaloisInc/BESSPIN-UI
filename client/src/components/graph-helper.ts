@@ -4,6 +4,12 @@ import {
 } from 'vis-network';
 
 import {
+    Data,
+    Node,
+    Edge,
+} from 'vis';
+
+import {
     ISelectionMap,
     SelectionMode,
     selectFeature as selectFeatureCallback,
@@ -35,27 +41,6 @@ export interface IFeatureModel {
     features: IFeatureMap;
     roots: string[];
     version: IFeatureModelVersion;
-}
-
-interface IVisNode {
-    id: string;
-    label: string;
-    shape: string;
-    color: string;
-}
-
-interface IVisEdge {
-    id: string;
-    label: string;
-    from: string;
-    to: string;
-    dashes: boolean;
-    color: string;
-}
-
-interface IVisTree {
-    nodes: DataSet<IVisNode>;
-    edges: DataSet<IVisEdge>;
 }
 
 enum SelectionColors {
@@ -95,11 +80,11 @@ const getColor = (card: string, mode?: SelectionMode): SelectionColors => {
     }
 };
 
-const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap): IVisTree => {
+const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap): Data => {
 
     const featureIds = Object.keys(featureModel.features);
 
-    return featureIds.reduce((acc: IVisTree, featureId: string): IVisTree => {
+    return featureIds.reduce((acc: Data, featureId: string): Data => {
         const feature = featureModel.features[featureId];
 
         if (!feature) return acc;
@@ -108,14 +93,14 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap):
         const card = feature.card;
         const color = getColor(card, mode);
 
-        acc.nodes.add({
+        if (acc.nodes) (acc.nodes as DataSet<Node>).add({
             id: featureId,
             label: `${featureId}\n [${card}]\n gcard: ${feature.gcard}`,
             shape: 'box',
             color: color,
         });
 
-        const edges = feature.children.map((childId: string): IVisEdge => {
+        const edges = feature.children.map((childId: string): Edge => {
             return {
                 id: `${featureId}-${childId}`,
                 label: '',
@@ -126,10 +111,10 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap):
             };
         });
 
-        acc.edges.add(edges);
+        if (acc.edges) (acc.edges as DataSet<Edge>).add(edges);
 
         return acc;
-    }, { nodes: new DataSet([]), edges: new DataSet([]) });
+    }, { nodes: new DataSet<Node>([]), edges: new DataSet<Edge>([]) });
 };
 
 // We need to ensure that redraws don't cause the graph
@@ -137,7 +122,7 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap):
 // To do that, we ensure that the network is only created once by
 // caching it via closure.
 let network: Network;
-let data: IVisTree
+let data: Data;
 
 export const graphFeatureModel = (
     domNode: HTMLDivElement,
@@ -167,9 +152,9 @@ export const graphFeatureModel = (
 
     if (network) {
         Object.values(currentSelections).forEach(s => {
-            data.nodes.update({
                 id: s.uid,
                 color: getColor(featureModel.features[s.uid].card, s.mode),
+                if (data.nodes) (data.nodes as DataSet<Node>).update({
             });
         });
     } else {
