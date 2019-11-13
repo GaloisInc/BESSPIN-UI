@@ -13,6 +13,7 @@ import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
 
 import {
+    clearFeatureSelections,
     fetchSystem,
     getCurrentSelections,
     getSystems,
@@ -36,6 +37,7 @@ export interface IConfigureCpuProps {
     currentSelections?: ISelectionMap;
     systemUid: string;
     selectFeature: typeof selectFeature;
+    clearFeatureSelections: typeof clearFeatureSelections;
 }
 
 const DEFAULT_FEATURE_MODEL: IFeatureModel = {
@@ -52,6 +54,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     currentSelections,
     systemUid,
     selectFeature,
+    clearFeatureSelections,
 }) => {
 
     // NOTE: I prefer functional components and use React Hooks to manage form
@@ -127,6 +130,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                 data={ configuratorModel }
                 selectFeature={ selectFeature }
                 currentSelections={ currentSelections || {} }
+                clearFeatureSelections={ clearFeatureSelections }
             />
         </Container>
     );
@@ -159,6 +163,7 @@ const mapDispatchToProps = {
     submitSystem,
     fetchSystem,
     selectFeature,
+    clearFeatureSelections,
 };
 
 export const ConnectedConfigureCpu = connect(mapStateToProps, mapDispatchToProps)(ConfigureCpu);

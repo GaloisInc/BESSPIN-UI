@@ -123,6 +123,7 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap):
 // caching it via closure.
 let network: Network;
 let data: Data;
+let roots: string = ''; // this is a way to track when we change models
 
 export const graphFeatureModel = (
     domNode: HTMLDivElement,
@@ -150,14 +151,26 @@ export const graphFeatureModel = (
         },
     };
 
-    if (network) {
-        Object.values(currentSelections).forEach(s => {
-                id: s.uid,
-                color: getColor(featureModel.features[s.uid].card, s.mode),
+    const hasVisDOM = domNode.firstElementChild !== null;
+    const newRoots = JSON.stringify(featureModel.roots);
+
+    if (hasVisDOM) {
+        const hasNewRoots = newRoots !== roots;
+
+        if (hasNewRoots) {
+            data = mapModelToTree(featureModel, currentSelections);
+            network.setData(data);
+            roots = newRoots;
+        } else {
+            Object.values(currentSelections).forEach(s => {
                 if (data.nodes) (data.nodes as DataSet<Node>).update({
+                    id: s.uid,
+                    color: getColor(featureModel.features[s.uid].card, s.mode),
+                });
             });
-        });
+        }
     } else {
+        roots = newRoots;
         data = mapModelToTree(featureModel, currentSelections);
         network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
     }

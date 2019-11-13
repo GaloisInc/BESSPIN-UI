@@ -46,6 +46,7 @@ export const DEFAULT_STATE: ISystemState = {
 // Actions
 
 export enum SystemActionTypes {
+    CLEAR_FEATURE_SELECTIONS = 'system/clear-feature-selections',
     FETCH_TEST_SYSTEM = 'system/fetch-one',
     FETCH_TEST_SYSTEM_FAILURE = 'system/fetch-one/failure',
     FETCH_TEST_SYSTEM_SUCCESS = 'system/fetch-one/success',
@@ -149,7 +150,14 @@ export const selectFeature = (uid: string, mode: SelectionMode, other: string, i
     } as const;
 };
 
+export const clearFeatureSelections = () => {
+    return {
+        type: SystemActionTypes.CLEAR_FEATURE_SELECTIONS,
+    } as const;
+};
+
 export type ISystemAction = ReturnType<
+    typeof clearFeatureSelections |
     typeof fetchSystem |
     typeof fetchSystemSuccess |
     typeof fetchSystemFailure |
@@ -166,6 +174,11 @@ export type ISystemAction = ReturnType<
 
 export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemState => {
     switch (action.type) {
+        case SystemActionTypes.CLEAR_FEATURE_SELECTIONS:
+            return {
+                ...state,
+                selections: [],
+            };
         case SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS:
             return {
                 ...state,

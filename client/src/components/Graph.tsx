@@ -5,6 +5,7 @@ import '../style/Graph.scss';
 import {
     ISelectionMap,
     selectFeature,
+    clearFeatureSelections,
 } from '../state/system';
 
 import {
@@ -15,14 +16,15 @@ import {
 export interface IGraphProps {
     data?: IFeatureModel;
     selectFeature: typeof selectFeature;
+    clearFeatureSelections: typeof clearFeatureSelections;
     currentSelections: ISelectionMap;
 }
-
 
 export const Graph: React.FC<IGraphProps> = ({
     data: treeData,
     selectFeature,
     currentSelections,
+    clearFeatureSelections,
 }) => {
 
     const visContainer = useRef(null) as RefObject<HTMLDivElement>;
@@ -39,6 +41,15 @@ export const Graph: React.FC<IGraphProps> = ({
 
         graphFeatureModel(ref, treeData, selectFeature, currentSelections);
     }, [treeData, visContainer, selectFeature, currentSelections]);
+
+    useEffect(() => {
+        // This will be called when the component will unmount
+        // At that point, we need to clear out any feature selections since
+        // that means the page is unloading (i.e. we are going to a new page)
+        return function cleanupSelections() {
+            clearFeatureSelections();
+        };
+    }, [clearFeatureSelections]);
 
     return (
         <div
