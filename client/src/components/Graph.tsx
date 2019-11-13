@@ -3,30 +3,57 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import '../style/Graph.scss';
 
 import {
-    graphSimple,
-    ITreeNode
+    ISelectionMap,
+    selectFeature,
+    clearFeatureSelections,
+} from '../state/system';
+
+import {
+    graphFeatureModel,
+    IFeatureModel
 } from './graph-helper';
 
 export interface IGraphProps {
-    data?: ITreeNode;
+    data?: IFeatureModel;
+    selectFeature: typeof selectFeature;
+    clearFeatureSelections: typeof clearFeatureSelections;
+    currentSelections: ISelectionMap;
 }
 
-export const Graph: React.FC<IGraphProps> = ({ data: treeData }) => {
+export const Graph: React.FC<IGraphProps> = ({
+    data: treeData,
+    selectFeature,
+    currentSelections,
+    clearFeatureSelections,
+}) => {
 
-    const d3Container = useRef(null) as RefObject<SVGSVGElement>;
+    const visContainer = useRef(null) as RefObject<HTMLDivElement>;
 
     useEffect(() => {
-        const ref = d3Container ? d3Container.current : null;
+        const ref = visContainer ? visContainer.current : null;
 
-        if (!(treeData && ref)) return;
+        if (!ref) return;
+        if (!treeData) return;
 
-        graphSimple(ref, treeData);
-    }, [treeData, d3Container]);
+        const hasDataToRender = treeData && treeData.features && Object.keys(treeData.features).length > 0;
+
+        if (!hasDataToRender) return;
+
+        graphFeatureModel(ref, treeData, selectFeature, currentSelections);
+    }, [treeData, visContainer, selectFeature, currentSelections]);
+
+    useEffect(() => {
+        // This will be called when the component will unmount
+        // At that point, we need to clear out any feature selections since
+        // that means the page is unloading (i.e. we are going to a new page)
+        return function cleanupSelections() {
+            clearFeatureSelections();
+        };
+    }, [clearFeatureSelections]);
 
     return (
-        <svg
+        <div
             className='Graph'
-            height='500'
-            ref={ d3Container } />
+            ref={ visContainer } />
     );
 };
