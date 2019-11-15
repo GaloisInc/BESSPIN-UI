@@ -7,7 +7,12 @@ import {
     Col,
     Container,
     Form,
+    ButtonGroup,
+    Button,
 } from 'react-bootstrap';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons'
 
 import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
@@ -126,6 +131,16 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                     </Col>
                 </Form.Row>
             </Form>
+            <ButtonGroup className="mr-2" aria-label="First group">
+                <Button>
+                    <FontAwesomeIcon icon={faUndo} />
+                    Undo
+                </Button>
+                <Button>
+                    Redo
+                    <FontAwesomeIcon icon={faRedo} />
+                </Button>
+            </ButtonGroup>
             <Graph
                 data={ configuratorModel }
                 selectFeature={ selectFeature }
