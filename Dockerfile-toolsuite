@@ -9,13 +9,12 @@ RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ bionic universe multiverse"
 
-RUN apt-get install -y python3-pip sqlite3
-RUN pip3 install flask nose
+RUN apt-get install -y sudo xz-utils curl ssh git python3-pip
 
 # Adapted from https://github.com/holochain/holonix/pull/63/files
 WORKDIR /
 
-RUN apt-get install -y sudo xz-utils curl ssh
+RUN apt-get install -y sudo xz-utils curl ssh git
 RUN adduser --disabled-password --gecos '' besspinuser
 RUN adduser besspinuser sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -38,17 +37,17 @@ RUN echo 'trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16Z
     echo 'netrc-file = /home/besspinuser/.config/nix/netrc' >> /home/besspinuser/.config/nix/nix.conf
 
 
-# Set the login and APIKET for artifactory
+# Set the login and APIKEY for artifactory
 ARG BINCACHE_LOGIN
 ARG BINCACHE_APIKEY
 RUN echo 'machine artifactory.galois.com' > /home/besspinuser/.config/nix/netrc && \
     echo "login ${BINCACHE_LOGIN}" >> /home/besspinuser/.config/nix/netrc && \
     echo "password ${BINCACHE_APIKEY}" >> /home/besspinuser/.config/nix/netrc
 
-#RUN cat /home/besspinuser/.config/nix/netrc
-#RUN cat /home/besspinuser/.config/nix/nix.conf
 
 WORKDIR /home/besspinuser/
+
+RUN git clone https://github.com/bluespec/Piccolo.git
 
 # https://nixos.wiki/wiki/Nix_Installation_Guide#Single-user_install
 RUN sudo install -d -m755 -o $(id -u) -g $(id -g) /nix
@@ -60,7 +59,6 @@ RUN mkdir /home/besspinuser/.ssh/
 RUN touch /home/besspinuser/.ssh/known_hosts
 RUN ssh-keyscan gitlab-ext.galois.com >> /home/besspinuser/.ssh/known_hosts
 
-RUN sudo apt-get install -y git
 RUN touch /home/besspinuser/.gitconfig && \
     echo "[url \"https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/\"]\n\
     insteadOf = \"git@gitlab-ext.galois.com:\"\n\
@@ -68,10 +66,10 @@ RUN touch /home/besspinuser/.gitconfig && \
     pushInsteadOf = \"git@gitlab-ext.galois.com:\"" >> /home/besspinuser/.gitconfig
 
 
-#RUN cat /home/besspinuser/.gitconfig
 RUN git clone "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/tool-suite.git"
 WORKDIR /home/besspinuser/tool-suite
 RUN git checkout develop
+
 
 RUN sudo curl --netrc-file /home/besspinuser/.config/nix/netrc https://artifactory.galois.com/besspin_generic-nix/nix-cache-info
 RUN . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell
