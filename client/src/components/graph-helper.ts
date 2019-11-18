@@ -7,7 +7,7 @@ import {
     Data,
     Node,
     Edge,
-} from 'vis';
+} from 'vis-network';
 
 import {
     ISelectionMap,
