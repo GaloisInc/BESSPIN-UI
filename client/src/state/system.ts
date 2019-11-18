@@ -212,7 +212,7 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
         case SystemActionTypes.UNDO_SELECT_FEATURE:
             return {
                 ...state,
-                selections: state.selections.slice(1),
+                selections: [], //state.selections.slice(1)
                 undos: [state.selections[0]].concat(state.undos),
             };
         default:
