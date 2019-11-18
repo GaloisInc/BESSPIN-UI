@@ -26,6 +26,7 @@ import {
     ISystemEntry,
     selectFeature,
     submitSystem,
+    undoSelectFeature,
 } from '../state/system';
 
 import { Header } from '../components/Header';
@@ -42,6 +43,7 @@ export interface IConfigureCpuProps {
     currentSelections?: ISelectionMap;
     systemUid: string;
     selectFeature: typeof selectFeature;
+    undoSelectFeature: typeof undoSelectFeature;
     clearFeatureSelections: typeof clearFeatureSelections;
 }
 
@@ -59,6 +61,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     currentSelections,
     systemUid,
     selectFeature,
+    undoSelectFeature,
     clearFeatureSelections,
 }) => {
 
@@ -132,7 +135,9 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                 </Form.Row>
             </Form>
             <ButtonGroup className="mr-2" aria-label="First group">
-                <Button>
+                <Button
+                    onClick={ () => {undoSelectFeature();} }
+                >
                     <FontAwesomeIcon icon={faUndo} />
                     Undo
                 </Button>
@@ -178,6 +183,7 @@ const mapDispatchToProps = {
     submitSystem,
     fetchSystem,
     selectFeature,
+    undoSelectFeature,
     clearFeatureSelections,
 };
 

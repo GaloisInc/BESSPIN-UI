@@ -36,11 +36,13 @@ export interface ISelectionMap {
 export interface ISystemState {
     systems: ISystemMap;
     selections: ISelectionType[],
+    undos: ISelectionType[],
 }
 
 export const DEFAULT_STATE: ISystemState = {
     systems: {},
     selections: [],
+    undos: [],
 };
 
 // Actions
@@ -54,6 +56,7 @@ export enum SystemActionTypes {
     FETCH_TEST_SYSTEMS_FAILURE = 'system/fetch/failure',
     FETCH_TEST_SYSTEMS_SUCCESS = 'system/fetch/success',
     SELECT_FEATURE = 'system/select/feature',
+    UNDO_SELECT_FEATURE = 'system/select/undo',
     SUBMIT_TEST_SYSTEM = 'system/submit',
     SUBMIT_TEST_SYSTEMS_FAILURE = 'system/submit/failure',
     SUBMIT_TEST_SYSTEMS_SUCCESS = 'system/submit/success',
@@ -150,6 +153,12 @@ export const selectFeature = (uid: string, mode: SelectionMode, other: string, i
     } as const;
 };
 
+export const undoSelectFeature = () => {
+    return {
+        type: SystemActionTypes.UNDO_SELECT_FEATURE,
+    } as const;
+};
+
 export const clearFeatureSelections = () => {
     return {
         type: SystemActionTypes.CLEAR_FEATURE_SELECTIONS,
@@ -167,7 +176,8 @@ export type ISystemAction = ReturnType<
     typeof submitSystem |
     typeof submitSystemSuccess |
     typeof submitSystemFailure |
-    typeof selectFeature
+    typeof selectFeature |
+    typeof undoSelectFeature
 >;
 
 // Reducers
@@ -198,6 +208,12 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
                 ...state,
                 // keep track of selections as stack (going back in time)
                 selections: [action.data].concat(state.selections),
+            };
+        case SystemActionTypes.UNDO_SELECT_FEATURE:
+            return {
+                ...state,
+                selections: state.selections.slice(1),
+                undos: [state.selections[0]].concat(state.undos),
             };
         default:
             return state;
