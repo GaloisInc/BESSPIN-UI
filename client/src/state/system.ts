@@ -202,6 +202,10 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
                     ...state.systems,
                     [action.data.system.uid]: action.data.system,
                 },
+                // NOTE: when loading a specific system, we reset the selections to use the "configs"
+                //       for the loaded system
+                selections: action.data.system.configs || [],
+                undos: [],
             };
         case SystemActionTypes.SELECT_FEATURE:
             return {
@@ -212,7 +216,7 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
         case SystemActionTypes.UNDO_SELECT_FEATURE:
             return {
                 ...state,
-                selections: [], //state.selections.slice(1)
+                selections: state.selections.slice(1),
                 undos: [state.selections[0]].concat(state.undos),
             };
         default:
