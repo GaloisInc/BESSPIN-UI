@@ -12,7 +12,6 @@ import {
 import {
     ISelectionMap,
     SelectionMode,
-    selectFeature as selectFeatureCallback,
 } from '../state/system';
 
 export interface IFeature {
@@ -42,6 +41,8 @@ export interface IFeatureModel {
     roots: string[];
     version: IFeatureModelVersion;
 }
+
+export type SelectFeatureCallback = (uid: string, mode: SelectionMode, other: string, isValid: boolean) => void;
 
 enum SelectionColors {
     on = '#ddffdd', // green
@@ -128,7 +129,7 @@ let roots: string = ''; // this is a way to track when we change models
 export const graphFeatureModel = (
     domNode: HTMLDivElement,
     featureModel: IFeatureModel,
-    selectFeature: typeof selectFeatureCallback,
+    selectFeature: SelectFeatureCallback,
     currentSelections: ISelectionMap,
 ) => {
 
@@ -180,7 +181,8 @@ export const graphFeatureModel = (
         network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
     }
 
-    network.once('click', (params) => {
+    network.off('click');
+    network.on('click', (params) => {
         const nodeId = network.getNodeAt(params.pointer.DOM) as string;
 
         if (nodeId == null) return; // short-circuit for non-selection click
