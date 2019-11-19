@@ -35,14 +35,10 @@ export interface ISelectionMap {
 
 export interface ISystemState {
     systems: ISystemMap;
-    selections: ISelectionType[],
-    undos: ISelectionType[],
 }
 
 export const DEFAULT_STATE: ISystemState = {
     systems: {},
-    selections: [],
-    undos: [],
 };
 
 // Actions
@@ -141,32 +137,7 @@ export const submitSystemSuccess = (system: ISystemEntry) => {
     } as const;
 };
 
-export const selectFeature = (uid: string, mode: SelectionMode, other: string, isValid: boolean) => {
-    return {
-        type: SystemActionTypes.SELECT_FEATURE,
-        data: {
-            uid,
-            mode,
-            other,
-            isValid,
-        },
-    } as const;
-};
-
-export const undoSelectFeature = () => {
-    return {
-        type: SystemActionTypes.UNDO_SELECT_FEATURE,
-    } as const;
-};
-
-export const clearFeatureSelections = () => {
-    return {
-        type: SystemActionTypes.CLEAR_FEATURE_SELECTIONS,
-    } as const;
-};
-
 export type ISystemAction = ReturnType<
-    typeof clearFeatureSelections |
     typeof fetchSystem |
     typeof fetchSystemSuccess |
     typeof fetchSystemFailure |
@@ -175,20 +146,13 @@ export type ISystemAction = ReturnType<
     typeof fetchSystemsFailure |
     typeof submitSystem |
     typeof submitSystemSuccess |
-    typeof submitSystemFailure |
-    typeof selectFeature |
-    typeof undoSelectFeature
+    typeof submitSystemFailure
 >;
 
 // Reducers
 
 export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemState => {
     switch (action.type) {
-        case SystemActionTypes.CLEAR_FEATURE_SELECTIONS:
-            return {
-                ...state,
-                selections: [],
-            };
         case SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS:
             return {
                 ...state,
@@ -202,22 +166,6 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
                     ...state.systems,
                     [action.data.system.uid]: action.data.system,
                 },
-                // NOTE: when loading a specific system, we reset the selections to use the "configs"
-                //       for the loaded system
-                selections: action.data.system.configs || [],
-                undos: [],
-            };
-        case SystemActionTypes.SELECT_FEATURE:
-            return {
-                ...state,
-                // keep track of selections as stack (going back in time)
-                selections: [action.data].concat(state.selections),
-            };
-        case SystemActionTypes.UNDO_SELECT_FEATURE:
-            return {
-                ...state,
-                selections: state.selections.slice(1),
-                undos: [state.selections[0]].concat(state.undos),
             };
         default:
             return state;
@@ -235,20 +183,4 @@ export const getSystem = (state: IState) => state.system;
 export const getSystems = createSelector(
     [getSystem],
     (system) => system.systems,
-);
-
-export const getSelections = createSelector(
-    [getSystem],
-    (system) => system.selections,
-);
-
-export const getCurrentSelections = createSelector(
-    [getSelections],
-    (selections) => {
-        return selections.reduce<ISelectionMap>((acc, selection) => {
-            if (acc[selection.uid]) return acc;
-            acc[selection.uid] = selection;
-            return acc;
-        }, {});
-    },
 );
