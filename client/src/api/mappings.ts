@@ -1,4 +1,4 @@
-import { ISystemMap, ISystemEntry } from "../state/system";
+import { ISelectionType, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
 import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
 
 export interface IConfigContent {
@@ -25,7 +25,30 @@ export interface IConfigurator {
     source: string;
 }
 
+const mapSelectionMode = (mode: string): SelectionMode => {
+    switch (mode) {
+        case 'selected':
+            return SelectionMode.selected;
+        case 'rejected':
+            return SelectionMode.rejected;
+        case 'unselected':
+            return SelectionMode.unselected;
+        default:
+            console.error(`Unknown selection mode "${mode}"`);
+            return SelectionMode.unselected;
+    }
+};
+
 export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEntry => {
+    const configs = configurator.configs ? configurator.configs.map<ISelectionType>((c: IConfig) => {
+        return {
+            uid: c.uid,
+            mode: mapSelectionMode(c.content.mode),
+            other: c.content.other,
+            isValid: c.content.validated,
+        };
+    }) : null;
+
     return {
         uid: configurator.uid,
         createdAt: configurator.date,
@@ -33,6 +56,7 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
         featureCount: configurator.nb_features_selected,
         filename: configurator.filename,
         conftree: configurator.conftree,
+        ...(configs ? { configs } : null),
     };
 };
 

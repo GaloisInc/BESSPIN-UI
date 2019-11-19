@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { IFeatureModel } from '../components/graph-helper';
 
 export interface ISystemEntry {
-    configs?: string; // base64-encoded JSON string
+    configs?: ISelectionType[];
     conftree?: IFeatureModel;
     createdAt: string;
     featureCount: number;
