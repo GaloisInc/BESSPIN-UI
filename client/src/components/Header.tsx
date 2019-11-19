@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { LinkContainer } from 'react-router-bootstrap'
-
 import {
     Nav,
     Navbar,
@@ -14,15 +12,9 @@ export const Header: React.FC = () => {
       <Navbar className='Header' variant='dark'>
           <Navbar.Brand className='logo'>BESSPIN</Navbar.Brand>
           <Nav>
-            <LinkContainer to='/'>
-                <Nav.Link>overview</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to='/configure-cpu'>
-                <Nav.Link>configure cpu</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to='/dashboard'>
-                <Nav.Link>dashboard</Nav.Link>
-            </LinkContainer>
+            <Nav.Link href='/'>overview</Nav.Link>
+            <Nav.Link href='/configure-cpu'>configure cpu</Nav.Link>
+            <Nav.Link href='/dashboard'>dashboard</Nav.Link>
           </Nav>
       </Navbar>
   );
