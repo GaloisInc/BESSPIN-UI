@@ -1,5 +1,6 @@
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import 'jest-canvas-mock';
 
 /**
  * This is needed in order for us to be able to use Enzyme in our tests

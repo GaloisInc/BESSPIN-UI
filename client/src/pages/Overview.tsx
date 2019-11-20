@@ -2,7 +2,9 @@ import React, { useEffect } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux'
 
+import { LinkContainer } from 'react-router-bootstrap';
 import {
+  Button,
   Container,
   Table,
 } from 'react-bootstrap';
@@ -57,10 +59,15 @@ export const Overview: React.FC<IOverviewProps> = ({ dataRequested, dispatch, is
             <tbody>
                 { systems && systems.map((s, i) => (
                     <tr className='system-row' key={ `system-${i}`}>
-                        <td>{ s.hash }</td>
+                        <td>{ s.uid }</td>
                         <td>{ s.createdAt }</td>
                         <td>{ s.lastUpdate }</td>
                         <td>{ s.featureCount }</td>
+                        <td>
+                          <LinkContainer to={ `/configure-cpu/${s.uid}` }>
+                            <Button>Configure</Button>
+                          </LinkContainer>
+                        </td>
                     </tr>
                 )) }
             </tbody>
@@ -73,7 +80,7 @@ const mapStateToProps = (state: IState): Partial<IOverviewProps> => {
   return {
     dataRequested: getDataRequested(state),
     isLoading: getIsLoading(state),
-    systems: getSystems(state),
+    systems: Object.values(getSystems(state)),
   };
 };
 

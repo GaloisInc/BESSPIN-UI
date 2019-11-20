@@ -5,6 +5,10 @@ import {
     getSystems,
     SystemActionTypes,
     ISystemEntry,
+    selectFeature,
+    SelectionMode,
+    getCurrentSelections,
+    reducer,
 } from './system';
 
 const genDate = (): string => {
@@ -12,7 +16,7 @@ const genDate = (): string => {
 };
 
 const DEFAULT_SYSTEM: ISystemEntry = {
-    hash: 'TEST-HASH',
+    uid: 'TEST-HASH',
     createdAt: genDate(),
     lastUpdate: genDate(),
     filename: 'TEST.fm.json',
@@ -21,7 +25,8 @@ const DEFAULT_SYSTEM: ISystemEntry = {
 
 const DEFAULT_STATE = {
     system: {
-        systems: [],
+        systems: {},
+        selections: [],
     },
 };
 
@@ -53,7 +58,7 @@ describe('systems', () => {
             });
         });
 
-        describe('fetchSystemsFailed', () => {
+        describe('fetchSystemsFailure', () => {
 
             it('should generate an action with error data', () => {
 
@@ -66,13 +71,13 @@ describe('systems', () => {
             });
         });
 
-        describe('fetchSystemsSucceeded', () => {
+        describe('fetchSystemsSuccess', () => {
 
             it('should generate an action with empty systems data', () => {
 
-                expect(fetchSystemsSuccess([])).toEqual({
+                expect(fetchSystemsSuccess({})).toEqual({
                     data: {
-                        systems: [],
+                        systems: {},
                     },
                     type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
                 });
@@ -81,11 +86,30 @@ describe('systems', () => {
             it('should generate an action with systems data', () => {
                 const testSystem = generateTestSystem();
 
-                expect(fetchSystemsSuccess([testSystem])).toEqual({
+                expect(fetchSystemsSuccess({ [testSystem.uid]: testSystem })).toEqual({
                     data: {
-                        systems: [testSystem],
+                        systems: {
+                            [testSystem.uid]: testSystem,
+                        },
                     },
                     type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
+                });
+            });
+        });
+
+        describe('selectFeature', () => {
+            const TEST_UID = 'TEST-UID';
+            const TEST_MODE = SelectionMode.rejected;
+
+            it('should generate an action with selection data', () => {
+                expect(selectFeature(TEST_UID, TEST_MODE, TEST_UID, false)).toEqual({
+                    data: {
+                        uid: TEST_UID,
+                        mode: TEST_MODE,
+                        other: TEST_UID,
+                        isValid: false,
+                    },
+                    type: SystemActionTypes.SELECT_FEATURE,
                 });
             });
         });
@@ -93,18 +117,75 @@ describe('systems', () => {
 
     describe('reducer', () => {
 
+        describe('selections', () => {
+            const TEST_UID = 'TEST-UID-2';
+            const TEST_MODE = SelectionMode.rejected;
+
+            describe('adding first selection', () => {
+
+                it('should add the selection', () => {
+                    expect(reducer(undefined, selectFeature(TEST_UID, TEST_MODE, TEST_UID, false))).toEqual({
+                        systems: {},
+                        selections: [
+                            { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false },
+                        ],
+                    });
+                });
+            });
+
+            describe('adding nth selection', () => {
+
+                it('should add the selection', () => {
+                    const testState = generateTestState({
+                        system: {
+                            systems: {},
+                            selections: [
+                                { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
+                                { uid: 'TEST-UID-2', mode: SelectionMode.selected, offer: 'TEST-UID-2', isValid: false },
+                                { uid: 'TEST-UID-1', mode: SelectionMode.selected, offer: 'TEST-UID-1', isValid: false },
+                            ],
+                        },
+                    });
+
+                    const reducedState = reducer(testState.system, selectFeature(TEST_UID, TEST_MODE, TEST_UID, false));
+                    expect(reducedState).toEqual({
+                        systems: {},
+                        selections: [
+                            { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false },
+                            { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
+                            { uid: 'TEST-UID-2', mode: SelectionMode.selected, offer: 'TEST-UID-2', isValid: false },
+                            { uid: 'TEST-UID-1', mode: SelectionMode.selected, offer: 'TEST-UID-1', isValid: false },
+                        ],
+                    });
+                });
+            });
+        });
     });
 
     describe('selectors', () => {
+        const TEST_UID = 'TEST-UID';
         const testState = generateTestState({
             system: {
-                systems: [generateTestSystem()],
+                systems: {
+                    [TEST_UID]: generateTestSystem({ uid: TEST_UID }),
+                },
+                selections: [
+                    { uid: 'TEST-UID-1', mode: SelectionMode.rejected, other: 'TEST-UID-1', isValid: true },
+                    { uid: 'TEST-UID-1', mode: SelectionMode.selected, other: 'TEST-UID-1', isValid: true },
+                    { uid: 'TEST-UID-2', mode: SelectionMode.selected, other: 'TEST-UID-2', isValid: false },
+                ],
             },
         }) ;
 
         it('should be able to pull systems out of state', () => {
-            
             expect(getSystems(testState)).toEqual(testState.system.systems);
-        })
+        });
+
+        it('should be able to pull current selections', () => {
+            expect(getCurrentSelections(testState)).toEqual({
+                'TEST-UID-1': { uid: 'TEST-UID-1', mode: SelectionMode.rejected, other: 'TEST-UID-1', isValid: true },
+                'TEST-UID-2': { uid: 'TEST-UID-2', mode: SelectionMode.selected, other: 'TEST-UID-2', isValid: false },
+            });
+        });
     });
 });

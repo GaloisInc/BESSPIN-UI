@@ -7,7 +7,7 @@ describe('mappings', () => {
         describe('when no data to map', () => {
 
             it('should return an empty list', () => {
-                expect(mapConfiguratorsToSystems([])).toEqual([]);
+                expect(mapConfiguratorsToSystems([])).toEqual({});
             });
         });
 
@@ -29,22 +29,22 @@ describe('mappings', () => {
                 },
             ];
 
-            const TEST_RESULTS = [
-                {
-                    hash: 'UID-1',
+            const TEST_RESULTS = {
+                'UID-1': {
+                    uid: 'UID-1',
                     filename: 'file.one',
                     createdAt: '2019-10-28T23:07:47.650Z',
                     lastUpdate: '2019-10-28T23:09:00.000Z',
                     featureCount: 5,
                 },
-                {
-                    hash: 'UID-2',
+                'UID-2': {
+                    uid: 'UID-2',
                     filename: 'file.two',
                     createdAt: '2019-10-27T23:07:47.650Z',
                     lastUpdate: '2019-10-27T23:09:00.000Z',
                     featureCount: 3,
                 },
-            ];
+            };
 
             it('should return related system entries', () => {
                 expect(mapConfiguratorsToSystems(TEST_DATA)).toEqual(TEST_RESULTS);

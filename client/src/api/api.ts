@@ -19,6 +19,21 @@ const DEFAULT_HEADERS = {
     accept: 'application/json',
 };
 
+export const fetchConfigurator = async (systemUid: string) => {
+    return axios.request({
+        url: '/configurator/load_from_db/',
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: {
+            model_uid: systemUid,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
 export const fetchConfigurators = async () => {
     return axios.request({
         url: '/api/configurator/list_db_models/',

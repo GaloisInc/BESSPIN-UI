@@ -12,17 +12,23 @@ describe('ConfigureCpu', () => {
 
     it('renders without crashing', () => {
         const testSystem = {
-            hash: 'TEST-HASH',
+            uid: 'TEST-HASH',
             createdAt: genDate(),
             lastUpdate: genDate(),
             featureCount: 42,
             filename: 'TEST.fm.json',
         };
         const onConfiguratorSubmitSpy = jest.fn();
+        const fetchSystemSpy = jest.fn();
 
         const wrapper = mount(
             <MemoryRouter initialEntries={['/configure']}>
-                <ConfigureCpu onConfiguratorSubmit={ onConfiguratorSubmitSpy } systemHash={ testSystem.hash } system={ testSystem } />
+                <ConfigureCpu
+                    onConfiguratorSubmit={ onConfiguratorSubmitSpy }
+                    fetchSystem={ fetchSystemSpy }
+                    dataRequested={ true }
+                    systemUid={ testSystem.uid }
+                    system={ testSystem } />
             </MemoryRouter>
         );
 
