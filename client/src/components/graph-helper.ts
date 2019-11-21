@@ -7,7 +7,7 @@ import {
     Data,
     Node,
     Edge,
-} from 'vis';
+} from 'vis-network';
 
 import {
     ISelectionMap,
@@ -162,11 +162,16 @@ export const graphFeatureModel = (
             network.setData(data);
             roots = newRoots;
         } else {
-            Object.values(currentSelections).forEach(s => {
-                if (data.nodes) (data.nodes as DataSet<Node>).update({
-                    id: s.uid,
-                    color: getColor(featureModel.features[s.uid].card, s.mode),
-                });
+            data.nodes.forEach((n: Node) => {
+                const { id } = n;
+
+                if (id) {
+                    const { card } = featureModel.features[id];
+                    const selection = currentSelections[id];
+                    const color = getColor(card, selection ? selection.mode : undefined);
+
+                    data.nodes.update({ id, color });
+                }
             });
         }
     } else {
