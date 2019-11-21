@@ -7,7 +7,12 @@ import {
     Col,
     Container,
     Form,
+    ButtonGroup,
+    Button,
 } from 'react-bootstrap';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons'
 
 import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
@@ -21,6 +26,7 @@ import {
     ISystemEntry,
     selectFeature,
     submitSystem,
+    undoSelectFeature,
 } from '../state/system';
 
 import { Header } from '../components/Header';
@@ -37,6 +43,7 @@ export interface IConfigureCpuProps {
     currentSelections?: ISelectionMap;
     systemUid: string;
     selectFeature: typeof selectFeature;
+    undoSelectFeature: typeof undoSelectFeature;
     clearFeatureSelections: typeof clearFeatureSelections;
 }
 
@@ -54,6 +61,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     currentSelections,
     systemUid,
     selectFeature,
+    undoSelectFeature,
     clearFeatureSelections,
 }) => {
 
@@ -126,6 +134,18 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                     </Col>
                 </Form.Row>
             </Form>
+            <ButtonGroup className="mr-2" aria-label="First group">
+                <Button
+                    onClick={ () => {undoSelectFeature();} }
+                >
+                    <FontAwesomeIcon icon={faUndo} />
+                    Undo
+                </Button>
+                <Button>
+                    Redo
+                    <FontAwesomeIcon icon={faRedo} />
+                </Button>
+            </ButtonGroup>
             <Graph
                 data={ configuratorModel }
                 selectFeature={ selectFeature }
@@ -163,6 +183,7 @@ const mapDispatchToProps = {
     submitSystem,
     fetchSystem,
     selectFeature,
+    undoSelectFeature,
     clearFeatureSelections,
 };
 

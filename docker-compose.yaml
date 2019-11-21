@@ -13,7 +13,7 @@ services:
       context: .
       dockerfile: client/Dockerfile
     volumes: # this is only for development mode to allow changes to the src to be picked up in the container without a restart
-      - './client/src:/besspin-ui/client/src'
+      - './client:/besspin-ui/client'
     ports:
       - '3000:3000'
       - '9229:9229' # this is only for development mode when the debugger is running
