@@ -36,7 +36,7 @@ export const fetchConfigurator = async (systemUid: string) => {
 
 export const fetchConfigurators = async () => {
     return axios.request({
-        url: '/configurator/list_db_models/',
+        url: '/api/configurator/list_db_models/',
         method: 'get',
         headers: {
             ...DEFAULT_HEADERS,
@@ -48,7 +48,7 @@ export const fetchConfigurators = async () => {
 
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
     return axios.request({
-        url: `/configurator/upload/${systemName}/global_var_cpu`,
+        url: `/api/configurator/upload/${systemName}/global_var_cpu`,
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,

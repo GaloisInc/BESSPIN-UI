@@ -419,7 +419,7 @@ function handleFileSelect(evt, cfg_type) {
     console.log("cfr_file" + cfg_type);
     global_filename = file.name;
     xhr = new XMLHttpRequest();
-    var route = '/configurator/upload/' + file.name + '/' + cfg_type;
+    var route = '/api/configurator/upload/' + file.name + '/' + cfg_type;
     xhr.open('POST', route);
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.onload = function() {
@@ -443,7 +443,7 @@ function handleFileSelect(evt, cfg_type) {
 function validate_features() {
     /* Ajax in pure javascript instead of jQuery */
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/configurator/configure/');
+    xhr.open('POST', '/api/configurator/configure/');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function() {
         if (xhr.status === 200) {
@@ -476,7 +476,7 @@ function validate_features() {
 
 function refresh_db_models() {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/configurator/list_db_models');
+    xhr.open('GET', '/api/configurator/list_db_models');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function() {
         if (xhr.status === 200) {
@@ -502,7 +502,7 @@ function refresh_db_models() {
 
 function load_configured_model(uid) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/configurator/load_from_db/');
+    xhr.open('POST', '/api/configurator/load_from_db/');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function() {
         if (xhr.status === 200) {

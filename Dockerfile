@@ -4,7 +4,7 @@ RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ bionic universe multiverse" && \
     apt-get install -y python3-pip sqlite3 ssh git curl && \
-    pip3 install flask nose
+    pip3 install flask nose Flask-RestPlus
 
 ARG TOKEN_NAME
 ARG PRIVATE_TOKEN
@@ -35,4 +35,4 @@ ENV PORT 3784
 EXPOSE 3784
 
 ENV BESSPIN_CLAFER /root/.local/bin/clafer
-CMD ["python3", "server_flask.py"]
+CMD ["python3", "server/server_flask.py"]
