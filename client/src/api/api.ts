@@ -21,7 +21,7 @@ const DEFAULT_HEADERS = {
 
 export const fetchConfigurator = async (systemUid: string) => {
     return axios.request({
-        url: '/configurator/load_from_db/',
+        url: '/api/configurator/load_from_db/',
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
