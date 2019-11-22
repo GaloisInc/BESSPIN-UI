@@ -18,15 +18,13 @@ import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
 
 import {
-    clearFeatureSelections,
     fetchSystem,
-    getCurrentSelections,
     getSystems,
     ISelectionMap,
     ISystemEntry,
-    selectFeature,
     submitSystem,
-    undoSelectFeature,
+    ISelectionType,
+    SelectionMode,
 } from '../state/system';
 
 import { Header } from '../components/Header';
@@ -40,11 +38,7 @@ export interface IConfigureCpuProps {
     submitSystem: typeof submitSystem;
     fetchSystem: typeof fetchSystem;
     system?: ISystemEntry;
-    currentSelections?: ISelectionMap;
     systemUid: string;
-    selectFeature: typeof selectFeature;
-    undoSelectFeature: typeof undoSelectFeature;
-    clearFeatureSelections: typeof clearFeatureSelections;
 }
 
 const DEFAULT_FEATURE_MODEL: IFeatureModel = {
@@ -54,15 +48,18 @@ const DEFAULT_FEATURE_MODEL: IFeatureModel = {
     version: { base: 1 },
 };
 
+const mapSelectionsByUid = (selections: ISelectionType[]): ISelectionMap => {
+    return selections.reduce((acc: ISelectionMap, s: ISelectionType) => {
+        if (!acc[s.uid]) acc[s.uid] = s;
+        return acc;
+    }, {}) 
+};
+
 export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     submitSystem,
     fetchSystem,
     system,
-    currentSelections,
     systemUid,
-    selectFeature,
-    undoSelectFeature,
-    clearFeatureSelections,
 }) => {
 
     // NOTE: I prefer functional components and use React Hooks to manage form
@@ -71,12 +68,25 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     const fileInputRef = useRef(null);
     const [configuratorModel, setConfiguratorModel] = useState(DEFAULT_FEATURE_MODEL);
     const [modelName, setModelName] = useState('');
+    const [currentSelections, setCurrentSelections] = useState([] as ISelectionType[]);
+    const [selectionUndos, setSelectionUndos] = useState([] as ISelectionType[]);
+    const onSelectFeature = useCallback(() => {
+        // NOTE: notice that this callback is returning our actual callback
+        //       this is done to leverage React's memoization of callbacks, preventing
+        //       a large number of unnecessary renders which would occur if a new instance
+        //       of the callback was passed in every time
+        return (uid: string, mode: SelectionMode, other: string, isValid: boolean) => {
+            setCurrentSelections([{ uid, mode, other, isValid }].concat(currentSelections));
+        };
+    }, [setCurrentSelections, currentSelections]);
 
     useEffect(() => {
         if (systemUid && (!system || !system.conftree)) {
             fetchSystem(systemUid);
         } else if (system && system.conftree) {
             setConfiguratorModel(system.conftree);
+            setCurrentSelections(system.configs ? system.configs : []);
+            setSelectionUndos([]);
         }
     }, [systemUid, fetchSystem, system]);
 
@@ -136,21 +146,32 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
             </Form>
             <ButtonGroup className="mr-2" aria-label="First group">
                 <Button
-                    onClick={ () => {undoSelectFeature();} }
+                    onClick={ () => {
+                        if (currentSelections.length > 0) {
+                            setSelectionUndos([currentSelections[0]].concat(selectionUndos));
+                            setCurrentSelections(currentSelections.slice(1));
+                        }
+                    } }
                 >
                     <FontAwesomeIcon icon={faUndo} />
                     Undo
                 </Button>
-                <Button>
+                <Button
+                    onClick={ () => {
+                        if (selectionUndos.length > 0) {
+                            setCurrentSelections([selectionUndos[0]].concat(currentSelections));
+                            setSelectionUndos(selectionUndos.slice(1));
+                        }
+                    } }
+                >
                     Redo
                     <FontAwesomeIcon icon={faRedo} />
                 </Button>
             </ButtonGroup>
             <Graph
                 data={ configuratorModel }
-                selectFeature={ selectFeature }
-                currentSelections={ currentSelections || {} }
-                clearFeatureSelections={ clearFeatureSelections }
+                selectFeature={ onSelectFeature() }
+                currentSelections={ mapSelectionsByUid(currentSelections) }
             />
         </Container>
     );
@@ -167,7 +188,6 @@ interface IConfigureCpuMapProps extends IConfigureCpuProps {
 const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigureCpuProps => {
     const systemUid = props.match.params.systemUid || '';
     const systems = getSystems(state);
-    const currentSelections = getCurrentSelections(state);
     const dataRequested = getDataRequested(state);
 
     return {
@@ -175,16 +195,12 @@ const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigur
         dataRequested,
         systemUid,
         system: systems[systemUid],
-        currentSelections,
     };
 };
 
 const mapDispatchToProps = {
     submitSystem,
     fetchSystem,
-    selectFeature,
-    undoSelectFeature,
-    clearFeatureSelections,
 };
 
 export const ConnectedConfigureCpu = connect(mapStateToProps, mapDispatchToProps)(ConfigureCpu);
