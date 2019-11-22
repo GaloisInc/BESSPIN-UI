@@ -33,7 +33,6 @@ services:
     networks:
       - proxy-layer
       - internal-service-layer
-      - proxy-layer
     ports:
       - '3784:3784'
       - '5000:5000'
