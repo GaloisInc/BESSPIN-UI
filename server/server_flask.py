@@ -41,7 +41,7 @@ app.register_blueprint(blueprint)
 
 default_handler.setLevel(logging.DEBUG)
 
-# UI Routes
+# Legacy UI Routes
 
 @app.route('/css/main')
 def css_main():
