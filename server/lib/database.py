@@ -9,6 +9,9 @@ import sqlite3
 from uuid import uuid4
 from datetime import datetime
 from hashlib import sha3_256
+import logging
+
+log = logging.getLogger('lib.database')
 
 
 # pylint: disable=invalid-name
@@ -17,20 +20,7 @@ XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME', os.path.join(__file__, '..', '..
 BESSPIN_DATA_HOME = os.path.abspath(os.path.join(XDG_DATA_HOME, 'besspin'))
 os.makedirs(BESSPIN_DATA_HOME, exist_ok=True)
 DATABASE = os.path.join(BESSPIN_DATA_HOME, 'configurator.db')
-
-DB_SCHEMA = '''
-CREATE TABLE
-  feature_models (
-    uid text,
-    filename text,
-    source text,
-    conftree text,
-    date text,
-    hash text,
-    configs text,
-    last_update text
-);
-'''
+SCHEMA_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'db', 'schema.sql'))
 
 DB_INSERT = """INSERT INTO feature_models VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
 
@@ -45,7 +35,9 @@ def initialize_db():
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     try:
-        c.execute(DB_SCHEMA)
+        with open(SCHEMA_PATH) as f:
+            db_schema = f.read()
+            c.executescript(db_schema)
     except sqlite3.OperationalError as err:
         if 'already exists' not in str(err):
             raise RuntimeError('Ooops DB')
