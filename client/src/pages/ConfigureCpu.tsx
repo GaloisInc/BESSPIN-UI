@@ -25,6 +25,7 @@ import {
     submitSystem,
     ISelectionType,
     SelectionMode,
+    submitValidateConfiguration,
 } from '../state/system';
 
 import { Header } from '../components/Header';
@@ -37,6 +38,7 @@ export interface IConfigureCpuProps {
     dataRequested: boolean;
     submitSystem: typeof submitSystem;
     fetchSystem: typeof fetchSystem;
+    submitValidateConfiguration: typeof submitValidateConfiguration;
     system?: ISystemEntry;
     systemUid: string;
 }
@@ -52,12 +54,13 @@ const mapSelectionsByUid = (selections: ISelectionType[]): ISelectionMap => {
     return selections.reduce((acc: ISelectionMap, s: ISelectionType) => {
         if (!acc[s.uid]) acc[s.uid] = s;
         return acc;
-    }, {}) 
+    }, {})
 };
 
 export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     submitSystem,
     fetchSystem,
+    submitValidateConfiguration,
     system,
     systemUid,
 }) => {
@@ -168,6 +171,11 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                     <FontAwesomeIcon icon={faRedo} />
                 </Button>
             </ButtonGroup>
+            <Button
+                    onClick={ () => { submitValidateConfiguration(systemUid, currentSelections) } }
+            >
+                    Validate
+            </Button>
             <Graph
                 data={ configuratorModel }
                 selectFeature={ onSelectFeature() }
@@ -201,6 +209,7 @@ const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigur
 const mapDispatchToProps = {
     submitSystem,
     fetchSystem,
+    submitValidateConfiguration,
 };
 
 export const ConnectedConfigureCpu = connect(mapStateToProps, mapDispatchToProps)(ConfigureCpu);

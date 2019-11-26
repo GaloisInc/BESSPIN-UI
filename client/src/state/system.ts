@@ -56,6 +56,9 @@ export enum SystemActionTypes {
     SUBMIT_TEST_SYSTEM = 'system/submit',
     SUBMIT_TEST_SYSTEMS_FAILURE = 'system/submit/failure',
     SUBMIT_TEST_SYSTEMS_SUCCESS = 'system/submit/success',
+    SUBMIT_VALIDATE_CONFIGURATION= 'system/submit/validate',
+    SUBMIT_VALIDATE_CONFIGURATION_FAILURE= 'system/submit/validate/failure',
+    SUBMIT_VALIDATE_CONFIGURATION_SUCCESS= 'system/submit/validate/success',
 }
 
 export const fetchSystem = (systemUid: string) => {
@@ -137,6 +140,35 @@ export const submitSystemSuccess = (system: ISystemEntry) => {
     } as const;
 };
 
+export const submitValidateConfiguration = (uid: string, selection: ISelectionType[]) => {
+    return {
+        type: SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION,
+        data: {
+            uid,
+            selection,
+        }
+    } as const;
+};
+
+export const submitValidateConfigurationFailure = (errors: string[]) => {
+    return {
+        type: SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_FAILURE,
+        data: {
+            errors
+        }
+    } as const;
+};
+
+export const submitValidateConfigurationSuccess = (uid: string, validated_selection: ISelectionType[]) => {
+    return {
+        type: SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_SUCCESS,
+        data: {
+            uid,
+            validated_selection,
+        }
+    } as const;
+};
+
 export type ISystemAction = ReturnType<
     typeof fetchSystem |
     typeof fetchSystemSuccess |
@@ -146,7 +178,10 @@ export type ISystemAction = ReturnType<
     typeof fetchSystemsFailure |
     typeof submitSystem |
     typeof submitSystemSuccess |
-    typeof submitSystemFailure
+    typeof submitSystemFailure |
+    typeof submitValidateConfiguration |
+    typeof submitValidateConfigurationSuccess |
+    typeof submitValidateConfigurationFailure
 >;
 
 // Reducers
@@ -167,6 +202,19 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
                     [action.data.system.uid]: action.data.system,
                 },
             };
+        case SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_SUCCESS:
+            return {
+                ...state,
+                systems: {
+                    ...state.systems,
+                    [action.data.uid]: {
+                        ...state.systems[action.data.uid],
+                        configs: (state.systems[action.data.uid].configs ?
+                                    state.systems[action.data.uid].configs as ISelectionType[] :
+                                    []).concat(action.data.validated_selection),
+                    }
+                }
+            }
         default:
             return state;
     }

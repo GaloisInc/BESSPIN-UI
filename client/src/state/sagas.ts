@@ -8,11 +8,13 @@ import {
     fetchConfigurator,
     fetchConfigurators,
     submitConfigurator,
+    submitValidateConfiguration as submitValidateConfigurationFunction,
 } from '../api/api';
 
 import {
     mapConfiguratorToSystem,
     mapConfiguratorsToSystems,
+    mapValidateResponse,
 } from '../api/mappings';
 
 import {
@@ -25,6 +27,9 @@ import {
     submitSystemSuccess,
     SystemActionTypes,
     submitSystem as submitSystemAction,
+    submitValidateConfiguration as submitValidateConfigurationAction,
+    submitValidateConfigurationSuccess,
+    submitValidateConfigurationFailure,
 } from './system';
 
 function* fetchSystem(action: ReturnType<typeof fetchSystemAction>) {
@@ -63,9 +68,26 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
     }
 }
 
+function* submitValidateConfiguration(action: ReturnType<typeof submitValidateConfigurationAction>) {
+    try {
+        const validateResponse = yield call(
+            submitValidateConfigurationFunction,
+            action.data.uid,
+            action.data.selection,
+        );
+        const mappedConfigurator = mapValidateResponse(validateResponse);
+        yield put(submitValidateConfigurationSuccess(action.data.uid, mappedConfigurator.validated_features));
+        console.log(validateResponse);
+    } catch (e) {
+        console.error(e);
+        yield put(submitValidateConfigurationFailure(e.message));
+    }
+}
+
 // Register all the actions that should trigger our sagas
 export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_TEST_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEMS, fetchSystems);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
+    yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
 };

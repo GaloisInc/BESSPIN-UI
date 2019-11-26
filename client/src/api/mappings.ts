@@ -25,6 +25,13 @@ export interface IConfigurator {
     source: string;
 }
 
+export interface IValidateResponse {
+    server_source: string,
+    server_constraints: string,
+    validated_features: ISelectionType[],
+    configured_feature_model: IFeatureMap,
+}
+
 const mapSelectionMode = (mode: string): SelectionMode => {
     switch (mode) {
         case 'selected':
@@ -67,4 +74,8 @@ export const mapConfiguratorsToSystems = (configurators: IConfigurator[]): ISyst
         ...configurators,
         [c.uid]: mapConfiguratorToSystem(c),
     }), {});
+};
+
+export const mapValidateResponse = (validateResponse: IValidateResponse): IValidateResponse => {
+    return validateResponse;
 };

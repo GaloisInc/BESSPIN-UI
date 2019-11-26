@@ -1,5 +1,9 @@
 import axios, { AxiosResponse } from 'axios';
 
+import {
+    ISelectionType,
+} from '../state/system';
+
 const trapHTMLError = (response: AxiosResponse) => {
     if (response.headers && response.headers['Content-type'] === 'text/html') {
         throw new Error('Server errored with HTML. Check server logs for details');
@@ -58,3 +62,19 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
     .then(trapHTMLError)
     .then(extractData);
 }
+
+export const submitValidateConfiguration = async (uid: string, selected_nodes: ISelectionType[]) => {
+    return axios.request({
+        url: '/api/configurator/configure/',
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: JSON.stringify({
+            uid: uid,
+            feature_selection: selected_nodes,
+        }),
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
