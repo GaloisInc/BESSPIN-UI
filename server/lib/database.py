@@ -13,8 +13,8 @@ from hashlib import sha3_256
 
 # pylint: disable=invalid-name
 
-XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME') or os.path.expanduser('~/.local/share')
-BESSPIN_DATA_HOME = os.path.join(XDG_DATA_HOME, 'besspin')
+XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME', os.path.join(__file__, '..', '..', 'db'))
+BESSPIN_DATA_HOME = os.path.abspath(os.path.join(XDG_DATA_HOME, 'besspin'))
 os.makedirs(BESSPIN_DATA_HOME, exist_ok=True)
 DATABASE = os.path.join(BESSPIN_DATA_HOME, 'configurator.db')
 
