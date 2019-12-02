@@ -1,15 +1,12 @@
 import { ISelectionType, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
 import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
 
-export interface IConfigContent {
+
+export interface IConfig {
+    uid: string;
     mode: string;
     other: string;
     validated: boolean;
-}
-
-export interface IConfig {
-    content: IConfigContent[];
-    uid: string;
 }
 
 export interface IConfigurator {
@@ -49,7 +46,7 @@ const mapSelectionMode = (mode: string): SelectionMode => {
 export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEntry => {
     const configs = configurator.configs ? configurator.configs.map<ISelectionType>((c: IConfig) => {
         // TOOD: is this correct? do we only need to take the most recent value?
-        const mostRecentContent = c.content[0];
+        const mostRecentContent = c;
         return {
             uid: c.uid,
             mode: mapSelectionMode(mostRecentContent.mode),
