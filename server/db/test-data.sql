@@ -221,6 +221,21 @@ INSERT INTO systemConfiguration (
     '{ "option": "different-choice" }',
     "SOME-UTTERLY-UNIQUE-HASH3"
 );
+INSERT INTO systemConfiguration (
+    label,
+    featureConfigurationId,
+    hdlId,
+    vulnerabilityConfigurationId,
+    customizationJson,
+    nixHash
+) VALUES (
+    "system-config-four",
+    (SELECT id FROM featureConfiguration WHERE label = "feat-config-three" LIMIT 1),
+    (SELECT fm.hdlId FROM featureModel AS fm, featureConfiguration AS fc WHERE fc.featureModelId = fm.id AND fc.label = "feat-config-three" LIMIT 1),
+    (SELECT id FROM vulnerabilityConfiguration WHERE label = "vuln-config-two" LIMIT 1),
+    '{ "option": "another-different-choice" }',
+    "SOME-UTTERLY-UNIQUE-HASH4"
+);
 
 INSERT INTO systemConfiguration (
     label,
@@ -277,6 +292,14 @@ INSERT INTO testRun (
 ) VALUES (
     "test-run-in-progress",
     (SELECT id FROM systemConfiguration WHERE label = "system-config-three" LIMIT 1)
+);
+
+INSERT INTO testRun (
+    label,
+    systemConfigurationId
+) VALUES (
+    "test-run-failed",
+    (SELECT id FROM systemConfiguration WHERE label = "system-config-four" LIMIT 1)
 );
 
 INSERT INTO testRun ( -- minimum required data example
@@ -389,7 +412,7 @@ INSERT INTO job ( -- failed test run job
     logFilePath
 ) VALUES (
     (SELECT id FROM jobType WHERE label = "testRun" LIMIT 1),
-    (SELECT id FROM testRun WHERE label = "test-run-two" LIMIT 1),
+    (SELECT id FROM testRun WHERE label = "test-run-failed" LIMIT 1),
     (SELECT id FROM jobStatus WHERE label = "failed" LIMIT 1),
     "/some/path/to/failed/jlog/file.log"
 );
@@ -398,10 +421,12 @@ INSERT INTO job ( -- running system configuration job
     jobTypeId,
     objectId,
     nixHash,
+    derivationJson,
     statusId
 ) VALUES (
     (SELECT id FROM jobType WHERE label = "systemConfiguration" LIMIT 1),
     (SELECT id FROM systemConfiguration WHERE label = "system-config-in-progress" LIMIT 1),
     "SOME-IMPROBABLY-UNIQUE-HASH7",
+    '{ "derivation": "value8" }',
     (SELECT id FROM jobStatus WHERE label = "running" LIMIT 1)
 );

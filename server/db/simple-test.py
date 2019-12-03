@@ -1,6 +1,8 @@
 import sqlite3
 
-conn = sqlite3.connect(':memory:')
+# db_conn_str = './test.db'
+db_conn_str = ':memory:'
+conn = sqlite3.connect(db_conn_str)
 c = conn.cursor()
 
 try:
@@ -16,8 +18,8 @@ try:
     
     print('running sample queries...')
     with open('./sample-queries.sql') as f:
-        dbQueries = f.read().splitlines()
-        for query in dbQueries:
+        db_queries = f.read().splitlines()
+        for query in db_queries:
             if query.startswith('--'):
                 print('running queries "' + query.replace('--', '') + '" queries')
             elif not query.isspace():
