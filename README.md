@@ -57,11 +57,20 @@ features of the configurator are:
    system and to change the set of features selected, click on
    "Overview" in the sidebar and select the model to configure.
 
+### Note on UI
+
+The UI has it's own [README.md](./client/README.md) that details it's structure
+
+## Configurator API
+
+All api routes are prefixed with `/api`. You can access an interactive Swagger UI to explore the API via `http://0.0.0.0:3784/api/doc`
+
 ## Requirements
 
 - `python3`
 - `pip3`
 - `flask`, restful APIs framework:
+- `nodejs`
 ```
 pip3 install flask
 ```
@@ -82,11 +91,40 @@ setting the environment variable `BESSPIN_CLAFER`:
 BESSPIN_CLAFER=<path-to-clafer> python3 server_flask.py
 ```
 
-
 The UI is accessible at the url:
 ```
 http://localhost:3784/
 ```
+
+### Build Docker image
+
+To build the docker image, you need to provide some `personal access
+token` credentials to access the gitlab repos. This is done by
+providing the environment variables to the docker `docker build`
+command:
+
+- `TOKEN_NAME` for the name of the personal access token
+- `PRIVATE_TOKEN` the private token value
+
+```
+docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
+```
+
+### Running in Docker
+
+There is an included `docker-compose` for spinning up a containerized instance of the server and UI:
+
+```
+$ docker-compose up
+```
+
+#### ENV vars
+
+There are a few environment variables that can be set to configure how the server runs:
+
+ * PORT: the port to expose (this should map to the first port mentioned in the `-p` argument to docker)
+ * HOST: the host to run flask on (defaults to `0.0.0.0` so you can access the server within docker)
+ * DEBUG: flag to run flask in debug mode (defaults to `True`)
 
 ## Architecture
 
@@ -103,4 +141,3 @@ Client Side:
 - Dashboard UI
 
 ![alt text](images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
-
