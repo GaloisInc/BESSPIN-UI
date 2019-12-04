@@ -169,7 +169,7 @@ configContentModel = api.model('Config Content', {
 
 configModel = api.model('Config', {
     'uid': fields.String,
-    'content': fields.List(fields.Nested(configContentModel))
+    'content': fields.Nested(configContentModel)
 })
 
 featureModelVersion = api.model('Feature Model Version', {
