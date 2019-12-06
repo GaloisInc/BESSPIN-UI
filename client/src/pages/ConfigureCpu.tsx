@@ -88,7 +88,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
             fetchSystem(systemUid);
         } else if (system && system.conftree) {
             setConfiguratorModel(system.conftree);
-            setCurrentSelections(system.configs ? system.configs : []);
+            setCurrentSelections(system.configs);
             setSelectionUndos([]);
         }
     }, [systemUid, fetchSystem, system]);

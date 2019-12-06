@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { IFeatureModel } from '../components/graph-helper';
 
 export interface ISystemEntry {
-    configs?: ISelectionType[];
+    configs: ISelectionType[];
     conftree?: IFeatureModel;
     createdAt: string;
     featureCount: number;
@@ -209,9 +209,9 @@ export const reducer = (state = DEFAULT_STATE, action: ISystemAction): ISystemSt
                     ...state.systems,
                     [action.data.uid]: {
                         ...state.systems[action.data.uid],
-                        configs: (state.systems[action.data.uid].configs ?
-                                    state.systems[action.data.uid].configs as ISelectionType[] :
-                                    []).concat(action.data.validated_selection),
+                        configs: state.systems[action.data.uid].configs.concat(
+                            action.data.validated_selection
+                        ),
                     }
                 }
             }

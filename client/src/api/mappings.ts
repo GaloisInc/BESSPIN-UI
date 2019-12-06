@@ -44,17 +44,6 @@ const mapSelectionMode = (mode: string): SelectionMode => {
 };
 
 export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEntry => {
-    const configs = configurator.configs ? configurator.configs.map<ISelectionType>((c: IConfig) => {
-        // TOOD: is this correct? do we only need to take the most recent value?
-        const mostRecentContent = c;
-        return {
-            uid: c.uid,
-            mode: mapSelectionMode(mostRecentContent.mode),
-            other: mostRecentContent.other,
-            isValid: mostRecentContent.validated,
-        };
-    }) : null;
-
     return {
         uid: configurator.uid,
         createdAt: configurator.date,
@@ -62,7 +51,7 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
         featureCount: configurator.nb_features_selected,
         filename: configurator.filename,
         conftree: configurator.conftree,
-        ...(configs ? { configs } : null),
+        configs: configurator.configs.map(mapIConfigToISelectionType),
     };
 };
 
@@ -71,6 +60,29 @@ export const mapConfiguratorsToSystems = (configurators: IConfigurator[]): ISyst
         ...configurators,
         [c.uid]: mapConfiguratorToSystem(c),
     }), {});
+};
+
+const mapIConfigToISelectionType = (c: IConfig): ISelectionType => {
+    return {
+        uid: c.uid,
+        mode: mapSelectionMode(c.mode),
+        other: c.other,
+        isValid: c.validated,
+    }
+
+}
+
+export const mapValidateRequestForServer = (validateRequest: ISelectionType[]): IConfig[] => {
+    const configs = validateRequest.map<IConfig>((c: ISelectionType) => {
+        return {
+            uid: c.uid,
+            mode: mapSelectionMode(c.mode),
+            other: c.other,
+            validated: c.isValid,
+        };
+    });
+
+    return configs;
 };
 
 export const mapValidateResponse = (validateResponse: IValidateResponse): IValidateResponse => {
