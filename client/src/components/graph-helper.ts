@@ -12,7 +12,14 @@ import {
 import {
     ISelectionMap,
     SelectionMode,
+    ISystemEntry,
+    selectFeature,
+    ISelection,
 } from '../state/system';
+
+import {
+    selection_search,
+} from '../state/selection';
 
 export interface IFeature {
     gcard: string;
@@ -42,7 +49,14 @@ export interface IFeatureModel {
     version: IFeatureModelVersion;
 }
 
-export type SelectFeatureCallback = (uid: string, mode: SelectionMode, other: string, isValid: boolean) => void;
+export const DEFAULT_FEATURE_MODEL: IFeatureModel = {
+    constraints: [],
+    features: {},
+    roots: [],
+    version: { base: -1 },
+}
+
+export type SelectFeatureCallback = typeof selectFeature;
 
 enum SelectionColors {
     on = '#ddffdd', // green
@@ -81,7 +95,7 @@ const getColor = (card: string, mode?: SelectionMode): SelectionColors => {
     }
 };
 
-const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap): Data => {
+const mapModelToTree = (featureModel: IFeatureModel, selections: ISelection): Data => {
 
     const featureIds = Object.keys(featureModel.features);
 
@@ -90,7 +104,9 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelectionMap):
 
         if (!feature) return acc;
 
-        const mode = selections[featureId] ? selections[featureId].mode : undefined;
+        const mode = selection_search(selections, featureId).uid !== "notFound" ?
+                        selection_search(selections, featureId).mode :
+                        undefined;
         const card = feature.card;
         const color = getColor(card, mode);
 
@@ -129,7 +145,7 @@ export const graphFeatureModel = (
     domNode: HTMLDivElement,
     featureModel: IFeatureModel,
     selectFeature: SelectFeatureCallback,
-    currentSelections: ISelectionMap,
+    system: ISystemEntry,
 ) => {
 
     const options = {
@@ -156,17 +172,16 @@ export const graphFeatureModel = (
     if (hasVisDOM) {
         data.nodes.forEach((n: Node) => {
             const { id } = n;
-
             if (id) {
                 const { card } = featureModel.features[id];
-                const selection = currentSelections[id];
-                const color = getColor(card, selection ? selection.mode : undefined);
+                const selection = selection_search(system.configs, featureModel.features[id].name);
+                const color = getColor(card, selection.uid !== 'notFound' ? selection.mode : undefined);
 
                 data.nodes.update({ id, color });
             }
         });
     } else {
-        data = mapModelToTree(featureModel, currentSelections);
+        data = mapModelToTree(featureModel, system ? system.configs : []);
         network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
     }
 
@@ -176,23 +191,7 @@ export const graphFeatureModel = (
 
         if (nodeId == null) return; // short-circuit for non-selection click
 
-        const selectedNode = featureModel.features[nodeId];
-
-        if (selectedNode && selectedNode.card === SELECTABLE_CARD) {
-            const mode = currentSelections[nodeId] ? currentSelections[nodeId].mode : SelectionMode.unselected;
-            switch (mode) {
-                case SelectionMode.unselected:
-                    selectFeature(nodeId, SelectionMode.selected, nodeId, false);
-                    return;
-                case SelectionMode.selected:
-                    selectFeature(nodeId, SelectionMode.rejected, nodeId, false);
-                    return;
-                case SelectionMode.rejected:
-                    selectFeature(nodeId, SelectionMode.unselected, nodeId, false);
-                    return;
-                default:
-                    console.error(`Unknown selection state (${mode})`);
-            }
-        }
+        selectFeature(system.uid, nodeId);
+        return;
     });
 };

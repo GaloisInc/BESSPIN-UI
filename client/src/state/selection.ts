@@ -54,6 +54,10 @@ export function selection_reset(this_selection: ISelection, uid: string): ISelec
     return [];
 };
 
+export function selection_top(this_selection: ISelection) : ISelectionType {
+    return this_selection[0];
+};
+
 export function selection_push(
         this_selection: ISelection,
         uid: string,

@@ -264,7 +264,7 @@ class ConfiguratorConfigure(Resource):
         uid = data['uid']
         feature_selection = data['feature_selection']
         entry = retrieve_model_from_db_by_uid(uid)
-        file_content = entry['source']
+        file_content = entry.get('source', '')
         conftree = entry['conftree']
         configs = feature_selection
         validated_features = configuration_algo(

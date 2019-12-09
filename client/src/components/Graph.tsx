@@ -4,6 +4,7 @@ import '../style/Graph.scss';
 
 import {
     ISelectionMap,
+    ISystemEntry,
 } from '../state/system';
 
 import {
@@ -13,15 +14,15 @@ import {
 } from './graph-helper';
 
 export interface IGraphProps {
+    system: ISystemEntry;
     data?: IFeatureModel;
     selectFeature: SelectFeatureCallback;
-    currentSelections: ISelectionMap;
 }
 
 export const Graph: React.FC<IGraphProps> = ({
+    system,
     data: treeData,
     selectFeature,
-    currentSelections,
 }) => {
 
     const visContainer = useRef(null) as RefObject<HTMLDivElement>;
@@ -36,8 +37,8 @@ export const Graph: React.FC<IGraphProps> = ({
 
         if (!hasDataToRender) return;
 
-        graphFeatureModel(ref, treeData, selectFeature, currentSelections);
-    }, [treeData, visContainer, selectFeature, currentSelections]);
+        graphFeatureModel(ref, treeData, selectFeature, system);
+    }, [treeData, visContainer, selectFeature, system]);
 
     return (
         <div

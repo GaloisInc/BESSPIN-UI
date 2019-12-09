@@ -14,12 +14,18 @@ export interface IConfigurator {
     filename: string,
     date: string,
     last_update: string,
-    nb_features_selected: number;
-    configs: IConfig[];
-    configs_pp: string;
-    configured_feature_model: IFeatureMap;
-    conftree: IFeatureModel;
-    source: string;
+    nb_features_selected: number,
+    configs: IConfig[],
+    configs_pp: string,
+    configured_feature_model: IFeatureMap,
+    conftree: IFeatureModel,
+    source: string,
+}
+
+export interface IUploadResponse {
+    uid: string,
+    tree: IFeatureModel,
+    configured_feature_model: IFeatureMap,
 }
 
 export interface IValidateResponse {
@@ -51,9 +57,24 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
         featureCount: configurator.nb_features_selected,
         filename: configurator.filename,
         conftree: configurator.conftree,
-        configs: configurator.configs.map(mapIConfigToISelectionType),
+        configs: configurator.configs ? configurator.configs.map(mapIConfigToISelectionType): [],
+        selectionUndos: [],
     };
 };
+
+export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): ISystemEntry => {
+    return {
+        uid: configurator.uid,
+        createdAt: "",
+        lastUpdate: "",
+        featureCount: -1,
+        filename: "",
+        conftree: configurator.tree,
+        configs: [],
+        selectionUndos: [],
+    };
+};
+
 
 export const mapConfiguratorsToSystems = (configurators: IConfigurator[]): ISystemMap => {
     return configurators.reduce((configurators: ISystemMap, c: IConfigurator) => ({

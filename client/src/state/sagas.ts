@@ -14,7 +14,9 @@ import {
 import {
     mapConfiguratorToSystem,
     mapConfiguratorsToSystems,
+    mapUploadConfiguratorToSystem,
     mapValidateResponse,
+    mapValidateRequestForServer,
 } from '../api/mappings';
 
 import {
@@ -57,11 +59,8 @@ function* fetchSystems() {
 function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
     try {
         const configurator = yield call(submitConfigurator, action.data.systemName, action.data.systemJsonString);
-        console.log(configurator);
-        const mappedConfigurator = mapConfiguratorToSystem(configurator);
+        const mappedConfigurator = mapUploadConfiguratorToSystem(configurator);
         yield put(submitSystemSuccess(mappedConfigurator));
-
-        yield call(fetchSystems);
     } catch (e) {
         console.error(e);
         yield put(submitSystemFailure(e.message));
@@ -70,14 +69,14 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
 
 function* submitValidateConfiguration(action: ReturnType<typeof submitValidateConfigurationAction>) {
     try {
+        const selectionServer = mapValidateRequestForServer(action.data.selection);
         const validateResponse = yield call(
             submitValidateConfigurationFunction,
             action.data.uid,
-            action.data.selection,
+            selectionServer,
         );
         const mappedConfigurator = mapValidateResponse(validateResponse);
         yield put(submitValidateConfigurationSuccess(action.data.uid, mappedConfigurator.validated_features));
-        console.log(validateResponse);
     } catch (e) {
         console.error(e);
         yield put(submitValidateConfigurationFailure(e.message));
@@ -86,7 +85,7 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
 
 // Register all the actions that should trigger our sagas
 export function* rootSaga() {
-    yield takeLatest(SystemActionTypes.SUBMIT_TEST_SYSTEM, submitSystem);
+    yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEMS, fetchSystems);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
