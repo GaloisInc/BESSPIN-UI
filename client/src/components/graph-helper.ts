@@ -10,7 +10,6 @@ import {
 } from 'vis-network';
 
 import {
-    ISelectionMap,
     SelectionMode,
     ISystemEntry,
     selectFeature,
@@ -191,7 +190,7 @@ export const graphFeatureModel = (
 
         if (nodeId == null) return; // short-circuit for non-selection click
 
-        selectFeature(system.uid, nodeId);
+        selectFeature(nodeId);
         return;
     });
 };

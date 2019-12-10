@@ -1,4 +1,3 @@
-import { createSelector } from 'reselect';
 import { IFeatureModel, DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
 import {
@@ -176,31 +175,26 @@ export const submitSystemSuccess = (system: ISystemEntry) => {
 };
 
 
-export const selectFeature = (systemUid: string, uid: string) => {
+export const selectFeature = (uid: string) => {
     return {
         type: SystemActionTypes.SELECT_FEATURE,
         data: {
-            systemUid,
             uid,
         }
     } as const;
 };
 
-export const selectFeatureUndo = (uid: string) => {
+export const selectFeatureUndo = () => {
     return {
         type: SystemActionTypes.UNDO_SELECT_FEATURE,
-        data: {
-            uid,
-        }
+        data: {}
     } as const;
 };
 
-export const selectFeatureRedo = (uid: string) => {
+export const selectFeatureRedo = () => {
     return {
         type: SystemActionTypes.REDO_SELECT_FEATURE,
-        data: {
-            uid,
-        }
+        data: {}
     } as const;
 };
 
@@ -259,33 +253,27 @@ function circle_selection(conftree: IFeatureModel, selected_nodes: ISelection, u
 
     if (selection_mem(selected_nodes, uid)) {
         switch (selection_get_mode(selected_nodes, uid)) {
-        case SelectionMode.selected: {
-            newsel = selection_change_mode(selected_nodes, uid, SelectionMode.rejected);
-            newsel = selection_change_validated(newsel, uid, false);
-            return newsel;
-        };
-        case SelectionMode.rejected: {
-            newsel = selection_remove(selected_nodes, uid);
-            return newsel;
-        };
+            case SelectionMode.selected:
+                newsel = selection_change_mode(selected_nodes, uid, SelectionMode.rejected);
+                newsel = selection_change_validated(newsel, uid, false);
+                return newsel;
+            case SelectionMode.rejected:
+                newsel = selection_remove(selected_nodes, uid);
+                return newsel;
         };
     }
 
     switch (thenode.card) {
-    case 'on': {
-        return selected_nodes;
-    };
-    case 'off': {
-        return selected_nodes;
-    };
-    case 'opt': {
-        newsel = selection_push(selected_nodes, uid, SelectionMode.selected, uid, false);
-        return newsel;
-    };
-    default: {
-        alert('no choice!');
-        return selected_nodes;
-    }
+        case 'on':
+            return selected_nodes;
+        case 'off':
+            return selected_nodes;
+        case 'opt':
+            newsel = selection_push(selected_nodes, uid, SelectionMode.selected, uid, false);
+            return newsel;
+        default:
+            alert('no choice!');
+            return selected_nodes;
     };
 };
 

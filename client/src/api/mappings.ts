@@ -57,7 +57,12 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
         featureCount: configurator.nb_features_selected,
         filename: configurator.filename,
         conftree: configurator.conftree,
-        configs: configurator.configs ? configurator.configs.map(mapIConfigToISelectionType): [],
+        configs:
+            // TODO this boolean expression is for backward compatibility
+            // Should remove it eventually
+            configurator.configs ?
+            configurator.configs.map(mapIConfigToISelectionType):
+            [],
         selectionUndos: [],
     };
 };

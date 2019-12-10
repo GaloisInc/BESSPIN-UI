@@ -12,22 +12,17 @@ import {
 } from 'react-bootstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons'
+import { faUndo, faRedo, faPlus} from '@fortawesome/free-solid-svg-icons'
 
 import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
 
 import {
     fetchSystem,
-    getSystems,
     getSystem,
-    ISelectionMap,
     ISystemEntry,
     submitSystem,
-    ISelectionType,
-    SelectionMode,
     submitValidateConfiguration,
-    ISelection,
     selectFeature,
     selectFeatureUndo,
     selectFeatureRedo,
@@ -59,13 +54,6 @@ const DEFAULT_FEATURE_MODEL: IFeatureModel = {
     version: { base: 1 },
 };
 
-
-const mapSelectionsByUid = (selections: ISelectionType[]): ISelectionMap => {
-    return selections.reduce((acc: ISelectionMap, s: ISelectionType) => {
-        if (!acc[s.uid]) acc[s.uid] = s;
-        return acc;
-    }, {})
-};
 
 export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     submitSystem,
@@ -128,9 +116,6 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                 <Form.Row>
                     <Col>
                         <InputGroup>
-                            <InputGroup.Prepend onClick={ onSubmitHandler }>
-                                <InputGroup.Text id='new-model-upload'>Upload Model</InputGroup.Text>
-                            </InputGroup.Prepend>
                             <div className='custom-file'>
                                 <Form.Control
                                     as='input'
@@ -145,20 +130,30 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                             </div>
                         </InputGroup>
                     </Col>
+                    <Col>
+                        <Button
+                            className="btn btn-light btn-outline-secondary"
+                            onClick={ onSubmitHandler }>
+                            <FontAwesomeIcon icon={ faPlus }/>
+                            <span> Upload Model </span>
+                        </Button>
+                    </Col>
                 </Form.Row>
             </Form>
             <ButtonGroup className="mr-2" aria-label="First group">
                 <Button
+                    className="btn-light btn-outline-secondary"
                     onClick={ () => {
-                        selectFeatureUndo(systemUid);
+                        selectFeatureUndo();
                     } }
                 >
                     <FontAwesomeIcon icon={faUndo} />
                     Undo
                 </Button>
                 <Button
+                    className="btn-light btn-outline-secondary"
                     onClick={ () => {
-                        selectFeatureRedo(systemUid);
+                        selectFeatureRedo();
                     } }
                 >
                     Redo
@@ -166,6 +161,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                 </Button>
             </ButtonGroup>
             <Button
+                    className="btn btn-primary"
                     onClick={ () => { submitValidateConfiguration(system.uid, system.configs) } }
             >
                     Validate

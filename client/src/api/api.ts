@@ -1,10 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
 import {
-    ISelectionType,
-} from '../state/system';
-
-import {
     IConfig,
 } from '../api/mappings';
 

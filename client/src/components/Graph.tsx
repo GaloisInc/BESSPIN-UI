@@ -3,7 +3,6 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import '../style/Graph.scss';
 
 import {
-    ISelectionMap,
     ISystemEntry,
 } from '../state/system';
 
