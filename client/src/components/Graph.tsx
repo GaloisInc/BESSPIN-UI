@@ -14,13 +14,11 @@ import {
 
 export interface IGraphProps {
     system: ISystemEntry;
-    data?: IFeatureModel;
     selectFeature: SelectFeatureCallback;
 }
 
 export const Graph: React.FC<IGraphProps> = ({
     system,
-    data: treeData,
     selectFeature,
 }) => {
 
@@ -28,6 +26,7 @@ export const Graph: React.FC<IGraphProps> = ({
 
     useEffect(() => {
         const ref = visContainer ? visContainer.current : null;
+        const treeData = system.conftree;
 
         if (!ref) return;
         if (!treeData) return;
@@ -36,8 +35,15 @@ export const Graph: React.FC<IGraphProps> = ({
 
         if (!hasDataToRender) return;
 
-        graphFeatureModel(ref, treeData, selectFeature, system);
-    }, [treeData, visContainer, selectFeature, system]);
+        graphFeatureModel(
+            ref,
+            selectFeature,
+            system);
+    }, [
+        visContainer,
+        selectFeature,
+        system
+    ]);
 
     return (
         <div

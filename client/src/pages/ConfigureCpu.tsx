@@ -168,7 +168,6 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
             </Button>
             <Graph
                 system={ system }
-                data={ configuratorModel }
                 selectFeature={ selectFeature }
             />
         </Container>

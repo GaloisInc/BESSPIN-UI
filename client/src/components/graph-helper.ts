@@ -153,7 +153,6 @@ let data: Data;
 
 export const graphFeatureModel = (
     domNode: HTMLDivElement,
-    featureModel: IFeatureModel,
     selectFeature: SelectFeatureCallback,
     system: ISystemEntry,
 ) => {
@@ -183,13 +182,13 @@ export const graphFeatureModel = (
         data.nodes.forEach((n: Node) => {
             const { id } = n;
             if (id) {
-                const { card } = featureModel.features[id];
-                const color = getColor(card, system.configs, featureModel.features[id].name);
+                const { card } = system.conftree.features[id];
+                const color = getColor(card, system.configs, system.conftree.features[id].name);
                 data.nodes.update({ id, color });
             }
         });
     } else {
-        data = mapModelToTree(featureModel, system ? system.configs : []);
+        data = mapModelToTree(system.conftree, system ? system.configs : []);
         network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
     }
 
