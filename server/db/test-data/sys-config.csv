@@ -1,6 +1,6 @@
 "sysConfigId","hdlId","featConfigId","osId","toolChainId","label","nixConfig"
 1,1,1,5,10,"system configuration one","{'os':'windows 95'}"
-2,2,2,6,11,"system configuration two","{'os':"palmos'}"
+2,2,2,6,11,"system configuration two","{'os':'palmos'}"
 3,3,2,7,10,"system configuration three","{'os':'windows ME'}"
 4,2,,8,11,"system configuration four with no feature config","{'os':'os/2'}"
 5,2,1,9,10,"system configuration in progress","{'os':'GM-NAA I/O'}"
