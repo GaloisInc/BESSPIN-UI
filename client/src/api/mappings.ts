@@ -1,4 +1,4 @@
-import { ISelectionType, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
+import { ISelection, ISelectionType, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
 import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
 
 
@@ -31,7 +31,7 @@ export interface IUploadResponse {
 export interface IValidateResponse {
     server_source: string,
     server_constraints: string,
-    validated_features: ISelectionType[],
+    validated_features: IConfig[],
     configured_feature_model: IFeatureMap,
 }
 
@@ -111,6 +111,6 @@ export const mapValidateRequestForServer = (validateRequest: ISelectionType[]): 
     return configs;
 };
 
-export const mapValidateResponse = (validateResponse: IValidateResponse): IValidateResponse => {
-    return validateResponse;
+export const mapValidateResponse = (validateResponse: IValidateResponse): ISelection => {
+    return validateResponse.validated_features.map(mapIConfigToISelectionType);
 };

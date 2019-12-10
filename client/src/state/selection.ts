@@ -1,8 +1,3 @@
-/*import {
-    concat,
-    findIndex,
-} from 'lodash';
-*/
 import {
     SelectionMode,
     ISelectionType,

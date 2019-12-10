@@ -61,21 +61,35 @@ enum SelectionColors {
     on = '#ddffdd', // green
     off = '#ffdddd', // red
     opt = '#ffffff', // white
-    validSelected = '#99ff99',  // green
-    invalidSelected = '#00dd00', // green
-    validRejected = '#ff9999', // red
-    invalidRejected = '#dd0000', // red
+    validatedSelected = '#99ff99',  // green
+    notValidatedSelected = '#00dd00', // green
+    validatedRejected = '#ff9999', // red
+    notValidatedRejected = '#dd0000', // red
 }
 
 const SELECTABLE_CARD = 'opt';
 
-const getColor = (card: string, mode?: SelectionMode): SelectionColors => {
-    if (mode) {
+const getColor = (card: string, configs: ISelection, uid: string): SelectionColors => {
+    const config = selection_search(configs, uid);
+    const inSelection = config.uid !== "notFound" ? true : false;
+    const isValidated = config.isValid;
+    const mode = config.mode;
+
+    if (inSelection) {
+        console.log(isValidated);
         switch (mode) {
-            case SelectionMode.selected:
-                return SelectionColors.validSelected;
-            case SelectionMode.rejected:
-                return SelectionColors.validRejected;
+            case SelectionMode.selected: {
+                if (isValidated)
+                    return SelectionColors.validatedSelected;
+                else
+                    return SelectionColors.notValidatedSelected;
+            }
+            case SelectionMode.rejected: {
+                if (isValidated)
+                    return SelectionColors.validatedRejected;
+                else
+                    return SelectionColors.notValidatedRejected;
+            }
             default:
                 return SelectionColors.opt;
         }
@@ -103,11 +117,8 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelection): Da
 
         if (!feature) return acc;
 
-        const mode = selection_search(selections, featureId).uid !== "notFound" ?
-                        selection_search(selections, featureId).mode :
-                        undefined;
         const card = feature.card;
-        const color = getColor(card, mode);
+        const color = getColor(card, selections, featureId);
 
         if (acc.nodes) (acc.nodes as DataSet<Node>).add({
             id: featureId,
@@ -173,9 +184,7 @@ export const graphFeatureModel = (
             const { id } = n;
             if (id) {
                 const { card } = featureModel.features[id];
-                const selection = selection_search(system.configs, featureModel.features[id].name);
-                const color = getColor(card, selection.uid !== 'notFound' ? selection.mode : undefined);
-
+                const color = getColor(card, system.configs, featureModel.features[id].name);
                 data.nodes.update({ id, color });
             }
         });
