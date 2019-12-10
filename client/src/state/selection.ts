@@ -6,6 +6,10 @@ import {
 
 export type ISelection = ISelectionType[]
 
+export function selection_is_empty(this_selection: ISelection): boolean {
+    return this_selection.length === 0;
+};
+
 export function selection_mem(this_selection: ISelection, uid: string): boolean {
     var sel = this_selection.find(entry => entry.uid === uid);
     if (sel === undefined) {

@@ -11,6 +11,7 @@ import {
     selection_change_mode,
     selection_change_validated,
     selection_mem,
+    selection_is_empty,
 } from '../state/selection';
 
 export interface ISystemEntry {
@@ -328,6 +329,9 @@ export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISyst
         case SystemActionTypes.UNDO_SELECT_FEATURE: {
             const configs = state.system.configs;
             const undos = state.system.selectionUndos;
+            if (selection_is_empty(configs)) {
+                return { ...state }
+            }
             const elm = selection_top(configs);
             return {
                 ...state,
@@ -341,6 +345,9 @@ export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISyst
         case SystemActionTypes.REDO_SELECT_FEATURE:
             const configs = state.system.configs;
             const undos = state.system.selectionUndos;
+            if (selection_is_empty(undos)) {
+                return { ...state }
+            }
             const elm = selection_top(undos);
             return {
                 ...state,
