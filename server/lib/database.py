@@ -16,10 +16,19 @@ log = logging.getLogger('lib.database')
 
 # pylint: disable=invalid-name
 
-XDG_DATA_HOME = os.environ.get('XDG_DATA_HOME', os.path.join(__file__, '..', '..', 'db'))
-BESSPIN_DATA_HOME = os.path.abspath(os.path.join(XDG_DATA_HOME, 'besspin'))
-os.makedirs(BESSPIN_DATA_HOME, exist_ok=True)
-DATABASE = os.path.join(BESSPIN_DATA_HOME, 'configurator.db')
+
+# allow developers to specify a custom path to the directory for besspin data,
+# falling back to XDG_DATA_HOME (or a hard-coded version of what that normally would be)
+DB_PATH = os.environ.get(
+    'DB_PATH',
+    os.environ.get(
+        'XDG_DATA_HOME',
+        os.path.expanduser('~/.local/share')
+    )
+)
+DB_PATH = os.path.abspath(os.path.join(DB_PATH, 'besspin'))
+os.makedirs(DB_PATH, exist_ok=True)
+DATABASE = os.path.join(DB_PATH, 'configurator.db')
 SCHEMA_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'db', 'schema.sql'))
 
 DB_INSERT = """INSERT INTO feature_models VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""

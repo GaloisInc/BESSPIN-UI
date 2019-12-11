@@ -18,7 +18,7 @@ SELECT
 	scj.logFilePath,
 	scj.nixStorePath
 FROM
-	systemConfigurations sc
+	systemConfigurationInputs sc
 JOIN
 	(
 		SELECT

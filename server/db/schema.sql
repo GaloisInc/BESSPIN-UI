@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS versionedResources (
     CONSTRAINT uniqueUrlVersion UNIQUE (url, version)
 );
 
-CREATE TABLE IF NOT EXISTS architectureModels (
+CREATE TABLE IF NOT EXISTS architectureModelInputs (
 	archModelId INTEGER PRIMARY KEY AUTOINCREMENT,
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS architectureModels (
 	hdlId INTEGER UNIQUE NOT NULL REFERENCES versionedResources (resourceId) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS featureModels (
+CREATE TABLE IF NOT EXISTS featureModelInputs (
 	featModelId INTEGER PRIMARY KEY AUTOINCREMENT,
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -34,17 +34,17 @@ CREATE TABLE IF NOT EXISTS featureModels (
 	hdlId INTEGER UNIQUE NOT NULL REFERENCES versionedResources (resourceId) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS featureConfigurations (
+CREATE TABLE IF NOT EXISTS featureConfigurationInputs (
 	featConfigId INTEGER PRIMARY KEY AUTOINCREMENT,
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	featModelId INTEGER NOT NULL REFERENCES featureModels (featModelId) ON DELETE CASCADE, -- can have many configurations for a model
+	featModelId INTEGER NOT NULL REFERENCES featureModelInputs (featModelId) ON DELETE CASCADE, -- can have many configurations for a model
 	configurationJson TEXT, -- JSON generated during feature configuration
 	CONSTRAINT uniqueFeatConfig UNIQUE (featModelId, configurationJson)
 );
 
-CREATE TABLE IF NOT EXISTS vulnerabilityConfigurations (
+CREATE TABLE IF NOT EXISTS vulnerabilityConfigurationInputs (
 	vulnConfigId INTEGER PRIMARY KEY AUTOINCREMENT,
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -52,12 +52,12 @@ CREATE TABLE IF NOT EXISTS vulnerabilityConfigurations (
 	configuration TEXT UNIQUE -- QUESTION: I have this as a text blob to store the actual configuration, but will we have a job to parse this and generate a test-config artifact?
 );
 
-CREATE TABLE IF NOT EXISTS systemConfigurations (
+CREATE TABLE IF NOT EXISTS systemConfigurationInputs (
 	sysConfigId INTEGER PRIMARY KEY AUTOINCREMENT,
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	featConfigId INTEGER REFERENCES featureConfigurations (featConfigId) ON DELETE SET NULL, -- if null, it implies they are using the configuration implicit in the HDL
+	featConfigId INTEGER REFERENCES featureConfigurationInputs (featConfigId) ON DELETE SET NULL, -- if null, it implies they are using the configuration implicit in the HDL
 	hdlId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL, -- QUESTION: I assume we need to point to the HDL in the case there is no feature configuration, but should it always be present (i.e. if you delete the HDL, this row is meaningless)?
 	osId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL, -- QUESTION: same as above
 	toolChainId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL, -- QUESTION: same as above
@@ -65,13 +65,13 @@ CREATE TABLE IF NOT EXISTS systemConfigurations (
 	CONSTRAINT uniqueSystemConfig UNIQUE (featConfigId, hdlId, osId, toolChainId, nixConfig)
 );
 
-CREATE TABLE IF NOT EXISTS testRuns (
+CREATE TABLE IF NOT EXISTS testRunInputs (
 	testRunId INTEGER PRIMARY KEY AUTOINCREMENT,
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	sysConfigId INTEGER NOT NULL REFERENCES systemConfigurations (sysConfigId) ON DELETE SET NULL, -- QUESTION: here, I am assuming we want to keep test results even if the system-config/vuln-config get deleted
-	vulnConfigId INTEGER REFERENCES vulnerabilityConfigurations (vulnConfigId) ON DELETE SET NULL,
+	sysConfigId INTEGER NOT NULL REFERENCES systemConfigurationInputs (sysConfigId) ON DELETE SET NULL, -- QUESTION: here, I am assuming we want to keep test results even if the system-config/vuln-config get deleted
+	vulnConfigId INTEGER REFERENCES vulnerabilityConfigurationInputs (vulnConfigId) ON DELETE SET NULL,
 	CONSTRAINT uniqueTestRun UNIQUE (sysConfigId, vulnConfigId) -- there should be a 1:1 relationship between the test inputs and the run
 );
 
@@ -97,22 +97,22 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE TABLE IF NOT EXISTS architectureExtractionJobs (
     jobId INTEGER PRIMARY KEY REFERENCES jobs(jobId),
-    archModelId INTEGER NOT NULL REFERENCES architectureModels(archModelId) ON DELETE CASCADE -- QUESTION: should we remove all jobs when the object is deleted?
+    archModelId INTEGER NOT NULL REFERENCES architectureModelInputs(archModelId) ON DELETE CASCADE -- QUESTION: should we remove all jobs when the object is deleted?
 );
 
 CREATE TABLE IF NOT EXISTS featureExtractionJobs (
     jobId INTEGER PRIMARY KEY REFERENCES jobs(jobId),
-    featModelId INTEGER NOT NULL REFERENCES featureModels(featModelId)
+    featModelId INTEGER NOT NULL REFERENCES featureInputs(featModelId)
 );
 
 CREATE TABLE IF NOT EXISTS featureConfigurationJobs (
     jobId INTEGER PRIMARY KEY REFERENCES jobs(jobId),
-    featConfigId INTEGER NOT NULL REFERENCES featureConfigurations(featConfigId)
+    featConfigId INTEGER NOT NULL REFERENCES featureConfigurationInputs(featConfigId)
 );
 
 CREATE TABLE IF NOT EXISTS vulnerabilityConfigurationJobs (
     jobId INTEGER PRIMARY KEY REFERENCES jobs(jobId),
-    vulnConfigId INTEGER NOT NULL REFERENCES vulnerabilityConfigurations(vulnConfigId)
+    vulnConfigId INTEGER NOT NULL REFERENCES vulnerabilityConfigurationInputs(vulnConfigId)
 );
 
 CREATE TABLE IF NOT EXISTS systemConfigurationJobs (
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS systemConfigurationJobs (
 -- QUESTION: should test-runs be implicitly a part of system configuration?
 CREATE TABLE IF NOT EXISTS testRunJobs (
     jobId INTEGER PRIMARY KEY REFERENCES jobs(jobId),
-    testRunId INTEGER NOT NULL REFERENCES testRuns(testRunId)
+    testRunId INTEGER NOT NULL REFERENCES testRunInputs(testRunId)
 );
 
 -- LEGACY SCHEMA (adding so we have it available until we are ready to convert to our new model)

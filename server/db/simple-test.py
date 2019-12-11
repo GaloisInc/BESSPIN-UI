@@ -65,11 +65,11 @@ connection = conn.connection
 create_db(connection)
 load_csv(connection, 'jobs', 'job')
 load_csv(connection, 'versionedResources', 'versioned-resource')
-load_csv(connection, 'architectureModels', 'arch-model')
+load_csv(connection, 'architectureModelInputs', 'arch-model')
 load_csv(connection, 'architectureExtractionJobs', 'arch-job')
-load_csv(connection, 'featureModels', 'feat-model')
+load_csv(connection, 'featureModelInputs', 'feat-model')
 load_csv(connection, 'featureExtractionJobs', 'feat-model-job')
-load_csv(connection, 'systemConfigurations', 'sys-config')
+load_csv(connection, 'systemConfigurationInputs', 'sys-config')
 load_csv(connection, 'systemConfigurationJobs', 'sys-job')
 
 for table_name in table_names:
