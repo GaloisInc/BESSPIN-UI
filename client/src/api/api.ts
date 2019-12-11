@@ -30,9 +30,11 @@ export const fetchConfigurator = async (systemUid: string) => {
         headers: {
             ...DEFAULT_HEADERS,
         },
+        /* eslint-disable camelcase */
         data: {
             model_uid: systemUid,
         },
+        /* eslint-enable camelcase */
     })
     .then(trapHTMLError)
     .then(extractData);
@@ -63,17 +65,19 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
     .then(extractData);
 }
 
-export const submitValidateConfiguration = async (uid: string, selected_nodes: IConfig[]) => {
+export const submitValidateConfiguration = async (uid: string, selectedNodes: IConfig[]) => {
     return axios.request({
         url: '/api/configurator/configure/',
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
         },
+        /* eslint-disable camelcase */
         data: JSON.stringify({
             uid: uid,
-            feature_selection: selected_nodes,
+            feature_selection: selectedNodes,
         }),
+        /* eslint-enable camelcase */
     })
     .then(trapHTMLError)
     .then(extractData);

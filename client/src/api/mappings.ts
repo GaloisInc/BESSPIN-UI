@@ -9,6 +9,7 @@ export interface IConfig {
     validated: boolean;
 }
 
+/* eslint-disable camelcase */
 export interface IConfigurator {
     uid: string,
     filename: string,
@@ -34,6 +35,7 @@ export interface IValidateResponse {
     validated_features: IConfig[],
     configured_feature_model: IFeatureMap,
 }
+/* eslint-enable camelcase */
 
 const mapSelectionMode = (mode: string): SelectionMode => {
     switch (mode) {
