@@ -8,7 +8,6 @@ import {
 
 import {
     graphFeatureModel,
-    IFeatureModel,
     SelectFeatureCallback
 } from './graph-helper';
 
