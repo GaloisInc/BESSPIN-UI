@@ -67,8 +67,6 @@ enum SelectionColors {
     notValidatedRejected = '#dd0000', // red
 }
 
-const SELECTABLE_CARD = 'opt';
-
 const getColor = (card: string, configs: ISelection, uid: string): SelectionColors => {
     const config = selection_search(configs, uid);
     const inSelection = config.uid !== "notFound" ? true : false;
