@@ -1,0 +1,4 @@
+"featConfigId","featModelId","label","configurationJson"
+1,1,"feature config one","{}"
+2,2,"feature config two","{}"
+3,3,"feature config failed","{}"

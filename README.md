@@ -1,6 +1,6 @@
 # BESSPIN UI
 
-![alt text](images/screenshot_UI.png "Screenshot UI")
+![alt text](server/images/screenshot_UI.png "Screenshot UI")
 
 *Disclaimer: this UI is under development is considered a
  proof-of-concept towards a prototype.*
@@ -140,4 +140,32 @@ Client Side:
 - Pipeline UI
 - Dashboard UI
 
-![alt text](images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
+![alt text](server/images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
+
+### Data Model
+
+The API backing the BESSPIN UI uses the following data model:
+
+![BESSPIN Data Model](server/db/Data-Model.svg)
+
+#### Key Concepts
+
+The data model separates out the notion of "inputs" and "jobs". The inputs are settings used to configure a job which is then run within nix. All of the top-level tables support additional meta-data, specifically user-generated labels, and datetime stamps to track when it was created as well as updated.
+
+##### Inputs
+
+Inputs are expected primarily to be pointers to versioned resources. More specifically, they are expected to be URLs to GitLab resources. For this, we have a notion of a "versioned resource" which consists of a URL and a version identifier.
+
+In some cases (particularly vulnerability and system configurations), there is an expectation of text-based information (a LANDO spec in the case of vulnerabilities and a nix-config in the case of system configurations).
+
+##### Jobs
+
+Once inputs are gathered, they are expected to be used to run a job within nix to generated the corresponding artifact. To that end, a job is expected to be comprised of:
+
+ - some status (e.g. "running", "succeeded", "failed")
+ - a pointer to the inputs record configuring the job
+ - a path to a nix derivation file describing the top-level inputs/outputs for the nix build the job will invoke
+ - a path to a log of the nix command output
+ - a path to the nix store directory containing the actual generated artifact(s) from the job
+
+Given that there are jobs for most of the top-level inputs, there is a "jobs" super-type table and sub-types for each of the specific inputs. It is expected that each unique combination of inputs will correspond to exactly one successful job run, but that is a requirement that the API layer must enforce.
