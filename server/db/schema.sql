@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS vulnerabilityConfigurationInputs (
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	configuration TEXT UNIQUE -- QUESTION: I have this as a text blob to store the actual configuration, but will we have a job to parse this and generate a test-config artifact?
+	configuration TEXT UNIQUE -- text to contain actual configuration (NOTE: this may change to point to a file upload path if the text is too large)
 );
 
 CREATE TABLE IF NOT EXISTS systemConfigurationInputs (
@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS systemConfigurationInputs (
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	featConfigId INTEGER REFERENCES featureConfigurationInputs (featConfigId) ON DELETE SET NULL, -- if null, it implies they are using the configuration implicit in the HDL
-	hdlId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL, -- QUESTION: I assume we need to point to the HDL in the case there is no feature configuration, but should it always be present (i.e. if you delete the HDL, this row is meaningless)?
-	osId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL, -- QUESTION: same as above
-	toolChainId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL, -- QUESTION: same as above
+	hdlId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL,
+	osId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL,
+	toolChainId INTEGER REFERENCES versionedResources (resourceId) ON DELETE SET NULL,
 	nixConfig TEXT, -- This column is our temporary one for the initial UI sys-config screen where we will simply provide a way to upload a nix config
 	CONSTRAINT uniqueSystemConfig UNIQUE (featConfigId, hdlId, osId, toolChainId, nixConfig)
 );
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS testRunInputs (
 	label TEXT DEFAULT "", -- user-defined label for usability
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	sysConfigId INTEGER NOT NULL REFERENCES systemConfigurationInputs (sysConfigId) ON DELETE SET NULL, -- QUESTION: here, I am assuming we want to keep test results even if the system-config/vuln-config get deleted
+	sysConfigId INTEGER NOT NULL REFERENCES systemConfigurationInputs (sysConfigId) ON DELETE SET NULL,
 	vulnConfigId INTEGER REFERENCES vulnerabilityConfigurationInputs (vulnConfigId) ON DELETE SET NULL,
 	CONSTRAINT uniqueTestRun UNIQUE (sysConfigId, vulnConfigId) -- there should be a 1:1 relationship between the test inputs and the run
 );
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 	jobId INTEGER PRIMARY KEY AUTOINCREMENT,
 	createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	derivationJson TEXT,
+	derivationFilePath TEXT, -- path to *.drv file generated via "nix instantiate" for a given job
 	statusId INTEGER NOT NULL REFERENCES jobStatus (statusId),
 	nixStorePath TEXT, -- output of nix-build should be a path to the results in nix
 	logFilePath TEXT UNIQUE -- output of command run
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE TABLE IF NOT EXISTS architectureExtractionJobs (
     jobId INTEGER PRIMARY KEY REFERENCES jobs(jobId),
-    archModelId INTEGER NOT NULL REFERENCES architectureModelInputs(archModelId) ON DELETE CASCADE -- QUESTION: should we remove all jobs when the object is deleted?
+    archModelId INTEGER NOT NULL REFERENCES architectureModelInputs(archModelId) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS featureExtractionJobs (
@@ -120,7 +120,6 @@ CREATE TABLE IF NOT EXISTS systemConfigurationJobs (
     sysConfigId INTEGER NOT NULL REFERENCES systemConfigurations(sysConfigId)
 );
 
--- QUESTION: should test-runs be implicitly a part of system configuration?
 CREATE TABLE IF NOT EXISTS testRunJobs (
     jobId INTEGER PRIMARY KEY REFERENCES jobs(jobId),
     testRunId INTEGER NOT NULL REFERENCES testRunInputs(testRunId)
