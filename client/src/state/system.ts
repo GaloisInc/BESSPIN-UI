@@ -3,6 +3,7 @@ import { IFeatureModel } from '../components/graph-helper';
 
 export interface ISystemEntry {
     configs?: ISelectionType[];
+    configsPP?: string;
     conftree?: IFeatureModel;
     createdAt: string;
     featureCount: number;

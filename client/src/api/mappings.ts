@@ -8,7 +8,7 @@ export interface IConfigContent {
 }
 
 export interface IConfig {
-    content: IConfigContent[];
+    content: IConfigContent;
     uid: string;
 }
 
@@ -58,6 +58,8 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
         featureCount: configurator.nb_features_selected,
         filename: configurator.filename,
         conftree: configurator.conftree,
+        configsPP: configurator.configs_pp,
+        source: configurator.source,
         ...(configs ? { configs } : null),
     };
 };
