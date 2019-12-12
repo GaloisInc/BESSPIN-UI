@@ -41,8 +41,7 @@ const mapSelectionMode = (mode: string): SelectionMode => {
 
 export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEntry => {
     const configs = configurator.configs ? configurator.configs.map<ISelectionType>((c: IConfig) => {
-        // TOOD: is this correct? do we only need to take the most recent value?
-        const mostRecentContent = c.content[0];
+        const mostRecentContent = c.content;
         return {
             uid: c.uid,
             mode: mapSelectionMode(mostRecentContent.mode),
