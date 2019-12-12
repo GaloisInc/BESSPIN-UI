@@ -7,18 +7,25 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 
 
-import { reducer as system, ISystemState } from './system';
+import {
+    reducerSystems as systems,
+    reducerSystem as system,
+    ISystemState,
+    ISystemConfigState,
+} from './system';
 import { reducer as testResults, ITestResultsState } from './test-results';
 import { reducer as ui, IUiState } from './ui';
 import { rootSaga } from './sagas';
 
 export interface IState {
-    system: ISystemState,
+    systems: ISystemState,
+    system: ISystemConfigState,
     testResults: ITestResultsState,
     ui: IUiState,
 };
 
 const rootReducer = combineReducers({
+    systems,
     system,
     testResults,
     ui,

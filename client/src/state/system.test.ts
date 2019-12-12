@@ -7,27 +7,31 @@ import {
     ISystemEntry,
     selectFeature,
     SelectionMode,
-    getCurrentSelections,
-    reducer,
+    getSystem,
+    reducerSystem,
 } from './system';
+
+import { DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
+
 
 const genDate = (): string => {
     return new Date(Date.now()).toISOString();
 };
 
 const DEFAULT_SYSTEM: ISystemEntry = {
+    configs: [],
+    conftree: DEFAULT_FEATURE_MODEL,
     uid: 'TEST-HASH',
     createdAt: genDate(),
     lastUpdate: genDate(),
     filename: 'TEST.fm.json',
     featureCount: 6,
+    selectionUndos: [],
 };
 
 const DEFAULT_STATE = {
-    system: {
-        systems: {},
-        selections: [],
-    },
+    systems: {},
+    system: DEFAULT_SYSTEM,
 };
 
 const generateTestSystem = (overrides: Partial<ISystemEntry> = {}): ISystemEntry => {
@@ -99,15 +103,11 @@ describe('systems', () => {
 
         describe('selectFeature', () => {
             const TEST_UID = 'TEST-UID';
-            const TEST_MODE = SelectionMode.rejected;
 
             it('should generate an action with selection data', () => {
-                expect(selectFeature(TEST_UID, TEST_MODE, TEST_UID, false)).toEqual({
+                expect(selectFeature(TEST_UID)).toEqual({
                     data: {
                         uid: TEST_UID,
-                        mode: TEST_MODE,
-                        other: TEST_UID,
-                        isValid: false,
                     },
                     type: SystemActionTypes.SELECT_FEATURE,
                 });
@@ -119,17 +119,25 @@ describe('systems', () => {
 
         describe('selections', () => {
             const TEST_UID = 'TEST-UID-2';
-            const TEST_MODE = SelectionMode.rejected;
+            const TEST_MODE = SelectionMode.selected;
 
             describe('adding first selection', () => {
 
                 it('should add the selection', () => {
-                    expect(reducer(undefined, selectFeature(TEST_UID, TEST_MODE, TEST_UID, false))).toEqual({
+                    const testState = generateTestState({
                         systems: {},
-                        selections: [
-                            { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false },
-                        ],
+                        system: {
+                            ...DEFAULT_SYSTEM,
+                            configs: [],
+                            conftree: {
+                                ...DEFAULT_SYSTEM.conftree,
+                                features: {'TEST-UID-2': {gcard: '', card: 'opt', name: '', children: [], parent: ''}},
+                            }
+                        },
                     });
+                    expect(reducerSystem(testState, selectFeature(TEST_UID)).system.configs).toEqual(
+                        [ { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false } ],
+                    );
                 });
             });
 
@@ -137,55 +145,32 @@ describe('systems', () => {
 
                 it('should add the selection', () => {
                     const testState = generateTestState({
+                        systems: {},
                         system: {
-                            systems: {},
-                            selections: [
+                            ...DEFAULT_SYSTEM,
+                            configs: [
                                 { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
                                 { uid: 'TEST-UID-2', mode: SelectionMode.selected, offer: 'TEST-UID-2', isValid: false },
-                                { uid: 'TEST-UID-1', mode: SelectionMode.selected, offer: 'TEST-UID-1', isValid: false },
+                                { uid: 'TEST-UID-3', mode: SelectionMode.selected, offer: 'TEST-UID-3', isValid: false },
                             ],
                         },
                     });
 
-                    const reducedState = reducer(testState.system, selectFeature(TEST_UID, TEST_MODE, TEST_UID, false));
+                    const reducedState = reducerSystem(testState, selectFeature(TEST_UID));
                     expect(reducedState).toEqual({
                         systems: {},
-                        selections: [
-                            { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false },
-                            { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
-                            { uid: 'TEST-UID-2', mode: SelectionMode.selected, offer: 'TEST-UID-2', isValid: false },
-                            { uid: 'TEST-UID-1', mode: SelectionMode.selected, offer: 'TEST-UID-1', isValid: false },
-                        ],
+                        system: {
+                            ...DEFAULT_SYSTEM,
+                            configs: [
+                                { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
+                                { uid: 'TEST-UID-2', mode: SelectionMode.rejected, offer: 'TEST-UID-2', isValid: false },
+                                { uid: 'TEST-UID-3', mode: SelectionMode.selected, offer: 'TEST-UID-3', isValid: false },
+                            ],
+                        }
                     });
                 });
             });
         });
     });
 
-    describe('selectors', () => {
-        const TEST_UID = 'TEST-UID';
-        const testState = generateTestState({
-            system: {
-                systems: {
-                    [TEST_UID]: generateTestSystem({ uid: TEST_UID }),
-                },
-                selections: [
-                    { uid: 'TEST-UID-1', mode: SelectionMode.rejected, other: 'TEST-UID-1', isValid: true },
-                    { uid: 'TEST-UID-1', mode: SelectionMode.selected, other: 'TEST-UID-1', isValid: true },
-                    { uid: 'TEST-UID-2', mode: SelectionMode.selected, other: 'TEST-UID-2', isValid: false },
-                ],
-            },
-        }) ;
-
-        it('should be able to pull systems out of state', () => {
-            expect(getSystems(testState)).toEqual(testState.system.systems);
-        });
-
-        it('should be able to pull current selections', () => {
-            expect(getCurrentSelections(testState)).toEqual({
-                'TEST-UID-1': { uid: 'TEST-UID-1', mode: SelectionMode.rejected, other: 'TEST-UID-1', isValid: true },
-                'TEST-UID-2': { uid: 'TEST-UID-2', mode: SelectionMode.selected, other: 'TEST-UID-2', isValid: false },
-            });
-        });
-    });
 });
