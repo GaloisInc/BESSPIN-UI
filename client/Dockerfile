@@ -36,9 +36,6 @@ COPY --from=builder /besspin-ui/client/dist /besspin-ui/client/dist
 COPY --from=builder /besspin-ui/client/tsconfig.json /besspin-ui/client/tsconfig.json
 COPY --from=builder /besspin-ui/client/src /besspin-ui/client/src
 
-# I _think_ this is only needed while working in development mode
-RUN npm rebuild node-sass
-
 ENV NODE_ENV development
 ENV HOST 0.0.0.0
 
