@@ -9,10 +9,14 @@ import {
     Form,
     ButtonGroup,
     Button,
+    Row,
 } from 'react-bootstrap';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons';
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/theme-monokai';
+import 'ace-builds/src-noconflict/mode-json';
 
 import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
@@ -173,6 +177,28 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                 selectFeature={ onSelectFeature() }
                 currentSelections={ mapSelectionsByUid(currentSelections) }
             />
+            <Container>
+                <Row>
+                    <Col>
+                        <AceEditor
+                            mode='json'
+                            theme='monokai'
+                            name='editor-source'
+                            value={ system && system.source ? JSON.stringify(JSON.parse(system.source), null, '\t') : '' }
+                            readOnly={ true }
+                        />
+                    </Col>
+                    <Col>
+                        <AceEditor
+                            mode='json'
+                            theme='monokai'
+                            name='editor-configs'
+                            value={ system ? system.configsPP : '' }
+                            readOnly={ true }
+                        />
+                    </Col>
+                </Row>
+            </Container>
         </Container>
     );
 }
