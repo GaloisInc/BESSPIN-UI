@@ -183,6 +183,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                             name='editor-source'
                             value={ system && system.source ? JSON.stringify(JSON.parse(system.source), null, '\t') : '' }
                             readOnly={ true }
+                            setOptions={{ useWorker: false }}
                         />
                     </Col>
                     <Col>
@@ -192,6 +193,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                             name='editor-configs'
                             value={ system ? system.configsPP : '' }
                             readOnly={ true }
+                            setOptions={{ useWorker: false }}
                         />
                     </Col>
                 </Row>
