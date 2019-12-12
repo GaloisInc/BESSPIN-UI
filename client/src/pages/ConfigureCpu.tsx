@@ -13,7 +13,7 @@ import {
 } from 'react-bootstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons';
+import { faUndo, faRedo, faPlus } from '@fortawesome/free-solid-svg-icons';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/mode-json';
@@ -23,13 +23,15 @@ import { getDataRequested } from '../state/ui';
 
 import {
     fetchSystem,
-    getSystems,
-    ISelectionMap,
+    getSystem,
     ISystemEntry,
     submitSystem,
-    ISelectionType,
-    SelectionMode,
+    submitValidateConfiguration,
+    selectFeature,
+    selectFeatureUndo,
+    selectFeatureRedo,
 } from '../state/system';
+
 
 import { Header } from '../components/Header';
 import { Graph } from '../components/Graph';
@@ -41,7 +43,11 @@ export interface IConfigureCpuProps {
     dataRequested: boolean;
     submitSystem: typeof submitSystem;
     fetchSystem: typeof fetchSystem;
-    system?: ISystemEntry;
+    selectFeature: typeof selectFeature,
+    selectFeatureUndo: typeof selectFeatureUndo,
+    selectFeatureRedo: typeof selectFeatureRedo,
+    submitValidateConfiguration: typeof submitValidateConfiguration;
+    system: ISystemEntry;
     systemUid: string;
 }
 
@@ -52,16 +58,14 @@ const DEFAULT_FEATURE_MODEL: IFeatureModel = {
     version: { base: 1 },
 };
 
-const mapSelectionsByUid = (selections: ISelectionType[]): ISelectionMap => {
-    return selections.reduce((acc: ISelectionMap, s: ISelectionType) => {
-        if (!acc[s.uid]) acc[s.uid] = s;
-        return acc;
-    }, {}) 
-};
 
 export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     submitSystem,
     fetchSystem,
+    selectFeature,
+    selectFeatureUndo,
+    selectFeatureRedo,
+    submitValidateConfiguration,
     system,
     systemUid,
 }) => {
@@ -72,25 +76,12 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     const fileInputRef = useRef(null);
     const [configuratorModel, setConfiguratorModel] = useState(DEFAULT_FEATURE_MODEL);
     const [modelName, setModelName] = useState('');
-    const [currentSelections, setCurrentSelections] = useState([] as ISelectionType[]);
-    const [selectionUndos, setSelectionUndos] = useState([] as ISelectionType[]);
-    const onSelectFeature = useCallback(() => {
-        // NOTE: notice that this callback is returning our actual callback
-        //       this is done to leverage React's memoization of callbacks, preventing
-        //       a large number of unnecessary renders which would occur if a new instance
-        //       of the callback was passed in every time
-        return (uid: string, mode: SelectionMode, other: string, isValid: boolean) => {
-            setCurrentSelections([{ uid, mode, other, isValid }].concat(currentSelections));
-        };
-    }, [setCurrentSelections, currentSelections]);
 
     useEffect(() => {
-        if (systemUid && (!system || !system.conftree)) {
+        if (systemUid && !system.uid ) {
             fetchSystem(systemUid);
         } else if (system && system.conftree) {
             setConfiguratorModel(system.conftree);
-            setCurrentSelections(system.configs ? system.configs : []);
-            setSelectionUndos([]);
         }
     }, [systemUid, fetchSystem, system]);
 
@@ -129,9 +120,6 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                 <Form.Row>
                     <Col>
                         <InputGroup>
-                            <InputGroup.Prepend onClick={ onSubmitHandler }>
-                                <InputGroup.Text id='new-model-upload'>Upload Model</InputGroup.Text>
-                            </InputGroup.Prepend>
                             <div className='custom-file'>
                                 <Form.Control
                                     as='input'
@@ -146,36 +134,45 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                             </div>
                         </InputGroup>
                     </Col>
+                    <Col>
+                        <Button
+                            className="btn btn-light btn-outline-secondary"
+                            onClick={ onSubmitHandler }>
+                            <FontAwesomeIcon icon={ faPlus }/>
+                            <span> Upload Model </span>
+                        </Button>
+                    </Col>
                 </Form.Row>
             </Form>
             <ButtonGroup className="mr-2" aria-label="First group">
                 <Button
+                    className="btn-light btn-outline-secondary"
                     onClick={ () => {
-                        if (currentSelections.length > 0) {
-                            setSelectionUndos([currentSelections[0]].concat(selectionUndos));
-                            setCurrentSelections(currentSelections.slice(1));
-                        }
+                        selectFeatureUndo();
                     } }
                 >
                     <FontAwesomeIcon icon={faUndo} />
                     Undo
                 </Button>
                 <Button
+                    className="btn-light btn-outline-secondary"
                     onClick={ () => {
-                        if (selectionUndos.length > 0) {
-                            setCurrentSelections([selectionUndos[0]].concat(currentSelections));
-                            setSelectionUndos(selectionUndos.slice(1));
-                        }
+                        selectFeatureRedo();
                     } }
                 >
                     Redo
                     <FontAwesomeIcon icon={faRedo} />
                 </Button>
             </ButtonGroup>
+            <Button
+                    className="btn btn-primary"
+                    onClick={ () => { submitValidateConfiguration(system.uid, system.configs) } }
+            >
+                    Validate
+            </Button>
             <Graph
-                data={ configuratorModel }
-                selectFeature={ onSelectFeature() }
-                currentSelections={ mapSelectionsByUid(currentSelections) }
+                system={ system }
+                selectFeature={ selectFeature }
             />
             <Container>
                 <Row>
@@ -213,20 +210,24 @@ interface IConfigureCpuMapProps extends IConfigureCpuProps {
 
 const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigureCpuProps => {
     const systemUid = props.match.params.systemUid || '';
-    const systems = getSystems(state);
+    const system = getSystem(state);
     const dataRequested = getDataRequested(state);
 
     return {
         ...props,
         dataRequested,
+        system: system,
         systemUid,
-        system: systems[systemUid],
     };
 };
 
 const mapDispatchToProps = {
     submitSystem,
     fetchSystem,
+    selectFeature,
+    selectFeatureUndo,
+    selectFeatureRedo,
+    submitValidateConfiguration,
 };
 
 export const ConnectedConfigureCpu = connect(mapStateToProps, mapDispatchToProps)(ConfigureCpu);

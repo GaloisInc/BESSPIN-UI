@@ -84,13 +84,13 @@ function selection_reset(uid){
 
 function selection_push(uid, mode, other, isvalid){
     this.selection.push(
-        { 'uid': uid,
-          'content': {
-              'mode': mode,
-              'other': other,
-              'validated': isvalid,
-          },
-        });
+        {
+            'uid': uid,
+            'mode': mode,
+            'other': other,
+            'validated': isvalid,
+        }
+    );
 };
 
 function selection_push_elm(elm){
@@ -101,33 +101,28 @@ function selection_pop(){
     return this.selection.pop();
 };
 
-function selection_change(uid, content){
-    var index = this.search_index(uid);
-    this.selection[index] = { 'uid': uid, 'content': content};
-};
-
 function selection_get_mode(uid){
     var index = this.search_index(uid);
-    return this.selection[index]['content']['mode'];
+    return this.selection[index]['mode'];
 };
 
 function selection_get_validated(uid){
     var index = this.search_index(uid);
-    return this.selection[index]['content']['validated'];
+    return this.selection[index]['validated'];
 };
 
 function selection_change_mode(uid, mode){
     var index = this.search_index(uid);
-    this.selection[index]['content']['mode'] = mode;
+    this.selection[index]['mode'] = mode;
 };
 
 function selection_change_validated(uid, is_validated){
     var index = this.search_index(uid);
-    this.selection[index]['content']['validated'] = is_validated;
+    this.selection[index]['validated'] = is_validated;
 };
 
 function selection_all_validated(){
-    var index = this.selection.findIndex( entry => entry['content']['validated'] == false);
+    var index = this.selection.findIndex( entry => entry['validated'] == false);
     if (index == -1)
         return true;
     else
@@ -149,7 +144,6 @@ function Selection() {
     this.push = selection_push;
     this.push_elm = selection_push_elm;
     this.pop = selection_pop;
-    this.change = selection_change;
     this.get_mode = selection_get_mode;
     this.get_validated = selection_get_validated;
     this.change_mode = selection_change_mode;
@@ -467,7 +461,6 @@ function validate_features() {
 
     console.log(global_filename);
     xhr.send(JSON.stringify({
-        'filename': global_filename,
         'uid': global_uid,
         'feature_selection': global_selected_nodes.to_json(),
     }));
