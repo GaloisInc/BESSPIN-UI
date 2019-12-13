@@ -1,7 +1,6 @@
 import { IFeatureModel, DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
 import {
-    ISelection,
     selection_top,
     selection_push,
     selection_push_elm,
@@ -15,6 +14,7 @@ import {
 } from '../state/selection';
 
 export interface ISystemEntry {
+    configsPP?: string;
     configs: ISelectionType[];
     conftree: IFeatureModel;
     createdAt: string;

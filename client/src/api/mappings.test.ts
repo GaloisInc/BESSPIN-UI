@@ -51,6 +51,8 @@ describe('mappings', () => {
                     lastUpdate: '2019-10-28T23:09:00.000Z',
                     featureCount: 5,
                     selectionUndos: [],
+                    configsPP: '',
+                    source: '',
                 },
                 'UID-2': {
                     configs: [],
@@ -61,6 +63,8 @@ describe('mappings', () => {
                     lastUpdate: '2019-10-27T23:09:00.000Z',
                     featureCount: 3,
                     selectionUndos: [],
+                    configsPP: '',
+                    source: '',
                 },
             };
 

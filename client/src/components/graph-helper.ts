@@ -74,7 +74,6 @@ const getColor = (card: string, configs: ISelection, uid: string): SelectionColo
     const mode = config.mode;
 
     if (inSelection) {
-        console.log(isValidated);
         switch (mode) {
             case SelectionMode.selected: {
                 if (isValidated)
@@ -148,6 +147,7 @@ const mapModelToTree = (featureModel: IFeatureModel, selections: ISelection): Da
 // caching it via closure.
 let network: Network;
 let data: Data;
+let systemUid: string;
 
 export const graphFeatureModel = (
     domNode: HTMLDivElement,
@@ -175,8 +175,9 @@ export const graphFeatureModel = (
     };
 
     const hasVisDOM = domNode.firstElementChild !== null;
+    const isSameSystem = system.uid === systemUid;
 
-    if (hasVisDOM) {
+    if (isSameSystem && hasVisDOM) {
         data.nodes.forEach((n: Node) => {
             const { id } = n;
             if (id) {
@@ -188,6 +189,7 @@ export const graphFeatureModel = (
     } else {
         data = mapModelToTree(system.conftree, system ? system.configs : []);
         network = new Network(domNode, { nodes: data.nodes, edges: data.edges }, options);
+        systemUid = system.uid;
     }
 
     network.off('click');
