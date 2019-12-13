@@ -14,6 +14,7 @@ services:
       dockerfile: client/Dockerfile
     volumes: # this is only for development mode to allow changes to the src to be picked up in the container without a restart
       - './client:/besspin-ui/client'
+      - /besspin-ui/client/node_modules # NOTE: this means that if you install a node module locally, you will have to rebuild your image
     ports:
       - '3000:3000'
       - '9229:9229' # this is only for development mode when the debugger is running
@@ -41,6 +42,7 @@ services:
       - './server:/besspin-ui/server'
       - '~/.local/bin:/root/.local/bin'
     environment:
+      DB_PATH: ./server/db # NOTE: if we use this docker-compose set up in production, we will need to remove this variable
       XDG_BASE_DATA: /root/.local/share
       BESSPIN_CLAFER: /root/.local/bin
       HOST: 0.0.0.0

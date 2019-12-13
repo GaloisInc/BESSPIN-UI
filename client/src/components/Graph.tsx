@@ -3,31 +3,29 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import '../style/Graph.scss';
 
 import {
-    ISelectionMap,
+    ISystemEntry,
 } from '../state/system';
 
 import {
     graphFeatureModel,
-    IFeatureModel,
     SelectFeatureCallback
 } from './graph-helper';
 
 export interface IGraphProps {
-    data?: IFeatureModel;
+    system: ISystemEntry;
     selectFeature: SelectFeatureCallback;
-    currentSelections: ISelectionMap;
 }
 
 export const Graph: React.FC<IGraphProps> = ({
-    data: treeData,
+    system,
     selectFeature,
-    currentSelections,
 }) => {
 
     const visContainer = useRef(null) as RefObject<HTMLDivElement>;
 
     useEffect(() => {
         const ref = visContainer ? visContainer.current : null;
+        const treeData = system.conftree;
 
         if (!ref) return;
         if (!treeData) return;
@@ -36,8 +34,15 @@ export const Graph: React.FC<IGraphProps> = ({
 
         if (!hasDataToRender) return;
 
-        graphFeatureModel(ref, treeData, selectFeature, currentSelections);
-    }, [treeData, visContainer, selectFeature, currentSelections]);
+        graphFeatureModel(
+            ref,
+            selectFeature,
+            system);
+    }, [
+        visContainer,
+        selectFeature,
+        system
+    ]);
 
     return (
         <div

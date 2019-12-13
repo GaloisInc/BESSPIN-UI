@@ -55,9 +55,9 @@ def selected_features_to_constraints(feats):
     """
     res = ""
     for sel in feats:
-        sel_str = sel['content']['other']
+        sel_str = sel['other']
 
-        mode = sel['content']['mode']
+        mode = sel['mode']
         if mode == 'selected':
             res += "[ " + sel_str + " ]" + "\n"
         elif mode == 'rejected':
@@ -75,8 +75,8 @@ def combine_featmodel_cfgs(model, cfgs):
     assert 'constraints' in model
     cfg_model = copy.deepcopy(model)
     for sel in cfgs:
-        sel_str = sel['content']['other']
-        mode = sel['content']['mode']
+        sel_str = sel['other']
+        mode = sel['mode']
         if mode == 'selected':
             cfg_model['constraints'].append({
                 'kind': 'feat',
@@ -105,6 +105,6 @@ def configuration_algo(conftree, feature_selection):
     A mock configuration algorithon. Says yes to everything
     """
     for e in feature_selection:
-        e['content']['validated'] = True
+        e['validated'] = True
 
     return feature_selection

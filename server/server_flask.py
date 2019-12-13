@@ -161,15 +161,11 @@ overviewModel = api.model('Overview', {
     'nb_features_selected': fields.Integer
 })
 
-configContentModel = api.model('Config Content', {
+configModel = api.model('Config', {
+    'uid': fields.String,
     'mode': fields.String,
     'other': fields.String,
     'validated': fields.Boolean
-})
-
-configModel = api.model('Config', {
-    'uid': fields.String,
-    'content': fields.List(fields.Nested(configContentModel))
 })
 
 featureModelVersion = api.model('Feature Model Version', {
@@ -264,7 +260,7 @@ class ConfiguratorConfigure(Resource):
         uid = data['uid']
         feature_selection = data['feature_selection']
         entry = retrieve_model_from_db_by_uid(uid)
-        file_content = entry['source']
+        file_content = entry.get('source', '')
         conftree = entry['conftree']
         configs = feature_selection
         validated_features = configuration_algo(
@@ -276,7 +272,6 @@ class ConfiguratorConfigure(Resource):
 
         # pylint: disable=line-too-long
         # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
-        # app.logger.debug('\n sdfdsf\n')
         # app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
         # d = load_json(filename_json)
 
