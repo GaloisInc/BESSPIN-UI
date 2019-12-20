@@ -11,25 +11,17 @@ from datetime import datetime
 from hashlib import sha3_256
 import logging
 
+from config import Config
+
 log = logging.getLogger('lib.database')
 
 
 # pylint: disable=invalid-name
 
 
-# allow developers to specify a custom path to the directory for besspin data,
-# falling back to XDG_DATA_HOME (or a hard-coded version of what that normally would be)
-DB_PATH = os.environ.get(
-    'DB_PATH',
-    os.environ.get(
-        'XDG_DATA_HOME',
-        os.path.expanduser('~/.local/share')
-    )
-)
-DB_PATH = os.path.abspath(os.path.join(DB_PATH, 'besspin'))
+DB_PATH = Config.DB_PATH
 os.makedirs(DB_PATH, exist_ok=True)
-DATABASE = os.path.join(DB_PATH, 'configurator.db')
-SCHEMA_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'db', 'schema.sql'))
+SCHEMA_PATH = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'db', 'schema.sql'))
 
 DB_INSERT = """INSERT INTO feature_models VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
 
@@ -41,7 +33,7 @@ def initialize_db():
     """
     Initiliaze the database
     """
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(Config.DATABASE)
     c = conn.cursor()
     try:
         with open(SCHEMA_PATH) as f:
@@ -77,7 +69,7 @@ def insert_feature_model_db(filename, content, conftree):
 
     :return: uid
     """
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(Config.DATABASE)
     c = conn.cursor()
     uid = str(uuid4())
     date = str(datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
@@ -104,7 +96,7 @@ def update_configs_db(uid, cfgs):
     :param uid:
     :param cfgs:
     """
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(Config.DATABASE)
     c = conn.cursor()
     enc_cfgs = encode_json_db(cfgs)
     last_update = str(datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
@@ -116,7 +108,7 @@ def retrieve_feature_models_db():
     """
     Retrieve feature model from db
     """
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(Config.DATABASE)
     c = conn.cursor()
     c.execute(DB_SELECT)
     entries = c.fetchall()
@@ -170,7 +162,7 @@ def retrieve_model_from_db_by_uid(uid):
     """
     Retrieve model from db by its uid
     """
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(Config.DATABASE)
     c = conn.cursor()
     c.execute(DB_SELECT)
     entries = c.fetchall()
@@ -205,7 +197,7 @@ def list_models_from_db():
     """
     List models in database
     """
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(Config.DATABASE)
     c = conn.cursor()
     c.execute(DB_SELECT)
     entries = c.fetchall()
