@@ -22,7 +22,7 @@ class Config(object):
     SCHEMA_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'db', 'schema.sql'))
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///' + DATABASE)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CODE_DIR = os.path.join(os.path.dirname(__file__), 'app')
+    CODE_DIR = os.path.join(os.path.dirname(__file__), 'app', 'ui')
     EXAMPLES_DIR = os.path.join(CODE_DIR, 'examples')
     PORT = os.getenv('PORT', 3784)
     DEBUG = os.getenv('DEBUG', True)

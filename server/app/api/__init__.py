@@ -5,4 +5,4 @@ blueprint = Blueprint('api', __name__)
 api = Api(blueprint, doc='/doc/')
 
 
-from app.api import legacy  # noqa E402, F401
+from app.api import feature_model  # noqa E402, F401

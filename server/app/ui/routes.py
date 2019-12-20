@@ -24,9 +24,9 @@ from app.lib.configurator_shim import (
 )
 # Legacy UI Routes
 
-legacy = Blueprint('legacy', __name__, template_folder='templates')
+ui_routes = Blueprint('ui', __name__, template_folder='templates')
 
-@legacy.route('/css/main')
+@ui_routes.route('/css/main')
 def css_main():
     """
     Endpoint serving the main css
@@ -34,7 +34,7 @@ def css_main():
     return render_template('main.css')
 
 
-@legacy.route('/script/overview')
+@ui_routes.route('/script/overview')
 def script_overview():
     """
     Endpoint serving the overview script
@@ -46,7 +46,7 @@ def script_overview():
     )
 
 
-@legacy.route('/script/configurator')
+@ui_routes.route('/script/configurator')
 def script_configurator():
     """
     Endpoint serving the configurator script
@@ -58,7 +58,7 @@ def script_configurator():
     )
 
 
-@legacy.route('/script/pipeline')
+@ui_routes.route('/script/pipeline')
 def script_pipeline():
     """
     Endpoint serving the configurator script
@@ -70,7 +70,7 @@ def script_pipeline():
     )
 
 
-@legacy.route('/')
+@ui_routes.route('/')
 def root_page():
     """
     Endpoint for root app.
@@ -79,7 +79,7 @@ def root_page():
     return render_template('overview.html')
 
 
-@legacy.route('/sidebar/')
+@ui_routes.route('/sidebar/')
 def sidebar():
     """
     endpoint for delivering the sidebar
@@ -87,7 +87,7 @@ def sidebar():
     return render_template('sidebar.html')
 
 
-@legacy.route('/overview/')
+@ui_routes.route('/overview/')
 def overview():
     """
     endpoint for the overview
@@ -95,8 +95,8 @@ def overview():
     return render_template('overview.html')
 
 
-@legacy.route('/configurator/')
-@legacy.route('/configurator/<path:subpath>')
+@ui_routes.route('/configurator/')
+@ui_routes.route('/configurator/<path:subpath>')
 def feature_configurator(subpath=None):
     """
     endpoint for the configurator app
@@ -116,8 +116,8 @@ def feature_configurator(subpath=None):
     return render_template('configurator.html', uid=uid, cfg_type=cfg_type)
 
 
-@legacy.route('/pipeline/')
-@legacy.route('/pipeline/<string:uid>')
+@ui_routes.route('/pipeline/')
+@ui_routes.route('/pipeline/<string:uid>')
 def pipeline(uid=None):
     """
     endpoint for the pipeline
@@ -125,8 +125,8 @@ def pipeline(uid=None):
     return render_template('pipeline.html', uid=uid)
 
 
-@legacy.route('/dashboard/')
-@legacy.route('/dashboard/<string:uid>')
+@ui_routes.route('/dashboard/')
+@ui_routes.route('/dashboard/<string:uid>')
 def dashboard(uid=None):
     """
     endpoint for the configurator app
