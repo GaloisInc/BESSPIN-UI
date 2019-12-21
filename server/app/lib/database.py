@@ -2,50 +2,23 @@
 Database module
 """
 
-import os
+
 import json
 import base64
 import sqlite3
 from uuid import uuid4
 from datetime import datetime
 from hashlib import sha3_256
-import logging
+from flask import current_app
 
 from config import Config
 
-log = logging.getLogger('lib.database')
-
-
-# pylint: disable=invalid-name
-
-
-DB_PATH = Config.DB_PATH
-os.makedirs(DB_PATH, exist_ok=True)
-SCHEMA_PATH = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'db', 'schema.sql'))
 
 DB_INSERT = """INSERT INTO feature_models VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
 
 DB_SELECT = """SELECT * FROM feature_models"""
 
 DB_UPDATE = """UPDATE feature_models SET configs = :configs, last_update = :last_update WHERE uid = :uid"""
-
-def initialize_db():
-    """
-    Initiliaze the database
-    """
-    conn = sqlite3.connect(Config.DATABASE)
-    c = conn.cursor()
-    try:
-        with open(SCHEMA_PATH) as f:
-            db_schema = f.read()
-            c.executescript(db_schema)
-    except sqlite3.OperationalError as err:
-        if 'already exists' not in str(err):
-            raise RuntimeError('Ooops DB')
-    finally:
-        conn.close()
-
-initialize_db()
 
 
 def encode_json_db(content):
@@ -54,11 +27,13 @@ def encode_json_db(content):
     """
     return base64.b64encode(bytes(json.dumps(content), 'utf8')).decode()
 
+
 def decode_json_db(content):
     """
     Decode data previously encoded into the db
     """
     return json.loads(base64.b64decode(content).decode())
+
 
 def insert_feature_model_db(filename, content, conftree):
     """
@@ -89,6 +64,7 @@ def insert_feature_model_db(filename, content, conftree):
     conn.close()
     return uid
 
+
 def update_configs_db(uid, cfgs):
     """
     Update configurations in db
@@ -104,6 +80,7 @@ def update_configs_db(uid, cfgs):
     conn.commit()
     conn.close()
 
+
 def retrieve_feature_models_db():
     """
     Retrieve feature model from db
@@ -115,11 +92,13 @@ def retrieve_feature_models_db():
     conn.close()
     return entries
 
+
 def uid_from_record(record):
     """
     returns the uid from a record
     """
     return record[0]
+
 
 def filename_from_record(record):
     """
@@ -127,11 +106,13 @@ def filename_from_record(record):
     """
     return record[1]
 
+
 def source_from_record(record):
     """
     returns the source from a record
     """
     return record[2]
+
 
 def conftree_from_record(record):
     """
@@ -139,11 +120,13 @@ def conftree_from_record(record):
     """
     return decode_json_db(record[3])
 
+
 def date_from_record(record):
     """
     returns the date from a record
     """
     return record[4]
+
 
 def configs_from_record(record):
     """
@@ -151,12 +134,14 @@ def configs_from_record(record):
     """
     return decode_json_db(record[6])
 
+
 def last_update_from_record(record):
     """
     returns the time of the last update from a record
     """
     last_update = '' if len(record) < 8 else record[7]
     return last_update
+
 
 def retrieve_model_from_db_by_uid(uid):
     """
@@ -193,10 +178,12 @@ def record_to_info(record):
         'nb_features_selected': len(configs_from_record(record)),
     }
 
+
 def list_models_from_db():
     """
     List models in database
     """
+    current_app.logger.debug(f'DATABASE: {Config.DATABASE}')
     conn = sqlite3.connect(Config.DATABASE)
     c = conn.cursor()
     c.execute(DB_SELECT)

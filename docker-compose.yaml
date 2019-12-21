@@ -42,9 +42,11 @@ services:
       - './server:/besspin-ui/server'
       - '~/.local/bin:/root/.local/bin'
     environment:
-      DB_PATH: ./server/db # NOTE: if we use this docker-compose set up in production, we will need to remove this variable
+      DB_PATH: /besspin-ui/server # NOTE: if we use this docker-compose set up in production, we will need to remove this variable
       XDG_BASE_DATA: /root/.local/share
       BESSPIN_CLAFER: /root/.local/bin
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
       HOST: 0.0.0.0
       PORT: 3784
 

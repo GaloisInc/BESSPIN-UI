@@ -2,4 +2,4 @@
 __pycache__
 node_modules
 **/*.configured
-server/db/**/*.db
+server/**/*.db
