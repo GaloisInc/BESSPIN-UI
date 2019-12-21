@@ -3,8 +3,7 @@ FROM ubuntu:bionic
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ bionic universe multiverse" && \
-    apt-get install -y python3-pip sqlite3 ssh git curl && \
-    pip3 install flask nose Flask-RestPlus Flask-SQLAlchemy Flask-Migrate
+    apt-get install -y python3-pip sqlite3 ssh git curl
 
 ARG TOKEN_NAME
 ARG PRIVATE_TOKEN
@@ -31,6 +30,15 @@ RUN stack install clafer
 WORKDIR /besspin-ui
 COPY . /besspin-ui
 
+# these are for sqlalchemy migration support
+WORKDIR /besspin-ui/server
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+RUN pip3 install -r requirements.txt
+
+WORKDIR /besspin-ui
+
+# have the flask server run on port 3784
 ENV PORT 3784
 EXPOSE 3784
 
