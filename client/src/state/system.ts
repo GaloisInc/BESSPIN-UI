@@ -26,6 +26,13 @@ export interface ISystemEntry {
     uid: string;
 }
 
+export interface ValidateResult {
+    serverSource: string;
+    serverConstraints: string;
+    validatedFeatures: ISelectionType[];
+    configuredFeatureModel: IFeatureModel;
+}
+
 export interface ISystemMap {
     [uid: string]: ISystemEntry
 }
@@ -218,12 +225,12 @@ export const submitValidateConfigurationFailure = (errors: string[]) => {
     } as const;
 };
 
-export const submitValidateConfigurationSuccess = (uid: string, validated_selection: ISelectionType[]) => {
+export const submitValidateConfigurationSuccess = (uid: string, validateResult: ValidateResult) => {
     return {
         type: SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_SUCCESS,
         data: {
             uid,
-            validated_selection,
+            validateResult,
         }
     } as const;
 };
@@ -309,7 +316,8 @@ export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISyst
                 ...state,
                 system: {
                     ...state.system,
-                    configs: action.data.validated_selection,
+                    configs: action.data.validateResult.validatedFeatures,
+                    configsPP: action.data.validateResult.serverConstraints,
                 }
             };
         case SystemActionTypes.SELECT_FEATURE: {
