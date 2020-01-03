@@ -96,7 +96,7 @@ def selected_features_to_constraints(feats):
     :return: str
     """
     res = ""
-    for sel in feats:
+    for sel in reversed(feats):
         sel_str = sel['other']
 
         mode = sel['mode']
