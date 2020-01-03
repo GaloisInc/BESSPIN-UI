@@ -183,7 +183,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                             mode='json'
                             theme='monokai'
                             name='editor-source'
-                            value={ system && system.source ? JSON.stringify(JSON.parse(system.source), null, '\t') : '' }
+                            value={ system && system.source ? system.source : '' }
                             readOnly={ true }
                             setOptions={{ useWorker: false }}
                         />

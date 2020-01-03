@@ -16,10 +16,13 @@ if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
     WORK_DIR_OBJ = tempfile.TemporaryDirectory()
     WORK_DIR = WORK_DIR_OBJ.name
 else:
-    WORK_DIR = '.'
+    WORK_DIR = '/tmp/'
 
 CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
 FORMAT_VERSIONS = [1]
+CMD_PRINT_CLAFER = "besspin-feature-model-tool print-clafer {}"
+
+USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
 
 def load_json(filename):
     """
@@ -33,19 +36,58 @@ def convert_model_to_json(source):
     """
     Convert the source of a model to json
     """
+
     filename = os.path.join(WORK_DIR, 'generated_file')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.fm.json'
     with open(filename_cfr, 'wb') as f:
         f.write(source)
-    cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
-    logging.debug('Clafer output: ' + str(cp.stdout))
+
+    if USE_TOOLSUITE:
+        cp = subprocess.run([
+            "su", "-", "besspinuser", "-c",
+            "cd ~/tool-suite &&" +
+            "nix-shell --command " + "\"clafer " + filename_cfr + " -m fmjson \""], capture_output=True)
+    else:
+        cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
+
+    logging.debug('Clafer stdout: ' + str(cp.stdout))
+    logging.debug('Clafer stderr: ' + str(cp.stderr))
     json_feat_model = load_json(filename_json)
+
     version = json_feat_model['version']['base']
     if version not in FORMAT_VERSIONS:
         logging.debug(version)
         raise RuntimeError('unsupported json format version {}'.format(version))
     return json_feat_model
+
+CMD_PRINT_CLAFER = "besspin-feature-model-tool print-clafer {}"
+
+def fmjson_to_clafer(source):
+    """
+    Convert a feature model from fm.json format to clafer format,
+    when USE_TOOLSUITE is set
+    """
+    if (not USE_TOOLSUITE):
+        return source.decode('utf8')
+
+    filename = os.path.join('/tmp/', 'generated_file')
+    filename_cfr = filename + '.cfr'
+    filename_json = filename + '.fm.json'
+    with open(filename_json, 'wb') as f:
+        f.write(source)
+    cmd = CMD_PRINT_CLAFER.format(filename_json)
+    cp = subprocess.run([
+        "su", "-", "besspinuser", "-c",
+        "cd ~/tool-suite &&" +
+        "nix-shell --command " + "\"" + cmd + "\""], capture_output=True)
+    logging.debug('besspin-feature-model-tool stdout: ' + str(cp.stdout))
+    logging.debug('besspin-feature-model-tool stderr: ' + str(cp.stderr))
+
+    if cp.stderr:
+        raise RuntimeError(cp.stderr)
+
+    return cp.stdout.decode('utf8')
 
 def selected_features_to_constraints(feats):
     """

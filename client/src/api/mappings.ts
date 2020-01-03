@@ -1,4 +1,4 @@
-import { ISelection, ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
+import { ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
 import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
 
 
@@ -27,6 +27,7 @@ export interface IUploadResponse {
     uid: string,
     tree: IFeatureModel,
     configured_feature_model: IFeatureMap,
+    source: string,
 }
 
 export interface IValidateResponse {
@@ -74,6 +75,7 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
 export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): ISystemEntry => {
     return {
         uid: configurator.uid,
+        source: configurator.source,
         createdAt: "",
         lastUpdate: "",
         featureCount: -1,
