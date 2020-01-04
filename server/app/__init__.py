@@ -18,4 +18,7 @@ def create_app(config_name=None):
     from app.ui.routes import ui_routes
     app.register_blueprint(ui_routes)
 
+    from commands import test_cli_bp
+    app.register_blueprint(test_cli_bp)
+
     return app
