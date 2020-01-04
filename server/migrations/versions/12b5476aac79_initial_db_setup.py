@@ -76,7 +76,7 @@ def upgrade():
         sa.PrimaryKeyConstraint('resourceId'),
         sa.UniqueConstraint('url', 'version', name='versioned_resources_uc')
     )
-    op.create_index(op.f('ix_versionedResources_url'), 'versionedResources', ['url'], unique=True)
+    op.create_index(op.f('ix_versionedResources_url'), 'versionedResources', ['url'], unique=False)
     op.create_index(op.f('ix_versionedResources_version'), 'versionedResources', ['version'], unique=False)
     op.create_table(
         'featureModelInputs',
