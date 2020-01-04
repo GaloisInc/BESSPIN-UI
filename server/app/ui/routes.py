@@ -1,27 +1,12 @@
 from config import Config
 
 import os
-import json
 from flask import (
-    request,
-    abort,
     send_from_directory,
     render_template,
     Blueprint,
 )
-from app.lib.database import (
-    list_models_from_db,
-    insert_feature_model_db,
-    update_configs_db,
-    retrieve_feature_models_db,
-    retrieve_model_from_db_by_uid
-)
-from app.lib.configurator_shim import (
-    convert_model_to_json,
-    selected_features_to_constraints,
-    combine_featmodel_cfgs,
-    configuration_algo,
-)
+
 # Legacy UI Routes
 
 ui_routes = Blueprint('ui', __name__, template_folder='templates')
