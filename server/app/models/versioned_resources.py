@@ -12,6 +12,15 @@ class VersionedResourceTypes(db.Model):
 
     ALLOWED_TYPES = ['hdl', 'os', 'toolchain']
 
+    @staticmethod
+    def load_allowed_types(db_conn=db.session):
+        for t in VersionedResourceTypes.ALLOWED_TYPES:
+            resource_type = VersionedResourceTypes.query.filter_by(label=t).first()
+            if resource_type is None:
+                resource_type = VersionedResourceTypes(label=t)
+            db_conn.add(resource_type)
+        db_conn.commit()
+
 
 class VersionedResources(db.Model, MetaDataColumnsMixin):
     __tablename__ = 'versionedResources'

@@ -160,11 +160,8 @@ def upgrade():
     # add our initial resource types and job statuses
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-
-    resource_types = [
-        VersionedResourceTypes(label=l) for l in VersionedResourceTypes.ALLOWED_TYPES
-    ]
-    session.add_all(resource_types)
+    
+    VersionedResourceTypes.load_allowed_types(session)
 
     job_statuses = [
         JobStatuses(label=l) for l in JobStatuses.ALLOWED_STATUSES
