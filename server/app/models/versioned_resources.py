@@ -22,7 +22,7 @@ class VersionedResources(db.Model, MetaDataColumnsMixin):
         db.ForeignKey('versionedResourceTypes.resourceTypeId'),
         nullable=False
     )
-    url = db.Column(db.String(256), index=True, unique=True, nullable=False)
+    url = db.Column(db.String(256), index=True, nullable=False)
     version = db.Column(db.String(256), index=True, nullable=False)
 
     resourceType = db.relationship('VersionedResourceTypes')
