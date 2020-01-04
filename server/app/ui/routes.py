@@ -1,4 +1,4 @@
-from config import Config
+from config import config
 
 import os
 from flask import (
@@ -10,6 +10,9 @@ from flask import (
 # Legacy UI Routes
 
 ui_routes = Blueprint('ui', __name__, template_folder='templates')
+
+ui_config = config[os.getenv('FLASK_CONFIG') or 'default']
+
 
 @ui_routes.route('/css/main')
 def css_main():
@@ -25,7 +28,7 @@ def script_overview():
     Endpoint serving the overview script
     """
     return send_from_directory(
-        os.path.join(Config.CODE_DIR, 'js'),
+        os.path.join(ui_config.CODE_DIR, 'js'),
         'overview.js',
         mimetype='application/javascript'
     )
@@ -37,7 +40,7 @@ def script_configurator():
     Endpoint serving the configurator script
     """
     return send_from_directory(
-        os.path.join(Config.CODE_DIR, 'js'),
+        os.path.join(ui_config.CODE_DIR, 'js'),
         'configurator.js',
         mimetype='application/javascript'
     )
@@ -49,7 +52,7 @@ def script_pipeline():
     Endpoint serving the configurator script
     """
     return send_from_directory(
-        os.path.join(Config.CODE_DIR, 'js'),
+        os.path.join(ui_config.CODE_DIR, 'js'),
         'pipeline.js',
         mimetype='application/javascript'
     )

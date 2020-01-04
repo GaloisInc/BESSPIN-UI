@@ -1,11 +1,11 @@
 from flask import Flask
+from config import config
 
-from config import Config
 
-
-def create_app(config_class=Config):
+def create_app(config_name=None):
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    config_obj = config[config_name or 'default']
+    app.config.from_object(config_obj)
 
     from .models import db
     db.init_app(app)

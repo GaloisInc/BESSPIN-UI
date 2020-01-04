@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,5 +26,27 @@ class Config(object):
     CODE_DIR = os.path.join(os.path.dirname(__file__), 'app', 'ui')
     EXAMPLES_DIR = os.path.join(CODE_DIR, 'examples')
     PORT = os.getenv('PORT', 3784)
-    DEBUG = os.getenv('DEBUG', True)
+    DEBUG = False
+    TESTING = False
     HOST = os.getenv('HOST', '0.0.0.0')
+
+
+class ProductionConfig(Config):
+    DEBUG = False
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+
+class TestConfig(Config):
+    db_fd, DATABASE = tempfile.mkstemp()
+    TESTING = True
+
+
+config = {
+    'development': DevelopmentConfig,
+    'test': TestConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}

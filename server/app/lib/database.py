@@ -2,7 +2,7 @@
 Database module
 """
 
-
+import os
 import json
 import base64
 import sqlite3
@@ -11,7 +11,9 @@ from datetime import datetime
 from hashlib import sha3_256
 from flask import current_app
 
-from config import Config
+from config import config
+
+db_config = config[os.getenv('FLASK_CONFIG') or 'default']
 
 
 DB_INSERT = """INSERT INTO feature_models VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
@@ -44,7 +46,7 @@ def insert_feature_model_db(filename, content, conftree):
 
     :return: uid
     """
-    conn = sqlite3.connect(Config.DATABASE)
+    conn = sqlite3.connect(db_config.DATABASE)
     c = conn.cursor()
     uid = str(uuid4())
     date = str(datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
@@ -72,7 +74,7 @@ def update_configs_db(uid, cfgs):
     :param uid:
     :param cfgs:
     """
-    conn = sqlite3.connect(Config.DATABASE)
+    conn = sqlite3.connect(db_config.DATABASE)
     c = conn.cursor()
     enc_cfgs = encode_json_db(cfgs)
     last_update = str(datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
@@ -85,7 +87,7 @@ def retrieve_feature_models_db():
     """
     Retrieve feature model from db
     """
-    conn = sqlite3.connect(Config.DATABASE)
+    conn = sqlite3.connect(db_config.DATABASE)
     c = conn.cursor()
     c.execute(DB_SELECT)
     entries = c.fetchall()
@@ -147,7 +149,7 @@ def retrieve_model_from_db_by_uid(uid):
     """
     Retrieve model from db by its uid
     """
-    conn = sqlite3.connect(Config.DATABASE)
+    conn = sqlite3.connect(db_config.DATABASE)
     c = conn.cursor()
     c.execute(DB_SELECT)
     entries = c.fetchall()
@@ -183,8 +185,8 @@ def list_models_from_db():
     """
     List models in database
     """
-    current_app.logger.debug(f'DATABASE: {Config.DATABASE}')
-    conn = sqlite3.connect(Config.DATABASE)
+    current_app.logger.debug(f'DATABASE: {db_config.DATABASE}')
+    conn = sqlite3.connect(db_config.DATABASE)
     c = conn.cursor()
     c.execute(DB_SELECT)
     entries = c.fetchall()
