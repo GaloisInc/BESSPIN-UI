@@ -170,7 +170,7 @@ def upgrade():
         JobStatuses(label=l) for l in JobStatuses.ALLOWED_STATUSES
     ]
     session.add_all(job_statuses)
-    
+
     session.commit()
 
 
