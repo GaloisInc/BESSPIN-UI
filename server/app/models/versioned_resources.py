@@ -8,7 +8,7 @@ class VersionedResourceTypes(db.Model):
     label = db.Column(db.String(64), index=True, unique=True, nullable=False)
 
     def __repr__(self):
-        return '<VersionedResourceTypes {}>'.format(self.label)
+        return f'<VersionedResourceTypes {self.label}>'
 
     ALLOWED_TYPES = ['hdl', 'os', 'toolchain']
 
@@ -24,6 +24,8 @@ class VersionedResources(db.Model, MetaDataColumnsMixin):
     )
     url = db.Column(db.String(256), index=True, unique=True, nullable=False)
     version = db.Column(db.String(256), index=True, nullable=False)
+
+    resourceType = db.relationship('VersionedResourceTypes')
 
     __table_args__ = (
         db.UniqueConstraint('url', 'version', name='versioned_resources_uc'),
