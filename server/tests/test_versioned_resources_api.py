@@ -30,6 +30,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
 
     def test_create(self):
         r = VersionedResources().query.all()
+        t = VersionedResourceTypes().query.filter_by(label='hdl').first()
         self.assertListEqual(r, [])
 
         label = f'created resource {datetime.utcnow()}'
@@ -37,9 +38,9 @@ class TestVersionedResourcesApi(unittest.TestCase):
             '/api/versioned-resource',
             data=json.dumps(dict(
                 label=label,
-                type='hdl',
                 url='https://github.com/test/repo.git',
                 version='1',
+                resourceType=dict(resourceTypeId=t.resourceTypeId, label=t.label)
             )))
 
         self.assertEqual(response.status_code, 200)
@@ -48,6 +49,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
 
     def test_update(self):
         r = VersionedResources().query.all()
+        t = VersionedResourceTypes().query.filter_by(label='hdl').first()
         self.assertListEqual(r, [])
         r = VersionedResources(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
         db.session.add(r)
@@ -60,9 +62,9 @@ class TestVersionedResourcesApi(unittest.TestCase):
             f'/api/versioned-resource/{r.resourceId}',
             data=json.dumps(dict(
                 label=label,
-                type='hdl',
                 url=r.url,
                 version=r.version,
+                resourceType=dict(resourceTypeId=t.resourceTypeId, label=t.label)
             )))
 
         self.assertEqual(response.status_code, 200)

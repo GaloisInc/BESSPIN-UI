@@ -62,7 +62,8 @@ class VersionedResourceList(Resource):
     @ns.expect(new_versioned_resource)
     def post(self):
         resource_input = json.loads(request.data)
-        resource_type = VersionedResourceTypes.query.filter_by(label=resource_input['type']).first()  # noqa E501
+        current_app.logger.debug(resource_input['resourceType'])
+        resource_type = VersionedResourceTypes.query.get(resource_input['resourceType']['resourceTypeId'])
         new_resource = VersionedResources(
             label=resource_input['label'],
             url=resource_input['url'],
@@ -77,13 +78,13 @@ class VersionedResourceList(Resource):
 
 @ns.route('/<int:resourceId>')
 class VersionedResource(Resource):
-    @ns.doc('create a versioned resource')
+    @ns.doc('update a versioned resource')
     @ns.marshal_list_with(existing_versioned_resource)
     @ns.expect(new_versioned_resource)
     def put(self, resourceId):
         current_app.logger.debug(f'updating resourceId: {resourceId}')
         resource_input = json.loads(request.data)
-        resource_type = VersionedResourceTypes.query.filter_by(label=resource_input['type']).first()  # noqa E501
+        resource_type = VersionedResourceTypes.query.get(resource_input['resourceType']['resourceTypeId'])
         existing_resource = VersionedResources.query.get_or_404(resourceId)
         existing_resource.label = resource_input['label']
         existing_resource.url = resource_input['url']
