@@ -5,12 +5,21 @@ from flask_restplus import Resource, fields
 from . import api
 from app.models import db, VersionedResources, VersionedResourceTypes
 
-
+"""
+    Since all the routes here are for managing our VersionedResources
+    we set up a root namespace that is the prefix for all routes
+    defined below
+"""
 ns = api.namespace(
     'versioned-resource',
     description='Operations on versioned resources'
 )
 
+"""
+    Define a swagger model that can be used for:
+    - defining expected shape of inputs/outputs to the api
+    - autogenerate swagger documentation for the structure of api data
+"""
 versioned_resource_type = api.model('VersionedResourceType', {
     'label': fields.String(
         required=True,
@@ -39,6 +48,11 @@ new_versioned_resource = api.model('NewVersionedResource', {
     )
 })
 
+"""
+    since the only difference between a "new" resource and an existing one
+    is the presence of a system-supplied ID, we inherit the "NewVersioendResource"
+    for the definition of our "existing" one...
+"""
 existing_versioned_resource = api.inherit(
     'ExistingVersionedResource',
     new_versioned_resource,
@@ -53,11 +67,17 @@ existing_versioned_resource = api.inherit(
 
 @ns.route('')
 class VersionedResourceList(Resource):
+    # by declaring which swagger model we use to marshal data,
+    # flask will automagically convert any returned data to be
+    # limited to that shape. This means that can effectively be
+    # hidden by not including them in the definition
     @ns.marshal_list_with(existing_versioned_resource)
     def get(self):
         current_app.logger.debug(f'fetching all versioned resources')
         return VersionedResources.query.all()
 
+    # we can also declare the expected shape of input data to allow
+    # for flask to validate that the correct data is supplied in a POST/PUT
     @ns.marshal_with(existing_versioned_resource)
     @ns.expect(new_versioned_resource)
     def post(self):

@@ -3,6 +3,10 @@ from . import db
 
 
 class MetaDataColumnsMixin(object):
+    """
+        Purpose: this is a model mixin to define meta-data columns common
+                 to most tables
+    """
     label = db.Column(
         db.String(128),
         default='',
