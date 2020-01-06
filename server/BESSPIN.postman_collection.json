@@ -1,0 +1,274 @@
+{
+	"info": {
+		"_postman_id": "16aa8349-7f8e-43ca-9450-65f66391aa26",
+		"name": "BESSPIN",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Upload Feature Configuration",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"roots\": [\n        \"CSR_REGFILE_MIN\",\n        \"EXTERNAL_DEBUG_MODULE\",\n        \"FABRIC32\",\n        \"FABRIC64\",\n        \"HTIF_MEMORY\",\n        \"INCLUDE_ACCEL0\",\n        \"INCLUDE_CAMERA_MODEL\",\n        \"INCLUDE_GDB_CONTROL\",\n        \"INCLUDE_INITIAL_MEMZERO\",\n        \"INCLUDE_TANDEM_VERIF\",\n        \"ISA_A\",\n        \"ISA_C\",\n        \"ISA_D\",\n        \"ISA_F\",\n        \"ISA_FD\",\n        \"ISA_FD_DIV\",\n        \"ISA_F_OR_D\",\n        \"ISA_N\",\n        \"ISA_PRIV_S\",\n        \"ISA_PRIV_U\",\n        \"IVERILOG\",\n        \"Near_Mem_Caches\",\n        \"Near_Mem_TCM\",\n        \"RV128\",\n        \"RV32\",\n        \"RV64\",\n        \"SHIFT_BARREL\",\n        \"SHIFT_MULT\",\n        \"SHIFT_SERIAL\",\n        \"SV34\",\n        \"SV39\",\n        \"Sv32\",\n        \"ISA_M\"\n    ],\n    \"version\": {\n        \"base\": 1\n    },\n    \"constraints\": [],\n    \"features\": {\n        \"ISA_FD\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_FD\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"INCLUDE_TANDEM_VERIF\": {\n            \"gcard\": \"opt\",\n            \"name\": \"INCLUDE_TANDEM_VERIF\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"Near_Mem_Caches\": {\n            \"gcard\": \"opt\",\n            \"name\": \"Near_Mem_Caches\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"on\"\n        },\n        \"ISA_FD_DIV\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_FD_DIV\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"SHIFT_SERIAL\": {\n            \"gcard\": \"opt\",\n            \"name\": \"SHIFT_SERIAL\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"opt\"\n        },\n        \"SHIFT_MULT\": {\n            \"gcard\": \"opt\",\n            \"name\": \"SHIFT_MULT\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"SHIFT_BARREL\": {\n            \"gcard\": \"opt\",\n            \"name\": \"SHIFT_BARREL\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"opt\"\n        },\n        \"FABRIC32\": {\n            \"gcard\": \"opt\",\n            \"name\": \"FABRIC32\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"IVERILOG\": {\n            \"gcard\": \"opt\",\n            \"name\": \"IVERILOG\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"RV128\": {\n            \"gcard\": \"opt\",\n            \"name\": \"RV128\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"HTIF_MEMORY\": {\n            \"gcard\": \"opt\",\n            \"name\": \"HTIF_MEMORY\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"ISA_D\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_D\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"EXTERNAL_DEBUG_MODULE\": {\n            \"gcard\": \"opt\",\n            \"name\": \"EXTERNAL_DEBUG_MODULE\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"ISA_A\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_A\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"opt\"\n        },\n        \"ISA_F\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_F\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"ISA_M\": {\n            \"gcard\": \"xor\",\n            \"name\": \"ISA_M\",\n            \"parent\": null,\n            \"children\": [\n                \"MULT_SERIAL\",\n                \"MULT_SYNTH\"\n            ],\n            \"card\": \"opt\"\n        },\n        \"ISA_C\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_C\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"on\"\n        },\n        \"INCLUDE_GDB_CONTROL\": {\n            \"gcard\": \"opt\",\n            \"name\": \"INCLUDE_GDB_CONTROL\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"Near_Mem_TCM\": {\n            \"gcard\": \"opt\",\n            \"name\": \"Near_Mem_TCM\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"MULT_SERIAL\": {\n            \"gcard\": \"opt\",\n            \"name\": \"MULT_SERIAL\",\n            \"parent\": \"ISA_M\",\n            \"children\": [],\n            \"card\": \"opt\"\n        },\n        \"CSR_REGFILE_MIN\": {\n            \"gcard\": \"opt\",\n            \"name\": \"CSR_REGFILE_MIN\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"SV34\": {\n            \"gcard\": \"opt\",\n            \"name\": \"SV34\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"SV39\": {\n            \"gcard\": \"opt\",\n            \"name\": \"SV39\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"RV64\": {\n            \"gcard\": \"opt\",\n            \"name\": \"RV64\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"RV32\": {\n            \"gcard\": \"opt\",\n            \"name\": \"RV32\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"on\"\n        },\n        \"FABRIC64\": {\n            \"gcard\": \"opt\",\n            \"name\": \"FABRIC64\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"on\"\n        },\n        \"Sv32\": {\n            \"gcard\": \"opt\",\n            \"name\": \"Sv32\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"INCLUDE_CAMERA_MODEL\": {\n            \"gcard\": \"opt\",\n            \"name\": \"INCLUDE_CAMERA_MODEL\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"INCLUDE_ACCEL0\": {\n            \"gcard\": \"opt\",\n            \"name\": \"INCLUDE_ACCEL0\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"ISA_PRIV_U\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_PRIV_U\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"opt\"\n        },\n        \"ISA_F_OR_D\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_F_OR_D\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"ISA_N\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_N\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"INCLUDE_INITIAL_MEMZERO\": {\n            \"gcard\": \"opt\",\n            \"name\": \"INCLUDE_INITIAL_MEMZERO\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"off\"\n        },\n        \"ISA_PRIV_S\": {\n            \"gcard\": \"opt\",\n            \"name\": \"ISA_PRIV_S\",\n            \"parent\": null,\n            \"children\": [],\n            \"card\": \"opt\"\n        },\n        \"MULT_SYNTH\": {\n            \"gcard\": \"opt\",\n            \"name\": \"MULT_SYNTH\",\n            \"parent\": \"ISA_M\",\n            \"children\": [],\n            \"card\": \"opt\"\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://0.0.0.0:3784/configurator/upload/piccolo.fm.json/foo",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "3784",
+					"path": [
+						"configurator",
+						"upload",
+						"piccolo.fm.json",
+						"foo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all feature configurations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://0.0.0.0:3784/configurator/list_db_models/",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "3784",
+					"path": [
+						"configurator",
+						"list_db_models",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a versioned resource",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"my newer first resource\",\n\t\"url\": \"https://github.com/my-repos/nice.git\",\n\t\"version\": \"ae56f0900\",\n\t\"resourceType\": {\n\t\t\"resourceTypeId\": 1,\n\t\t\"label\": \"hdl\"\n\t}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/versioned-resource",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"versioned-resource"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a versioned resource",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiHost}}/api/versioned-resource/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"versioned-resource",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create feature model inputs",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"my first feature model inputs\",\n\t\"hdlId\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/feature-model-inputs",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"feature-model-inputs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a feature extraction job",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"featModelId\": 1,\n\t\"label\": \"my first feat extract job\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/feature-extraction-job",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"feature-extraction-job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET configurator db models",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiHost}}/api/configurator/list_db_models/",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"configurator",
+						"list_db_models",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all versioned resources",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiHost}}/api/versioned-resource",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"versioned-resource"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a versioned resource",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"my first, renamed resource\",\n\t\"url\": \"https://github.com/my-repos/nice.git\",\n\t\"version\": \"ae56f0839\",\n\t\"resourceType\": {\n\t\t\"resourceTypeId\": 1,\n\t\t\"label\": \"hdl\"\n\t}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/versioned-resource/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"versioned-resource",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
