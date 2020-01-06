@@ -5,6 +5,7 @@ import os
 import logging
 import json
 import subprocess
+from shlex import quote
 import tempfile
 import copy
 
@@ -21,6 +22,7 @@ else:
 CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
 FORMAT_VERSIONS = [1]
 CMD_PRINT_CLAFER = "besspin-feature-model-tool print-clafer {}"
+CMD_CLAFER = "clafer {} -m fmjson"
 
 USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
 
@@ -47,7 +49,8 @@ def convert_model_to_json(source):
         cp = subprocess.run([
             "su", "-", "besspinuser", "-c",
             "cd ~/tool-suite &&" +
-            "nix-shell --command " + "\"clafer " + filename_cfr + " -m fmjson \""], capture_output=True)
+            "nix-shell --run " + quote(CMD_CLAFER.format(filename_cfr)) ],
+            capture_output=True)
     else:
         cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
 
@@ -76,11 +79,13 @@ def fmjson_to_clafer(source):
     filename_json = filename + '.fm.json'
     with open(filename_json, 'wb') as f:
         f.write(source)
-    cmd = CMD_PRINT_CLAFER.format(filename_json)
+    cmd = quote(CMD_PRINT_CLAFER.format(filename_json))
+
     cp = subprocess.run([
         "su", "-", "besspinuser", "-c",
         "cd ~/tool-suite &&" +
-        "nix-shell --command " + "\"" + cmd + "\""], capture_output=True)
+        "nix-shell --run " + cmd],
+        capture_output=True)
     logging.debug('besspin-feature-model-tool stdout: ' + str(cp.stdout))
     logging.debug('besspin-feature-model-tool stderr: ' + str(cp.stderr))
 
