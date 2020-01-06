@@ -17,7 +17,7 @@ if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
     WORK_DIR_OBJ = tempfile.TemporaryDirectory()
     WORK_DIR = WORK_DIR_OBJ.name
 else:
-    WORK_DIR = '/tmp/'
+    WORK_DIR = tempfile.gettempdir()
 
 CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
 FORMAT_VERSIONS = [1]
@@ -74,7 +74,7 @@ def fmjson_to_clafer(source):
     if (not USE_TOOLSUITE):
         return source.decode('utf8')
 
-    filename = os.path.join('/tmp/', 'generated_file')
+    filename = os.path.join(WORK_DIR, 'generated_file')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.fm.json'
     with open(filename_json, 'wb') as f:
