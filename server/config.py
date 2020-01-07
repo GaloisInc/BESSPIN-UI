@@ -41,6 +41,8 @@ class DevelopmentConfig(Config):
 
 class TestConfig(Config):
     db_fd, DATABASE = tempfile.mkstemp()
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///' + DATABASE)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     TESTING = True
 
 
