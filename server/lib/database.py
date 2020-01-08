@@ -68,12 +68,13 @@ def decode_json_db(content):
     """
     return json.loads(base64.b64decode(content).decode())
 
-def insert_feature_model_db(filename, content, conftree):
+def insert_feature_model_db(filename, source, conftree):
     """
     Insert feature mode in db
 
     :param filename:
-    :param content:
+    :param source: the source of the feature model
+    :param conftree: configuration tree as fm.json
 
     :return: uid
     """
@@ -81,12 +82,12 @@ def insert_feature_model_db(filename, content, conftree):
     c = conn.cursor()
     uid = str(uuid4())
     date = str(datetime.today().strftime("%Y-%m-%d %H:%M:%S"))
-    thehash = str(sha3_256(bytes(content, 'utf8')))
+    thehash = str(sha3_256(bytes(source, 'utf8')))
     last_update = date
     c.execute(DB_INSERT, (
         uid,
         filename,
-        content,
+        source,
         encode_json_db(conftree),
         date,
         thehash,

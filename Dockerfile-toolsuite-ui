@@ -1,4 +1,6 @@
-FROM ubuntu:bionic
+FROM besspin-toolsuite-image:latest
+
+USER root
 
 RUN apt-get update && \
     apt-get install -y software-properties-common && \

@@ -26,7 +26,7 @@ services:
   server:
     build: # this is only for development, we should use when we are ready for production
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-toolsuite-ui
       args:
         - TOKEN_NAME
         - PRIVATE_TOKEN
@@ -46,6 +46,7 @@ services:
       BESSPIN_CLAFER: /root/.local/bin/clafer
       HOST: 0.0.0.0
       PORT: 3784
+      USE_TOOLSUITE: "True"
 
 networks:
   proxy-layer:

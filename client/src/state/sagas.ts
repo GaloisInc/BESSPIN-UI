@@ -75,8 +75,8 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
             action.data.uid,
             selectionServer,
         );
-        const validated_features = mapValidateResponse(validateResponse);
-        yield put(submitValidateConfigurationSuccess(action.data.uid, validated_features));
+        const validateResult = mapValidateResponse(validateResponse);
+        yield put(submitValidateConfigurationSuccess(action.data.uid, validateResult));
     } catch (e) {
         console.error(e);
         yield put(submitValidateConfigurationFailure(e.message));

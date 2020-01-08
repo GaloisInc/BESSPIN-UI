@@ -23,6 +23,7 @@ from lib.database import (
 )
 from lib.configurator_shim import (
     convert_model_to_json,
+    fmjson_to_clafer,
     selected_features_to_constraints,
     combine_featmodel_cfgs,
     configuration_algo,
@@ -227,23 +228,33 @@ class ConfiguratorUpload(Resource):
         """
         upload a clafer or fm.json file
         """
+
         name, cfg_type = subpath.split('/')
         app.logger.debug('name is: '+ name +', cfg_type is: '+ cfg_type)
         if name.endswith('.cfr'):
             try:
                 json_feat_model = convert_model_to_json(request.data)
+                cfr_feature_model_source = request.data.decode('utf8')
             except RuntimeError as err:
                 app.logger.info(str(err))
                 return abort(500, str(err))
         elif name.endswith('.fm.json'):
-            json_feat_model = json.loads(request.data)
+            try:
+                json_feat_model = json.loads(request.data)
+                cfr_feature_model_source = (
+                    fmjson_to_clafer(request.data)
+                )
+            except RuntimeError as err:
+                app.logger.info(str(err))
+                return abort(500, str(err))
         else:
             return abort(400, 'Unsupported file extension for filename: ' + name)
-        uid = insert_feature_model_db(name, request.data.decode('utf8'), json_feat_model)
+        uid = insert_feature_model_db(name, cfr_feature_model_source, json_feat_model)
         return {
             'uid': uid,
             'tree': json_feat_model,
             'configured_feature_model': combine_featmodel_cfgs(json_feat_model, []),
+            'source': cfr_feature_model_source,
         }
 
 
