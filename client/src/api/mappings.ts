@@ -1,4 +1,4 @@
-import { ISelection, ISelectionType, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
+import { ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
 import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
 
 
@@ -27,13 +27,14 @@ export interface IUploadResponse {
     uid: string,
     tree: IFeatureModel,
     configured_feature_model: IFeatureMap,
+    source: string,
 }
 
 export interface IValidateResponse {
     server_source: string,
     server_constraints: string,
     validated_features: IConfig[],
-    configured_feature_model: IFeatureMap,
+    configured_feature_model: IFeatureModel,
 }
 /* eslint-enable camelcase */
 
@@ -74,6 +75,7 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
 export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): ISystemEntry => {
     return {
         uid: configurator.uid,
+        source: configurator.source,
         createdAt: "",
         lastUpdate: "",
         featureCount: -1,
@@ -115,6 +117,11 @@ export const mapValidateRequestForServer = (validateRequest: ISelectionType[]): 
     return configs;
 };
 
-export const mapValidateResponse = (validateResponse: IValidateResponse): ISelection => {
-    return validateResponse.validated_features.map(mapIConfigToISelectionType);
+export const mapValidateResponse = (validateResponse: IValidateResponse): ValidateResult => {
+    return {
+        serverSource: validateResponse.server_source,
+        serverConstraints: validateResponse.server_constraints,
+        validatedFeatures: validateResponse.validated_features.map(mapIConfigToISelectionType),
+        configuredFeatureModel: validateResponse.configured_feature_model,
+    };
 };
