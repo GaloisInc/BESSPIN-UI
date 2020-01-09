@@ -2,12 +2,10 @@ import {
     fetchSystems,
     fetchSystemsFailure,
     fetchSystemsSuccess,
-    getSystems,
     SystemActionTypes,
     ISystemEntry,
     selectFeature,
     SelectionMode,
-    getSystem,
     reducerSystem,
 } from './system';
 

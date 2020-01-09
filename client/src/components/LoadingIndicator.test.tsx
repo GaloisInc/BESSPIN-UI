@@ -15,6 +15,6 @@ describe('LoadingIndicator', () => {
     })
 
     it('should have a spinner', () => {
-        expect(wrapper.find(Spinner)).toBeTruthy();``
+        expect(wrapper.find(Spinner)).toBeTruthy();
     });
 });

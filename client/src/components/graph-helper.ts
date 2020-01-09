@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */ // disabling for now
 import {
     DataSet,
     Network,

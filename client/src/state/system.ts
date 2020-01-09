@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */ // disabling for now
 import { IFeatureModel, DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
 import {

@@ -1,8 +1,8 @@
+import { fetchConfigurators, submitConfigurator } from './api';
+
 import axios from 'axios';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;;
-
-import { fetchConfigurators, submitConfigurator } from './api';
 
 describe('api', () => {
 

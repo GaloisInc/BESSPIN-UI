@@ -21,10 +21,10 @@ describe('mappings', () => {
                     uid: 'UID-1',
                     filename: 'file.one',
                     date: '2019-10-28T23:07:47.650Z',
-                    last_update: '2019-10-28T23:09:00.000Z',
-                    nb_features_selected: 5,
-                    configs_pp: '',
-                    configured_feature_model: {},
+                    last_update: '2019-10-28T23:09:00.000Z', // eslint-disable-line camelcase
+                    nb_features_selected: 5, // eslint-disable-line camelcase
+                    configs_pp: '', // eslint-disable-line camelcase
+                    configured_feature_model: {}, // eslint-disable-line camelcase
                     source: '',
                 },
                 {
@@ -33,10 +33,10 @@ describe('mappings', () => {
                     uid: 'UID-2',
                     filename: 'file.two',
                     date: '2019-10-27T23:07:47.650Z',
-                    last_update: '2019-10-27T23:09:00.000Z',
-                    nb_features_selected: 3,
-                    configs_pp: '',
-                    configured_feature_model: {},
+                    last_update: '2019-10-27T23:09:00.000Z', // eslint-disable-line camelcase
+                    nb_features_selected: 3, // eslint-disable-line camelcase
+                    configs_pp: '', // eslint-disable-line camelcase
+                    configured_feature_model: {}, // eslint-disable-line camelcase
                     source: '',
                 },
             ];
