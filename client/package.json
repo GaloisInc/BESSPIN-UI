@@ -35,7 +35,7 @@
     "start:debug": "react-scripts --inspect start --no-cache --runInBand",
     "build": "react-scripts build",
     "lint": "eslint --ext js,ts,tsx src",
-    "test": "react-scripts test",
+    "test": "tsc && react-scripts test",
     "test:coverage": "npm test -- --coverage --watchAll=false",
     "eject": "react-scripts eject"
   },

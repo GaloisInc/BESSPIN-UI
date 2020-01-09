@@ -8,7 +8,7 @@ import {
 import { LoadingIndicator } from './LoadingIndicator';
 
 describe('LoadingIndicator', () => {
-    let wrapper;
+    let wrapper: ReturnType<typeof shallow>;
 
     beforeEach(() => {
         wrapper = shallow(<LoadingIndicator />);
