@@ -18,7 +18,6 @@ from lib.database import (
     list_models_from_db,
     insert_feature_model_db,
     update_configs_db,
-    retrieve_feature_models_db,
     retrieve_model_from_db_by_uid
 )
 from lib.configurator_shim import (
