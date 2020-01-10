@@ -23,7 +23,12 @@ CLAFER = os.environ.get('BESSPIN_CLAFER', 'clafer')
 FORMAT_VERSIONS = [1]
 CMD_PRINT_CLAFER = "besspin-feature-model-tool print-clafer {}"
 CMD_CLAFER = "clafer {} -m fmjson"
-
+CMD_CONFIGURATION_ALGO = (
+    # the cd into the work_dir is important because clafer write its output file
+    # in the working directory
+    "cd {} && ".format(WORK_DIR) +
+    "clafer -m fmjson {} && besspin-feature-model-tool count-configs {}"
+)
 USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
 
 def load_json(filename):
@@ -146,12 +151,60 @@ def combine_featmodel_cfgs(model, cfgs):
 
 
 
+def _find_answer_in_configuration_algo_output(out):
+    split_out = out.split('\n')
+    logging.debug('SPLIY: ' + str(split_out))
+    for line in reversed(split_out):
+        try:
+            i = int(line.strip())
+            return i
+        except ValueError:
+            continue
 
-def configuration_algo(conftree, feature_selection):
+def validate_all_features(feature_selection):
     """
-    A mock configuration algorithon. Says yes to everything
+    Validates all the features selected.
     """
-    for e in feature_selection:
+    feat_sel = copy.deepcopy(feature_selection)
+    for e in feat_sel:
         e['validated'] = True
 
-    return feature_selection
+    return feat_sel
+
+def configuration_algo(cfr_source, feature_selection):
+    """
+    Execute the configuration validation algorithm and returns a boolean
+    indicating the success or failure of the validation.
+    When `USE_TOOLSUITE` is disabled, it blindly returns true
+
+    :param cfr_source:
+    :param feature_selection:
+
+    :return: boolean
+    """
+    if not USE_TOOLSUITE:
+        return True
+
+    filename = os.path.join(WORK_DIR, 'generated_configured_feature_model')
+    filename_cfr = filename + '.cfr'
+    filename_json = filename + '.fm.json'
+
+    logging.debug('CFR source: ' + cfr_source)
+    with open(filename_cfr, 'w') as f:
+        f.write(cfr_source)
+        f.write(selected_features_to_constraints(feature_selection))
+
+    cmd = quote(CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json))
+    cp = subprocess.run([
+        "su", "-", "besspinuser", "-c",
+        "cd ~/tool-suite &&" +
+        "nix-shell --run " + cmd],
+        capture_output=True)
+    logging.debug('configuration algo stdout: ' + str(cp.stdout))
+    logging.debug('configuration algo stderr: ' + str(cp.stderr))
+
+    if cp.stderr:
+        raise RuntimeError(cp.stderr)
+
+    n = _find_answer_in_configuration_algo_output(cp.stdout.decode('utf8'))
+    return n > 0
