@@ -100,21 +100,25 @@ def fmjson_to_clafer(source):
 
     return cp.stdout.decode('utf8')
 
-def selected_features_to_constraints(feats):
+def selected_features_to_constraints(feats, even_not_validated=False):
     """
-    Convert a set of selected features to constraints
+    Convert a set of selected features to constraints.
+    Only the features that are validated are translated into constraints,
+    otherwise all are translated when `even_not_validated` is set.
 
     :return: str
     """
     res = ""
+
     for sel in reversed(feats):
         sel_str = sel['other']
 
         mode = sel['mode']
-        if mode == 'selected':
-            res += "[ " + sel_str + " ]" + "\n"
-        elif mode == 'rejected':
-            res += "[ !" + sel_str + " ]" + "\n"
+        if sel['validated'] or even_not_validated:
+            if mode == 'selected':
+                res += "[ " + sel_str + " ]" + "\n"
+            elif mode == 'rejected':
+                res += "[ !" + sel_str + " ]" + "\n"
     return res
 
 def combine_featmodel_cfgs(model, cfgs):
@@ -130,24 +134,26 @@ def combine_featmodel_cfgs(model, cfgs):
     for sel in cfgs:
         sel_str = sel['other']
         mode = sel['mode']
-        if mode == 'selected':
-            cfg_model['constraints'].append({
-                'kind': 'feat',
-                'name': sel_str,
-            })
-        elif mode == 'rejected':
-            cfg_model['constraints'].append({
-                'kind': 'op',
-                'op': 'not',
-                'args': [
-                    {
-                        'kind': 'feat',
-                        'name': sel_str,
-                    },
-                ]
-            })
-        else:
-             raise RuntimeError('feature selection is neither selected or rejected')
+        validated = sel['validated']
+        if validated:
+            if mode == 'selected':
+                cfg_model['constraints'].append({
+                    'kind': 'feat',
+                    'name': sel_str,
+                })
+            elif mode == 'rejected':
+                cfg_model['constraints'].append({
+                    'kind': 'op',
+                    'op': 'not',
+                    'args': [
+                        {
+                            'kind': 'feat',
+                            'name': sel_str,
+                        },
+                    ]
+                })
+            else:
+                raise RuntimeError('feature selection is neither selected or rejected')
     return cfg_model
 
 
@@ -193,7 +199,11 @@ def configuration_algo(cfr_source, feature_selection):
     logging.debug('CFR source: ' + cfr_source)
     with open(filename_cfr, 'w') as f:
         f.write(cfr_source)
-        f.write(selected_features_to_constraints(feature_selection))
+        f.write(selected_features_to_constraints(feature_selection, even_not_validated=True))
+
+    with open(filename_cfr, 'r') as f:
+        text = f.read()
+        logging.debug('CFR+CONSTRAINTS: \n' + text)
 
     cmd = quote(CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json))
     cp = subprocess.run([
