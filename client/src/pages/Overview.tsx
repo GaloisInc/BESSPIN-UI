@@ -35,6 +35,66 @@ import '../style/Overview.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
 
+const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
+const TEST_WORKFLOWS: IWorkflow[] = [
+  {
+    id: 1,
+    label: 'Completed Workflow',
+    createdAt: (new Date(Date.now() - TWO_DAYS_IN_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - .5 * TWO_DAYS_IN_MS)).toISOString(),
+    systemConfig: { id: 2 },
+    testConfig: { id: 2 },
+    report: { id: 2 },
+  },
+  {
+    id: 2,
+    label: 'Failed build workflow',
+    createdAt: (new Date(Date.now() - 2 * TWO_DAYS_IN_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - 1.5 * TWO_DAYS_IN_MS)).toISOString(),
+    hasError: true,
+    systemConfig: {
+      id: 1,
+    },
+    testConfig: {
+      id: 1,
+    },
+    report: {
+      id: 1,
+      error: {
+        id: 1,
+        message: 'Something went wrong building the system',
+      },
+    }
+  },
+  {
+    id: 3,
+    label: 'Failed test config workflow',
+    createdAt: (new Date(Date.now() - 2 * TWO_DAYS_IN_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - 1.5 * TWO_DAYS_IN_MS)).toISOString(),
+    hasError: true,
+    systemConfig: { id: 1 },
+    testConfig: {
+      id: 1,
+      error: {
+        id: 1,
+        message: 'Something went wrong configuring the tests',
+      },
+    },
+  },
+  {
+    id: 4,
+    label: 'Missing Test Config Workflow',
+    createdAt: (new Date(Date.now() - TWO_DAYS_IN_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - .25 * TWO_DAYS_IN_MS)).toISOString(),
+    systemConfig: { id: 1 },
+  },
+  {
+    id: 5,
+    label: 'New Workflow',
+    createdAt: (new Date(Date.now())).toISOString(),
+  },
+];
+
 // NOTE: We currently are defining our workflow data-types here so
 //       we can easily iterate on the UX.
 //       Once we have settled on the UX, we need to create a new
@@ -101,7 +161,7 @@ const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabl
     : (
       <Button disabled={disabled} variant={variantType} href={url}>
         {label}
-        {!disabled && variantType !== 'primary' && !noNextStep && <FontAwesomeIcon icon={faChevronRight} />
+        {!(disabled || noNextStep ) && variantType !== 'primary' && <FontAwesomeIcon icon={faChevronRight} />
         }</Button>
     );
 };
@@ -235,8 +295,6 @@ export const Overview: React.FC<IOverviewProps> = ({
     </Container>
   );
 };
-
-import { TEST_WORKFLOWS } from './Overview.test';
 
 const mapStateToProps = (state: IState): IOverviewProps => {
   return {

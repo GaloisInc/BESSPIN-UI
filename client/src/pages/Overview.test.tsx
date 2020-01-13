@@ -11,65 +11,7 @@ import {
 } from '../state/system';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 
-const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
-export const TEST_WORKFLOWS: IWorkflow[] = [
-  {
-    id: 1,
-    label: 'Completed Workflow',
-    createdAt: (new Date(Date.now() - TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - .5 * TWO_DAYS_IN_MS)).toISOString(),
-    systemConfig: { id: 2 },
-    testConfig: { id: 2 },
-    report: { id: 2 },
-  },
-  {
-    id: 2,
-    label: 'Failed build workflow',
-    createdAt: (new Date(Date.now() - 2 * TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - 1.5 * TWO_DAYS_IN_MS)).toISOString(),
-    hasError: true,
-    systemConfig: {
-      id: 1,
-    },
-    testConfig: {
-      id: 1,
-    },
-    report: {
-      id: 1,
-      error: {
-        id: 1,
-        message: 'Something went wrong building the system',
-      },
-    }
-  },
-  {
-    id: 3,
-    label: 'Failed test config workflow',
-    createdAt: (new Date(Date.now() - 2 * TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - 1.5 * TWO_DAYS_IN_MS)).toISOString(),
-    hasError: true,
-    systemConfig: { id: 1 },
-    testConfig: {
-      id: 1,
-      error: {
-        id: 1,
-        message: 'Something went wrong configuring the tests',
-      },
-    },
-  },
-  {
-    id: 4,
-    label: 'Missing Test Config Workflow',
-    createdAt: (new Date(Date.now() - TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - .25 * TWO_DAYS_IN_MS)).toISOString(),
-    systemConfig: { id: 1 },
-  },
-  {
-    id: 5,
-    label: 'New Workflow',
-    createdAt: (new Date(Date.now())).toISOString(),
-  },
-];
+
 const genDate = (): string => {
     return (new Date(Date.now())).toISOString();
 };
@@ -129,7 +71,7 @@ describe('Overview', () => {
 
   it('dispatches action to fetch data if no data has been fetched', () => {
       const dispatchSpy = jest.fn();
-      const _wrapper = genOverviewWrapper({ dataRequested: false, dispatch: dispatchSpy });
+      genOverviewWrapper({ dataRequested: false, dispatch: dispatchSpy });
 
       expect(dispatchSpy).toHaveBeenCalledWith({ type: SystemActionTypes.FETCH_TEST_SYSTEMS });
   });
