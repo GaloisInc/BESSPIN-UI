@@ -12,7 +12,6 @@ from app.lib.database import (
     list_models_from_db,
     insert_feature_model_db,
     update_configs_db,
-    retrieve_feature_models_db,
     retrieve_model_from_db_by_uid
 )
 from app.lib.configurator_shim import (
@@ -20,6 +19,7 @@ from app.lib.configurator_shim import (
     fmjson_to_clafer,
     selected_features_to_constraints,
     combine_featmodel_cfgs,
+    validate_all_features,
     configuration_algo,
 )
 
@@ -145,13 +145,24 @@ class ConfiguratorConfigure(Resource):
         entry = retrieve_model_from_db_by_uid(uid)
         file_content = entry.get('source', '')
         conftree = entry['conftree']
-        configs = feature_selection
-        validated_features = configuration_algo(
-            entry['conftree'],
-            feature_selection,
+        old_feature_selection = entry['configs']
+
+        try:
+            is_selection_valid = configuration_algo(
+                entry['source'],
+                feature_selection,
+            )
+        except RuntimeError as err:
+            app.logger.info(str(err))
+            return abort(500, str(err))
+
+        validated_features = (
+            validate_all_features(feature_selection)
+            if is_selection_valid
+            else old_feature_selection
         )
         update_configs_db(uid, validated_features)
-        constraints = selected_features_to_constraints(feature_selection)
+        constraints = selected_features_to_constraints(validated_features)
 
         # pylint: disable=line-too-long
         # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
@@ -162,7 +173,7 @@ class ConfiguratorConfigure(Resource):
             'server_source': file_content,
             'server_constraints': constraints,
             'validated_features': validated_features,
-            'configured_feature_model': combine_featmodel_cfgs(conftree, configs)
+            'configured_feature_model': combine_featmodel_cfgs(conftree, validated_features)
         }
 
 @api.route('/configurator/list_db_models/')
