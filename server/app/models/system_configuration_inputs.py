@@ -2,7 +2,7 @@ from . import db
 from .metadata_mixin import MetaDataColumnsMixin
 
 
-class SystemConfigurationInputs(db.Model, MetaDataColumnsMixin):
+class SystemConfigurationInput(db.Model, MetaDataColumnsMixin):
     __tablename__ = 'systemConfigurationInputs'
 
     sysConfigId = db.Column(db.Integer, primary_key=True)
@@ -41,4 +41,4 @@ class SystemConfigurationInputs(db.Model, MetaDataColumnsMixin):
     )
 
     def __repr__(self):
-        return f'<SystemConfigurationInputs id="{self.sysConfigId}" label="{self.label}">'  # noqa E501
+        return f'<SystemConfigurationInput id="{self.sysConfigId}" label="{self.label}">'  # noqa E501

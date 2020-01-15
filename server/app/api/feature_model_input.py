@@ -2,7 +2,7 @@ from flask import current_app
 from flask_restplus import Resource, fields
 
 from . import api
-from app.models import db, FeatureModelInputs
+from app.models import db, FeatureModelInput
 
 
 ns = api.namespace(
@@ -33,13 +33,13 @@ existing_feature_model_inputs = api.inherit(
 
 @ns.route('')
 @ns.route('/<int:featModelId>')
-class FeatureModelInput(Resource):
+class FeatureModelInputApi(Resource):
     @ns.doc('create feature model inputs')
     @ns.marshal_list_with(existing_feature_model_inputs)
     @ns.expect(new_feature_model_inputs)
     def post(self):
         new_feat_model_data = api.payload
-        new_feat_model_input = FeatureModelInputs(label=new_feat_model_data['label'], hdlId=new_feat_model_data['hdlId'])  # noqa E501
+        new_feat_model_input = FeatureModelInput(label=new_feat_model_data['label'], hdlId=new_feat_model_data['hdlId'])  # noqa E501
         db.session.add(new_feat_model_input)
         db.session.commit()
 
@@ -49,4 +49,4 @@ class FeatureModelInput(Resource):
     @ns.marshal_with(existing_feature_model_inputs)
     def get(self, featModelId):
         current_app.logger.debug(f'featModelId: {featModelId}')
-        return FeatureModelInputs.query.filter_by(featModelId=featModelId).first()  # noqa E501
+        return FeatureModelInput.query.filter_by(featModelId=featModelId).first()  # noqa E501

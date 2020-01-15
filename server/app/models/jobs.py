@@ -2,7 +2,7 @@ from . import db
 from .metadata_mixin import MetaDataColumnsMixin
 
 
-class JobStatuses(db.Model):
+class JobStatus(db.Model):
     __tablename__ = 'jobStatuses'
 
     statusId = db.Column(db.Integer, primary_key=True)
@@ -12,12 +12,13 @@ class JobStatuses(db.Model):
     )
 
     def __repr__(self):
-        return '<JobStatuses "{}" {}>'.format(self.statusId, self.label)
+        return '<JobStatus "{}" {}>'.format(self.statusId, self.label)
 
     ALLOWED_STATUSES = ['running', 'failed', 'succeeded']
 
 
-class Jobs(db.Model, MetaDataColumnsMixin):
+
+class Job(db.Model, MetaDataColumnsMixin):
     __tablename__ = 'jobs'
 
     jobId = db.Column(db.Integer, primary_key=True)
@@ -54,7 +55,7 @@ class Jobs(db.Model, MetaDataColumnsMixin):
         return f'<Jobs id="{self.jobId}" label="{self.label}">'
 
 
-class FeatureExtractionJobs(Jobs):
+class FeatureExtractionJob(Job):
     __tablename__ = 'featureExtractionJobs'
 
     jobId = db.Column(db.Integer, db.ForeignKey('jobs.jobId'), primary_key=True)  # noqa E501

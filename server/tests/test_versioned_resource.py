@@ -4,8 +4,8 @@ from sqlalchemy.exc import IntegrityError
 from app import create_app
 from app.models import (
     db,
-    VersionedResources,
-    VersionedResourceTypes,
+    VersionedResource,
+    VersionedResourceType,
 )
 
 
@@ -16,7 +16,7 @@ class VersionedResourceModelTestCase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
-        VersionedResourceTypes.load_allowed_types()
+        VersionedResourceType.load_allowed_types()
 
     def tearDown(self):
         db.session.remove()
@@ -24,16 +24,16 @@ class VersionedResourceModelTestCase(unittest.TestCase):
         self.app_context.pop()
 
     def test_resource_types_loaded(self):
-        types = VersionedResourceTypes().query.all()
-        self.assertTrue(len(types) == len(VersionedResourceTypes.ALLOWED_TYPES))
+        types = VersionedResourceType().query.all()
+        self.assertTrue(len(types) == len(VersionedResourceType.ALLOWED_TYPES))
 
     def test_unique_url_version_constraint(self):
-        hdl_type_id = VersionedResourceTypes().query.filter_by(label='hdl').first().resourceTypeId
+        hdl_type_id = VersionedResourceType().query.filter_by(label='hdl').first().resourceTypeId
         test_url = 'https://github.com/fancy-pants/master.git'
         test_version = '1'
 
         db.session.add(
-            VersionedResources(
+            VersionedResource(
                 label='test resource 1',
                 url=test_url,
                 version=test_version,
@@ -41,7 +41,7 @@ class VersionedResourceModelTestCase(unittest.TestCase):
             )
         )
         db.session.add(
-            VersionedResources(
+            VersionedResource(
                 label='test resource 2',
                 url=test_url,
                 version=test_version,
@@ -53,11 +53,11 @@ class VersionedResourceModelTestCase(unittest.TestCase):
             db.session.commit()
 
     def test_allow_same_url_different_version(self):
-        hdl_type_id = VersionedResourceTypes().query.filter_by(label='hdl').first().resourceTypeId
+        hdl_type_id = VersionedResourceType().query.filter_by(label='hdl').first().resourceTypeId
         test_url = 'https://github.com/fancy-pants/master.git'
 
         db.session.add(
-            VersionedResources(
+            VersionedResource(
                 label='test resource 1',
                 url=test_url,
                 version='1',
@@ -65,7 +65,7 @@ class VersionedResourceModelTestCase(unittest.TestCase):
             )
         )
         db.session.add(
-            VersionedResources(
+            VersionedResource(
                 label='test resource 2',
                 url=test_url,
                 version='2',
@@ -75,4 +75,4 @@ class VersionedResourceModelTestCase(unittest.TestCase):
 
         db.session.commit()
 
-        self.assertEqual(len(VersionedResources.query.all()), 2)
+        self.assertEqual(len(VersionedResource.query.all()), 2)

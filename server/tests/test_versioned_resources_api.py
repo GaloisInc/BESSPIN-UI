@@ -6,8 +6,8 @@ import logging
 from app import create_app
 from app.models import (
     db,
-    VersionedResourceTypes,
-    VersionedResources,
+    VersionedResourceType,
+    VersionedResource,
 )
 
 
@@ -19,7 +19,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
         self.app_context.push()
         self.app.logger.setLevel(logging.CRITICAL)
         db.create_all()
-        VersionedResourceTypes.load_allowed_types()
+        VersionedResourceType.load_allowed_types()
         self.client = self.app.test_client()
 
     def tearDown(self):
@@ -29,8 +29,8 @@ class TestVersionedResourcesApi(unittest.TestCase):
         self.app.logger.setLevel(logging.NOTSET)
 
     def test_create(self):
-        r = VersionedResources().query.all()
-        t = VersionedResourceTypes().query.filter_by(label='hdl').first()
+        r = VersionedResource().query.all()
+        t = VersionedResourceType().query.filter_by(label='hdl').first()
         self.assertListEqual(r, [])
 
         label = f'created resource {datetime.utcnow()}'
@@ -44,18 +44,18 @@ class TestVersionedResourcesApi(unittest.TestCase):
             )))
 
         self.assertEqual(response.status_code, 200)
-        created_resource = VersionedResources.query.filter_by(label=label).first()
+        created_resource = VersionedResource.query.filter_by(label=label).first()
         self.assertIsNotNone(created_resource)
 
     def test_update(self):
-        r = VersionedResources().query.all()
-        t = VersionedResourceTypes().query.filter_by(label='hdl').first()
+        r = VersionedResource().query.all()
+        t = VersionedResourceType().query.filter_by(label='hdl').first()
         self.assertListEqual(r, [])
-        r = VersionedResources(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
+        r = VersionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
         db.session.add(r)
         db.session.commit()
 
-        self.assertEqual(len(VersionedResources().query.all()), 1)
+        self.assertEqual(len(VersionedResource().query.all()), 1)
 
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
@@ -68,18 +68,18 @@ class TestVersionedResourcesApi(unittest.TestCase):
             )))
 
         self.assertEqual(response.status_code, 200)
-        created_resource = VersionedResources.query.filter_by(label=label)
+        created_resource = VersionedResource.query.filter_by(label=label)
         self.assertIsNotNone(created_resource)
 
     def test_get(self):
         # add two resources
-        r = VersionedResources().query.all()
+        r = VersionedResource().query.all()
         self.assertListEqual(r, [])
-        r1 = VersionedResources(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
-        r2 = VersionedResources(label='r2', url='https://test.url.two', version='1', resourceTypeId=1)
+        r1 = VersionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
+        r2 = VersionedResource(label='r2', url='https://test.url.two', version='1', resourceTypeId=1)
         db.session.add_all([r1, r2])
         db.session.commit()
-        r = VersionedResources().query.all()
+        r = VersionedResource().query.all()
         self.assertEqual(len(r), 2)
 
         # get them individually
