@@ -76,3 +76,23 @@ class VersionedResourceModelTestCase(unittest.TestCase):
         db.session.commit()
 
         self.assertEqual(len(VersionedResource.query.all()), 2)
+
+    def test_resource_type_access(self):
+        hdl_type_id = VersionedResourceType().query.filter_by(label='hdl').first().resourceTypeId
+        test_url = 'https://github.com/fancy-pants/master.git'
+
+        db.session.add(
+            VersionedResource(
+                label='test resource 1',
+                url=test_url,
+                version='1',
+                resourceTypeId=hdl_type_id
+            )
+        )
+
+        db.session.commit()
+
+        versionedResource = VersionedResource.query.filter_by(url=test_url).first()
+
+        self.assertIsNotNone(versionedResource)
+        self.assertEqual(versionedResource.resourceType.label, 'hdl')
