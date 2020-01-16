@@ -2,7 +2,6 @@ from flask import current_app
 from flask_restplus import Resource, fields
 from flask import (
     abort,
-    current_app,
     json,
     request,
 )
@@ -12,7 +11,7 @@ from app.lib.database import (
     list_models_from_db,
     insert_feature_model_db,
     update_configs_db,
-    retrieve_feature_models_db,
+    # retrieve_feature_models_db,
     retrieve_model_from_db_by_uid
 )
 from app.lib.configurator_shim import (
@@ -64,7 +63,10 @@ featureModelFeatureMap = api.model('Feature Model Feature Map', {
 
 featureModel = api.model('Feature', {
     'constraints': fields.List(fields.Nested(featureModelConstraint)),
-    'features': fields.Raw, # NOTE: would be better to use "Nested(featureModelFeatureMap)" but a feature model map is an open-ended project of arbitrary keys, so we cannot spec that ahead of time
+    # NOTE: would be better to use "Nested(featureModelFeatureMap)" but a
+    #       feature model map is an open-ended project of arbitrary keys,
+    #       so we cannot spec that ahead of time
+    'features': fields.Raw,
     'roots': fields.List(fields.String),
     'version': fields.Nested(featureModelVersion)
 })
@@ -94,6 +96,7 @@ class OverviewModels(Resource):
         models = list_models_from_db()
         return models
 
+
 @api.route('/configurator/upload/<path:subpath>')
 class ConfiguratorUpload(Resource):
     def post(self, subpath):
@@ -102,7 +105,7 @@ class ConfiguratorUpload(Resource):
         """
 
         name, cfg_type = subpath.split('/')
-        current_app.logger.debug('name is: '+ name +', cfg_type is: '+ cfg_type)
+        current_app.logger.debug('name is: ' + name + ', cfg_type is: ' + cfg_type)
         if name.endswith('.cfr'):
             try:
                 json_feat_model = convert_model_to_json(request.data)
@@ -117,7 +120,7 @@ class ConfiguratorUpload(Resource):
                     fmjson_to_clafer(request.data)
                 )
             except RuntimeError as err:
-                app.logger.info(str(err))
+                current_app.logger.info(str(err))
                 return abort(500, str(err))
         else:
             return abort(400, 'Unsupported file extension for filename: ' + name)
@@ -164,6 +167,7 @@ class ConfiguratorConfigure(Resource):
             'validated_features': validated_features,
             'configured_feature_model': combine_featmodel_cfgs(conftree, configs)
         }
+
 
 @api.route('/configurator/list_db_models/')
 class ConfiguratorList(Resource):
