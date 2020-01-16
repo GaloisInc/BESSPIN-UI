@@ -77,3 +77,18 @@ class FeatureExtractionJob(Job):
     __mapper_args__ = {
         'polymorphic_identity': 'feature-extraction',
     }
+
+
+class ReportJob(Job):
+    __tablename__ = 'reportJobs'
+
+    jobId = db.Column(db.Integer, db.ForeignKey('jobs.jobId'), primary_key=True)  # noqa E501
+    sysConfigId = db.Column(
+        db.Integer,
+        db.ForeignKey('systemConfigurationInputs.sysConfigId', ondelete='CASCADE'),  # noqa E501
+        nullable=False
+    )
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'report',
+    }
