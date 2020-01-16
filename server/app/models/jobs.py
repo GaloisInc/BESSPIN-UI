@@ -16,6 +16,14 @@ class JobStatus(db.Model):
 
     ALLOWED_STATUSES = ['running', 'failed', 'succeeded']
 
+    @staticmethod
+    def load_allowed_statuses(db_conn=db.session):
+        for t in JobStatus.ALLOWED_STATUSES:
+            job_status = JobStatus.query.filter_by(label=t).first()
+            if job_status is None:
+                job_status = JobStatus(label=t)
+            db_conn.add(job_status)
+        db_conn.commit()
 
 
 class Job(db.Model, MetaDataColumnsMixin):
@@ -45,6 +53,7 @@ class Job(db.Model, MetaDataColumnsMixin):
         nullable=False,
         comment='internal polymorphic type-tracking',
     )
+    status = db.relationship('JobStatus')
 
     __mapper_args__ = {
         'polymorphic_identity': 'job',
@@ -52,7 +61,7 @@ class Job(db.Model, MetaDataColumnsMixin):
     }
 
     def __repr__(self):
-        return f'<Jobs id="{self.jobId}" label="{self.label}">'
+        return f'<Job id="{self.jobId}" label="{self.label}" status="{self.status.label}">'
 
 
 class FeatureExtractionJob(Job):
