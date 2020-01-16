@@ -23,12 +23,10 @@ ns = api.namespace(
 versioned_resource_type = api.model('VersionedResourceType', {
     'label': fields.String(
         required=True,
-        description='Human-readable resource type label',
-    ),
+        description='Human-readable resource type label'),
     'resourceTypeId': fields.Integer(
         required=True,
-        description='Id of resource type',
-    ),
+        description='Id of resource type'),
 })
 
 new_versioned_resource = api.model('NewVersionedResource', {
@@ -44,8 +42,7 @@ new_versioned_resource = api.model('NewVersionedResource', {
     'resourceType': fields.Nested(
         versioned_resource_type,
         required=True,
-        description='Label for the versioned resource type categorizing this resource'  # noqa E501
-    )
+        description='type of resource we are dealing with'),
 })
 
 """
@@ -59,8 +56,7 @@ existing_versioned_resource = api.inherit(
     {
         'resourceId': fields.Integer(
             required=True,
-            description='Resource identifier'
-        ),
+            description='Resource identifier'),
     }
 )
 
@@ -79,7 +75,7 @@ class VersionedResourceListApi(Resource):
     # we can also declare the expected shape of input data to allow
     # for flask to validate that the correct data is supplied in a POST/PUT
     @ns.marshal_with(existing_versioned_resource)
-    @ns.expect(new_versioned_resource)
+    @ns.expect(new_versioned_resource, validate=True)
     def post(self):
         resource_input = json.loads(request.data)
         current_app.logger.debug(resource_input['resourceType'])
@@ -100,7 +96,7 @@ class VersionedResourceListApi(Resource):
 class VersionedResourceApi(Resource):
     @ns.doc('update a versioned resource')
     @ns.marshal_list_with(existing_versioned_resource)
-    @ns.expect(new_versioned_resource)
+    @ns.expect(new_versioned_resource, validate=True)
     def put(self, resourceId):
         current_app.logger.debug(f'updating resourceId: {resourceId}')
         resource_input = json.loads(request.data)

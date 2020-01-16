@@ -36,6 +36,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
         label = f'created resource {datetime.utcnow()}'
         response = self.client.post(
             '/api/versioned-resource',
+            headers={'Content-type': 'application/json'},
             data=json.dumps(dict(
                 label=label,
                 url='https://github.com/test/repo.git',
@@ -46,6 +47,25 @@ class TestVersionedResourcesApi(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         created_resource = VersionedResource.query.filter_by(label=label).first()
         self.assertIsNotNone(created_resource)
+
+    def test_create_with_missing_data(self):
+        r = VersionedResource().query.all()
+        self.assertListEqual(r, [])
+
+        label = f'created resource {datetime.utcnow()}'
+        response = self.client.post(
+            '/api/versioned-resource',
+            headers={'Content-type': 'application/json'},
+            data=json.dumps(dict(
+                label=label,
+                url='https://github.com/test/repo.git',
+                version='1'
+            )))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json(), {
+            'errors': {'resourceType': "'resourceType' is a required property"},
+            'message': 'Input payload validation failed'})
 
     def test_update(self):
         r = VersionedResource().query.all()
@@ -60,6 +80,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
             f'/api/versioned-resource/{r.resourceId}',
+            headers={'Content-type': 'application/json'},
             data=json.dumps(dict(
                 label=label,
                 url=r.url,
@@ -70,6 +91,30 @@ class TestVersionedResourcesApi(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         created_resource = VersionedResource.query.filter_by(label=label)
         self.assertIsNotNone(created_resource)
+
+    def test_update_with_missing_data(self):
+        r = VersionedResource().query.all()
+        self.assertListEqual(r, [])
+        r = VersionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
+        db.session.add(r)
+        db.session.commit()
+
+        self.assertEqual(len(VersionedResource().query.all()), 1)
+
+        label = f'{r.label}-{datetime.now()}'
+        response = self.client.put(
+            f'/api/versioned-resource/{r.resourceId}',
+            headers={'Content-type': 'application/json'},
+            data=json.dumps(dict(
+                label=label,
+                url=r.url,
+                version=r.version,
+            )))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json(), {
+            'errors': {'resourceType': "'resourceType' is a required property"},
+            'message': 'Input payload validation failed'})
 
     def test_get(self):
         # add two resources
