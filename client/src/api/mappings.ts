@@ -1,5 +1,6 @@
 import { ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
 import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
+import { IWorkflow } from '../state/workflow';
 
 
 export interface IConfig {
@@ -36,6 +37,17 @@ export interface IValidateResponse {
     validated_features: IConfig[],
     configured_feature_model: IFeatureModel,
 }
+
+export interface IServersideWorkflow {
+    workflowId: number;
+    label: string;
+    createdAt: string;
+    updatedAt?: string;
+    sysConfigId?: string;
+    testConfigId?: string;
+    reportId?: string;
+}
+
 /* eslint-enable camelcase */
 
 const mapSelectionMode = (mode: string): SelectionMode => {
@@ -124,4 +136,15 @@ export const mapValidateResponse = (validateResponse: IValidateResponse): Valida
         validatedFeatures: validateResponse.validated_features.map(mapIConfigToISelectionType),
         configuredFeatureModel: validateResponse.configured_feature_model,
     };
+};
+
+export const mapWorkflows = (workflows: IServersideWorkflow[]): IWorkflow[] => {
+    return workflows.map(w => ({
+        id: w.workflowId,
+        createdAt: w.createdAt,
+        label: w.label,
+        sysConfigId: w.sysConfigId,
+        testConfigId: w.testConfigId,
+        reportId: w.reportId,
+    }));
 };

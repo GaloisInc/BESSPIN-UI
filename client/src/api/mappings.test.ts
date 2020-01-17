@@ -1,4 +1,11 @@
-import { mapConfiguratorsToSystems } from './mappings';
+import {
+    mapConfiguratorsToSystems,
+    mapWorkflows,
+    IServersideWorkflow,
+} from './mappings';
+import {
+    IWorkflow,
+} from '../state/workflow';
 
 import { DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
@@ -72,5 +79,21 @@ describe('mappings', () => {
                 expect(mapConfiguratorsToSystems(TEST_DATA)).toEqual(TEST_RESULTS);
             });
         });
+    });
+
+    describe('mapWorkflows', () => {
+
+        it('should simply pass thru the given workflow data', () => {
+            const TEST_API_WORKFLOWS: IServersideWorkflow[] = [
+                { workflowId: 1, label: 'w1', createdAt: 'SOME DATESTRING' },
+                { workflowId: 2, label: 'w2', createdAt: 'SOME DATESTRING' },
+            ];
+
+            const TEST_CLIENT_WORKFLOWS: IWorkflow[] = [
+                { id: 1, label: 'w1', createdAt: 'SOME DATESTRING' },
+                { id: 2, label: 'w2', createdAt: 'SOME DATESTRING' },
+            ];
+            expect(mapWorkflows(TEST_API_WORKFLOWS)).toEqual(TEST_CLIENT_WORKFLOWS);
+        })
     });
 });
