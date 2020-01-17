@@ -77,6 +77,22 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
     .then(extractData);
 }
 
+export const submitWorkflow = async (workflowLabel: string) => {
+
+    return axios.request({
+        url: '/api/workflow',
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: {
+            label: workflowLabel,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
 export const submitValidateConfiguration = async (uid: string, selectedNodes: IConfig[]) => {
     return axios.request({
         url: '/api/configurator/configure/',
