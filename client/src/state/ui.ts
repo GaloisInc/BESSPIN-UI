@@ -1,6 +1,10 @@
 import { createSelector } from 'reselect';
 
 import { SystemActionTypes, ISystemAction } from './system';
+import {
+    WorkflowActionTypes,
+    IWorkflowAction,
+} from './workflow';
 
 export interface IUiState {
     isLoading: boolean;
@@ -27,13 +31,15 @@ export const isLoading = () => {
 
 export type IUiAction =
     ReturnType<typeof isLoading> |
-    ISystemAction;
+    ISystemAction |
+    IWorkflowAction;
 
 // Reducers
 
 export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
     switch (action.type) {
         case SystemActionTypes.FETCH_TEST_SYSTEMS:
+        case WorkflowActionTypes.FETCH_WORKFLOWS:
             return {
                 ...state,
                 isLoading: true,
@@ -41,6 +47,8 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
             };
         case SystemActionTypes.FETCH_TEST_SYSTEMS_FAILURE:
         case SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS:
+        case WorkflowActionTypes.FETCH_WORKFLOWS_FAILURE:
+        case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
             return {
                 ...state,
                 isLoading: false,
