@@ -1,5 +1,5 @@
-import { ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
-import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
+import { ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from '../state/system';
+import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { IWorkflow } from '../state/workflow';
 
 
@@ -43,9 +43,9 @@ export interface IServersideWorkflow {
     label: string;
     createdAt: string;
     updatedAt?: string;
-    sysConfigId?: string;
-    testConfigId?: string;
-    reportId?: string;
+    sysConfigId?: number;
+    testConfigId?: number;
+    reportId?: number;
 }
 
 /* eslint-enable camelcase */
@@ -138,13 +138,24 @@ export const mapValidateResponse = (validateResponse: IValidateResponse): Valida
     };
 };
 
+export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
+    return {
+        id: workflow.workflowId,
+        createdAt: workflow.createdAt,
+        updatedAt: workflow.updatedAt,
+        label: workflow.label,
+        ...(workflow.sysConfigId ? {
+            systemConfig: { id: workflow.sysConfigId, },
+        } : null),
+        ...(workflow.testConfigId ? {
+            testConfig: { id: workflow.testConfigId, },
+        } : null),
+        ...(workflow.reportId ? {
+            report: { id: workflow.reportId, },
+        } : null),
+    };
+};
+
 export const mapWorkflows = (workflows: IServersideWorkflow[]): IWorkflow[] => {
-    return workflows.map(w => ({
-        id: w.workflowId,
-        createdAt: w.createdAt,
-        label: w.label,
-        sysConfigId: w.sysConfigId,
-        testConfigId: w.testConfigId,
-        reportId: w.reportId,
-    }));
+    return workflows.map(mapWorkflow);
 };

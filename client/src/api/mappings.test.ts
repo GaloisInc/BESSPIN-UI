@@ -1,5 +1,6 @@
 import {
     mapConfiguratorsToSystems,
+    mapWorkflow,
     mapWorkflows,
     IServersideWorkflow,
 } from './mappings';
@@ -79,6 +80,16 @@ describe('mappings', () => {
                 expect(mapConfiguratorsToSystems(TEST_DATA)).toEqual(TEST_RESULTS);
             });
         });
+    });
+
+    describe('mapWorkflow', () => {
+
+        it.todo('should map minimal serverside workflow into client one');
+        it.todo('should map workflow that also has updatedAt information');
+        it.todo('should map workflow that also system configuration information');
+        it.todo('should map workflow that also test configuration information');
+        it.todo('should map workflow that also report information');
+        // TODO: are the error messages coming from the API?
     });
 
     describe('mapWorkflows', () => {
