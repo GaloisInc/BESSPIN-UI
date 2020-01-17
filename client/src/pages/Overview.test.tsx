@@ -1,15 +1,18 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import {
+  Modal,
+} from 'react-bootstrap';
 
 import {
-    Overview,
-    IOverviewProps,
-    IWorkflow,
+  Overview,
+  IOverviewProps,
 } from './Overview';
-import {
-    SystemActionTypes,
-} from '../state/system';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import {
+  WorkflowActionTypes,
+  IWorkflow,
+} from '../state/workflow';
 
 
 const genDate = (): string => {
@@ -19,7 +22,8 @@ const genDate = (): string => {
 const genOverviewWrapper = (propsOverrides: Partial<IOverviewProps> = {}): ReturnType<typeof mount> => {
     const props: IOverviewProps = {
         workflows: [],
-        createNewWorkflow: jest.fn(),
+        createWorkflow: jest.fn(),
+        dispatch: jest.fn(),
         isLoading: false,
         dataRequested: true,
         ...propsOverrides,
@@ -73,40 +77,54 @@ describe('Overview', () => {
       const dispatchSpy = jest.fn();
       genOverviewWrapper({ dataRequested: false, dispatch: dispatchSpy });
 
-      expect(dispatchSpy).toHaveBeenCalledWith({ type: SystemActionTypes.FETCH_TEST_SYSTEMS });
+      expect(dispatchSpy).toHaveBeenCalledWith({ type: WorkflowActionTypes.FETCH_WORKFLOWS });
   });
 
-  it('does not show "new workflow" modal by default', () => {
-    const wrapper = genOverviewWrapper();
+  describe('new workflow modal', () => {
+    it('does not show "new workflow" modal by default', () => {
+      const wrapper = genOverviewWrapper();
 
-    // this is weird, but apparently mount does some rendering of the modal
-    // even though the real-world does...
-    const editorContent = wrapper.find('.workflow-editor').map(f => f.text()).filter(f => f).length
-    expect(editorContent).toBe(0);
-  });
-
-  it('does show "new workflow" modal when the "create" button is clicked', () => {
-    const wrapper = genOverviewWrapper();
-
-    wrapper.find('button.new-workflow').simulate('click');
-
-    // this is weird, but apparently mount does some rendering of the modal
-    // even though the real-world does...
-    const editorContent = wrapper.find('.workflow-editor').map(f => f.text()).filter(f => f).length
-    expect(editorContent).toBeGreaterThan(0);
-  });
-
-  it('calls our "create" handler with content when the create button is clicked', () => {
-    const TEST_LABEL = 'TEST-LABEL';
-    const createNewWorkflowSpy = jest.fn();
-    const wrapper = genOverviewWrapper({
-        createNewWorkflow: createNewWorkflowSpy,
+      // this is weird, but apparently mount does some rendering of the modal
+      // even though the real-world does...
+      const editorContent = wrapper.find('.workflow-editor').map(f => f.text()).filter(f => f).length
+      expect(editorContent).toBe(0);
     });
 
-    wrapper.find('button.new-workflow').simulate('click');
-    wrapper.find('input.new-workflow-label').simulate('blur', { target: { value: TEST_LABEL } });
-    wrapper.find('button.create-new-workflow').simulate('click');
+    describe('activation lifecycle', () => {
+      let wrapper: ReturnType<typeof genOverviewWrapper>;
+      let createWorkflowSpy: (_: string, REMOVE: number) => void;
 
-    expect(createNewWorkflowSpy).toHaveBeenCalledWith(TEST_LABEL);
+      beforeEach(() => {
+        createWorkflowSpy = jest.fn();
+        wrapper = genOverviewWrapper({
+            createWorkflow: createWorkflowSpy,
+        });
+        wrapper.find('button.new-workflow').simulate('click');
+      });
+
+      it('does show "new workflow" modal when the "create" button is clicked', () => {
+
+        // this is weird, but apparently mount does some rendering of the modal
+        // even though the real-world does...
+        const editorContent = wrapper.find('.workflow-editor').map(f => f.text()).filter(f => f).length
+        expect(editorContent).toBeGreaterThan(0);
+      });
+
+      it('calls our "create" handler with content when the create button is clicked', () => {
+        const TEST_LABEL = 'TEST-LABEL';
+
+        wrapper.find('input.new-workflow-label').simulate('blur', { target: { value: TEST_LABEL } });
+        wrapper.find('button.create-new-workflow').simulate('click');
+
+        expect(createWorkflowSpy).toHaveBeenCalledWith(TEST_LABEL, 1);
+      });
+
+      it('closes the create modal upon submission of a new workflow', () => {
+        wrapper.find('input.new-workflow-label').simulate('blur', { target: { value: 'FOO' } });
+        wrapper.find('button.create-new-workflow').simulate('click');
+        const editorModal = wrapper.find(Modal);
+        expect(editorModal.prop('show')).toBeFalsy();
+      });
+    });
   });
 });

@@ -6,15 +6,24 @@ import {
 import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 
-
 import {
     reducerSystems as systems,
     reducerSystem as system,
     ISystemState,
     ISystemConfigState,
 } from './system';
-import { reducer as testResults, ITestResultsState } from './test-results';
-import { reducer as ui, IUiState } from './ui';
+import {
+    reducer as workflow,
+    IWorkflowState,
+} from './workflow';
+import {
+    reducer as testResults,
+    ITestResultsState,
+} from './test-results';
+import {
+    reducer as ui,
+    IUiState,
+} from './ui';
 import { rootSaga } from './sagas';
 
 export interface IState {
@@ -22,6 +31,7 @@ export interface IState {
     system: ISystemConfigState,
     testResults: ITestResultsState,
     ui: IUiState,
+    workflow: IWorkflowState,
 };
 
 const rootReducer = combineReducers({
@@ -29,6 +39,7 @@ const rootReducer = combineReducers({
     system,
     testResults,
     ui,
+    workflow,
 });
 
 const sagaMiddleware = createSagaMiddleware();

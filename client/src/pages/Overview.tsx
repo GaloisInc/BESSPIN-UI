@@ -19,9 +19,13 @@ import {
 import { IState } from '../state';
 
 import {
-  ISystemAction,
-  fetchSystems,
-} from '../state/system';
+  getWorkflowIds,
+  getWorkflowsMap,
+  submitWorkflowSuccess,
+  fetchWorkflows,
+  IWorkflow,
+  IConfig,
+} from '../state/workflow';
 
 import {
   getIsLoading,
@@ -34,91 +38,6 @@ import { LoadingIndicator } from '../components/LoadingIndicator';
 import '../style/Overview.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
-
-const TWO_DAYS_IN_MS = 1000 * 60 * 60 * 24 * 2;
-const TEST_WORKFLOWS: IWorkflow[] = [
-  {
-    id: 1,
-    label: 'Completed Workflow',
-    createdAt: (new Date(Date.now() - TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - .5 * TWO_DAYS_IN_MS)).toISOString(),
-    systemConfig: { id: 2 },
-    testConfig: { id: 2 },
-    report: { id: 2 },
-  },
-  {
-    id: 2,
-    label: 'Failed build workflow',
-    createdAt: (new Date(Date.now() - 2 * TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - 1.5 * TWO_DAYS_IN_MS)).toISOString(),
-    hasError: true,
-    systemConfig: {
-      id: 1,
-    },
-    testConfig: {
-      id: 1,
-    },
-    report: {
-      id: 1,
-      error: {
-        id: 1,
-        message: 'Something went wrong building the system',
-      },
-    }
-  },
-  {
-    id: 3,
-    label: 'Failed test config workflow',
-    createdAt: (new Date(Date.now() - 2 * TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - 1.5 * TWO_DAYS_IN_MS)).toISOString(),
-    hasError: true,
-    systemConfig: { id: 1 },
-    testConfig: {
-      id: 1,
-      error: {
-        id: 1,
-        message: 'Something went wrong configuring the tests',
-      },
-    },
-  },
-  {
-    id: 4,
-    label: 'Missing Test Config Workflow',
-    createdAt: (new Date(Date.now() - TWO_DAYS_IN_MS)).toISOString(),
-    updatedAt: (new Date(Date.now() - .25 * TWO_DAYS_IN_MS)).toISOString(),
-    systemConfig: { id: 1 },
-  },
-  {
-    id: 5,
-    label: 'New Workflow',
-    createdAt: (new Date(Date.now())).toISOString(),
-  },
-];
-
-// NOTE: We currently are defining our workflow data-types here so
-//       we can easily iterate on the UX.
-//       Once we have settled on the UX, we need to create a new
-//       "workflow" state definition and move these to that definition.
-export interface IWorkflowError {
-  id: number;
-  message: string;
-}
-
-export interface IConfig {
-  id: number;
-  error?: IWorkflowError;
-}
-
-export interface IWorkflow {
-  id: number;
-  label: string;
-  createdAt: string;
-  hasError?: boolean;
-  updatedAt?: string;
-  systemConfig?: IConfig;
-  testConfig?: IConfig;
-  report?: IConfig;
-}
 
 // NOTE: Rendering buttons that represent a directed workflow involves
 //       a fair amount of logic to map the state of a given workflow.
@@ -203,31 +122,30 @@ const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
   return false;
 };
 
-export interface IOverviewProps {
-  dispatch?: Dispatch<ISystemAction>;
+interface IStateFromProps {
   workflows: IWorkflow[];
   isLoading: boolean;
   dataRequested: boolean;
-  createNewWorkflow: (_: string) => void;
 }
 
-// TODO: this is a placeholder implementation to allow us to 
-//       iterate on the UX before plumbing in the actual state
-const tmpWorkFlowFn = (label: string) => {
-  console.log(`create new workflow labeled "${label}"`);
-};
+interface IDispatchFromProps {
+  dispatch: Dispatch;
+  createWorkflow: (_: string, __: number) => void;
+}
+
+export type IOverviewProps  = IStateFromProps & IDispatchFromProps;
 
 export const Overview: React.FC<IOverviewProps> = ({
   dataRequested,
   dispatch,
   isLoading,
   workflows,
-  createNewWorkflow = tmpWorkFlowFn
+  createWorkflow,
 }) => {
 
   // useEffect is a way for us to trigger side-effects to load systems
   useEffect(() => {
-    dataRequested || (dispatch && dispatch(fetchSystems()));
+    dataRequested || (dispatch && dispatch(fetchWorkflows()));
   });
 
   const [newWorkflow, setNewWorkflow] = useState('');
@@ -256,7 +174,10 @@ export const Overview: React.FC<IOverviewProps> = ({
         </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={() => setShowWorkflowEditor(false)}>Cancel</Button>
-          <Button className='create-new-workflow' variant='primary' onClick={() => createNewWorkflow(newWorkflow)}>Create</Button>
+          <Button className='create-new-workflow' variant='primary' onClick={() => {
+            createWorkflow(newWorkflow, ++workflows.length)
+            setShowWorkflowEditor(false);
+          }}>Create</Button>
         </Modal.Footer>
       </Modal>
       <h1>Overview</h1>
@@ -296,13 +217,27 @@ export const Overview: React.FC<IOverviewProps> = ({
   );
 };
 
-const mapStateToProps = (state: IState): IOverviewProps => {
+const mapStateToProps = (state: IState): IStateFromProps => {
+  const workflowsById = getWorkflowsMap(state);
+  const workflowIds = getWorkflowIds(state);
+  const workflows = workflowIds.map((id) => workflowsById[id]);
+
   return {
     dataRequested: getDataRequested(state),
     isLoading: getIsLoading(state),
-    workflows: TEST_WORKFLOWS, // PLACEHOLDER...
-    createNewWorkflow: (_: string) => { }, // PLACEHOLDER...
+    workflows,
   };
 };
 
-export const ConnectedOverview = connect(mapStateToProps)(Overview);
+const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
+  dispatch,
+  createWorkflow: (label: string, testId: number) => dispatch(submitWorkflowSuccess({
+    id: testId, // TODO: get rid of this when we switch this to the "submiteWorkflow" action-creator
+    label,
+    createdAt: (new Date()).toUTCString(),
+  })),
+});
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+export const ConnectedOverview = connector(Overview);
