@@ -75,6 +75,38 @@ describe('api', () => {
         });
     });
 
+    describe('fetchWorkflows', () => {
+
+        describe('happy path', () => {
+            const TEST_DATA = [
+                { id: 1, label: 'w1' },
+                { id: 2, label: 'w2' },
+            ];
+
+            beforeEach(() => {
+                mockedAxios.request.mockImplementation(() => {
+                    return Promise.resolve({ data: [...TEST_DATA] });
+                });
+            });
+
+            it('should give us data extracted from the response', (done) => {
+                fetchConfigurators()
+                    .then(data => {
+                        expect(data).toEqual(TEST_DATA);
+                        done();
+                    })
+                    .catch(done);
+            });
+        });
+
+        describe('error cases', () => {
+
+            it.todo('traps exceptions');
+
+            it.todo('traps HTML responses');
+        });
+    });
+
     describe('submitConfigurator', () => {
         const TEST_SYSTEM_NAME = 'test-system-name';
         const TEST_SYSTEM_JSON_STRING = JSON.stringify({ test: 'foo' });

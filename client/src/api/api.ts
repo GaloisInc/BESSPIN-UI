@@ -52,6 +52,18 @@ export const fetchConfigurators = async () => {
     .then(extractData);
 };
 
+export const fetchWorkflows = async () => {
+    return axios.request({
+        url: '/api/workflow',
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+}
+
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
     return axios.request({
         url: `/api/configurator/upload/${systemName}/global_var_cpu`,
