@@ -36,6 +36,12 @@ existing_workflow = api.inherit(
         'workflowId': fields.Integer(
             required=True,
             description='Workflow identifier'),
+        'createdAt': fields.String(
+            required=False,
+            description='Date workflow was initiallly created'),
+        'updatedAt': fields.String(
+            required=False,
+            description='Date workflow was last updated'),
         'sysConfigId': fields.Integer(
             required=False,
             description='SystemConfigurationInputs identifier'),
