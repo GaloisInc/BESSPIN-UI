@@ -92,7 +92,7 @@ describe('Overview', () => {
 
     describe('activation lifecycle', () => {
       let wrapper: ReturnType<typeof genOverviewWrapper>;
-      let createWorkflowSpy: (_: string, REMOVE: number) => void;
+      let createWorkflowSpy: (_: string) => void;
 
       beforeEach(() => {
         createWorkflowSpy = jest.fn();
@@ -116,7 +116,7 @@ describe('Overview', () => {
         wrapper.find('input.new-workflow-label').simulate('blur', { target: { value: TEST_LABEL } });
         wrapper.find('button.create-new-workflow').simulate('click');
 
-        expect(createWorkflowSpy).toHaveBeenCalledWith(TEST_LABEL, 1);
+        expect(createWorkflowSpy).toHaveBeenCalledWith(TEST_LABEL);
       });
 
       it('closes the create modal upon submission of a new workflow', () => {
