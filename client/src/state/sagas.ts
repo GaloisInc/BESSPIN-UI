@@ -9,6 +9,7 @@ import {
     fetchConfigurators,
     fetchWorkflows as fetchApiWorkflows,
     submitConfigurator,
+    submitWorkflow as submitApiWorkflow,
     submitValidateConfiguration as submitValidateConfigurationFunction,
 } from '../api/api';
 
@@ -18,6 +19,7 @@ import {
     mapUploadConfiguratorToSystem,
     mapValidateResponse,
     mapValidateRequestForServer,
+    mapWorkflow,
     mapWorkflows,
 } from '../api/mappings';
 
@@ -39,6 +41,9 @@ import {
 import {
     fetchWorkflowsError,
     fetchWorkflowsSuccess,
+    submitWorkflow as submitWorkflowAction,
+    submitWorkflowError,
+    submitWorkflowSuccess,
     WorkflowActionTypes,
 } from './workflow';
 
@@ -86,6 +91,17 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
     }
 }
 
+function* submitWorkflow(action: ReturnType<typeof submitWorkflowAction>) {
+    try {
+        const workflow = yield call(submitApiWorkflow, action.payload);
+        const mappedWorkflow = yield call(mapWorkflow, workflow);
+        yield put(submitWorkflowSuccess(mappedWorkflow));
+    } catch (e) {
+        console.error(e);
+        yield put(submitWorkflowError(e.message));
+    }
+}
+
 function* submitValidateConfiguration(action: ReturnType<typeof submitValidateConfigurationAction>) {
     try {
         const selectionServer = mapValidateRequestForServer(action.data.selection);
@@ -109,4 +125,5 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOWS, fetchWorkflows);
+    yield takeLatest(WorkflowActionTypes.SUBMIT_WORKFLOW, submitWorkflow);
 };

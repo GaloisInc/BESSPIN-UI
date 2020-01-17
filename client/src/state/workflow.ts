@@ -66,10 +66,10 @@ export const fetchWorkflowsSuccess = (workflows: IWorkflow[]) => {
     } as const;
 };
 
-export const submitWorkflow = (workflow: IWorkflow) => {
+export const submitWorkflow = (newWorkflowLabel: string) => {
     return {
         type: WorkflowActionTypes.SUBMIT_WORKFLOW,
-        payload: workflow,
+        payload: newWorkflowLabel,
     } as const;
 };
 

@@ -21,7 +21,7 @@ import { IState } from '../state';
 import {
   getWorkflowIds,
   getWorkflowsMap,
-  submitWorkflowSuccess,
+  submitWorkflow,
   fetchWorkflows,
   IWorkflow,
   IConfig,
@@ -130,7 +130,7 @@ interface IStateFromProps {
 
 interface IDispatchFromProps {
   dispatch: Dispatch;
-  createWorkflow: (_: string, __: number) => void;
+  createWorkflow: (_: string) => void;
 }
 
 export type IOverviewProps  = IStateFromProps & IDispatchFromProps;
@@ -175,7 +175,7 @@ export const Overview: React.FC<IOverviewProps> = ({
         <Modal.Footer>
           <Button variant='secondary' onClick={() => setShowWorkflowEditor(false)}>Cancel</Button>
           <Button className='create-new-workflow' variant='primary' onClick={() => {
-            createWorkflow(newWorkflow, ++workflows.length)
+            createWorkflow(newWorkflow);
             setShowWorkflowEditor(false);
           }}>Create</Button>
         </Modal.Footer>
@@ -231,11 +231,7 @@ const mapStateToProps = (state: IState): IStateFromProps => {
 
 const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
   dispatch,
-  createWorkflow: (label: string, testId: number) => dispatch(submitWorkflowSuccess({
-    id: testId, // TODO: get rid of this when we switch this to the "submiteWorkflow" action-creator
-    label,
-    createdAt: (new Date()).toUTCString(),
-  })),
+  createWorkflow: (label: string) => dispatch(submitWorkflow(label)),
 });
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
