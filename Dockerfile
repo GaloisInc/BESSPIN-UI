@@ -6,8 +6,7 @@ RUN apt-get update && \
     apt-get install -y python3.7 && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 && \
-    apt-get install -y python3-pip sqlite3 ssh git curl && \
-    pip3 install flask nose Flask-RestPlus
+    apt-get install -y python3-pip sqlite3 ssh git curl
 
 ARG TOKEN_NAME
 ARG PRIVATE_TOKEN
@@ -34,8 +33,17 @@ RUN stack install clafer
 WORKDIR /besspin-ui
 COPY . /besspin-ui
 
+# these are for sqlalchemy migration support
+WORKDIR /besspin-ui/server
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+RUN pip3 install -r requirements.txt
+
+WORKDIR /besspin-ui
+
+# have the flask server run on port 3784
 ENV PORT 3784
 EXPOSE 3784
 
 ENV BESSPIN_CLAFER /root/.local/bin/clafer
-CMD ["python3", "server/server_flask.py"]
+CMD ["scripts/entrypoint.sh"]

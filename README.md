@@ -1,6 +1,6 @@
 # BESSPIN UI
 
-![alt text](server/images/screenshot_UI.png "Screenshot UI")
+![alt text](docs/screenshot_UI.png "Screenshot UI")
 
 *Disclaimer: this UI is under development is considered a
  proof-of-concept towards a prototype.*
@@ -65,30 +65,31 @@ The UI has it's own [README.md](./client/README.md) that details it's structure
 
 All api routes are prefixed with `/api`. You can access an interactive Swagger UI to explore the API via `http://0.0.0.0:3784/api/doc`
 
-## Requirements
+### Running locally
 
-- `python3`
-- `pip3`
-- `flask`, restful APIs framework:
-- `nodejs`
-```
-pip3 install flask
-```
-- `clafer` version 0.5, with fm-json
-- web browser: Chrome or Firefox.
+The best way to run this application locally is to run the following commant:
 
-## Start the configurator
+```
+$ TOKEN_NAME='<<NAME OF YOUR GITLAB ACCESS TOKEN>>' PRIVATE_TOKEN='<<VALUE OF YOUR TOKEN>>' docker-compose up
+```
 
-To start the feature model configurator, first start the web server:
+This will run the API/UI server locally on your machine using docker and docker-compose. It should show log output from both applications.
+
+#### Stopping the server
+
+You should be able to simply hit `Ctrl-C` to quit the servers. To fully shut down the docker containers, issue the command:
+
 ```
-python3 server_flask.py
+$ docker-compose down
 ```
+
+#### Customizing the clafer version used
 
 It is also possible to indicate a specific version of Clafer to use, by
 setting the environment variable `BESSPIN_CLAFER`:
 
 ```
-BESSPIN_CLAFER=<path-to-clafer> python3 server_flask.py
+BESSPIN_CLAFER=<path-to-clafer> TOKEN_NAME='<<GITLAB ACCESS TOKEN NAME>> ' PRIVATE_TOKEN='<<GITLAB TOKEN>>' docker-compose up
 ```
 
 The UI is accessible at the url:
@@ -105,6 +106,7 @@ command:
 
 - `TOKEN_NAME` for the name of the personal access token
 - `PRIVATE_TOKEN` the private token value
+- `DB_PATH` if you want to customize the path to the sqlite database
 
 ```
 docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
@@ -140,13 +142,13 @@ Client Side:
 - Pipeline UI
 - Dashboard UI
 
-![alt text](server/images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
+![alt text](docs/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
 
 ### Data Model
 
 The API backing the BESSPIN UI uses the following data model:
 
-![BESSPIN Data Model](server/db/Data-Model.svg)
+![BESSPIN Data Model](docs/Data-Model.svg)
 
 #### Key Concepts
 
