@@ -71,6 +71,30 @@ export const DEFAULT_CONFIG_SYSTEM_STATE: ISystemConfigState = {
     },
 }
 
+/**
+ * NOTE: We have two related, but different models going on here
+ * 
+ *  - System: this is the original proof-of-concept feature-model system
+ *  - SystemConfigInput: The inputs necessasry to build a system in ToolSuite
+ * 
+ * This could be a source of confusion and should be cleaned up.
+ * One possibility is to remove "systems" as that does not appear to be used.
+ * "system" could be renamed to "architecture" or "systemFeatureModel" to disambiguate...
+ */
+
+export interface INewSystemConfigInput {
+    label: string;
+    workflowId: number;
+    filename: string;
+    config: string;
+}
+
+export interface ISystemConfigInput extends INewSystemConfigInput {
+    id: number;
+    createdAt: string;
+    updatedAt?: string;
+}
+
 // Actions
 
 export enum SystemActionTypes {
@@ -90,6 +114,9 @@ export enum SystemActionTypes {
     SUBMIT_VALIDATE_CONFIGURATION= 'system/submit/validate',
     SUBMIT_VALIDATE_CONFIGURATION_FAILURE = 'system/submit/validate/failure',
     SUBMIT_VALIDATE_CONFIGURATION_SUCCESS = 'system/submit/validate/success',
+    SUBMIT_SYSTEM_CONFIG_INPUT = 'system-config/submit',
+    SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE = 'system-config/submit/failure',
+    SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS = 'system-config/submit/success',
 }
 
 export const fetchSystem = (systemUid: string) => {
@@ -199,6 +226,27 @@ export const submitValidateConfigurationSuccess = (uid: string, validateResult: 
     } as const;
 };
 
+export const submitSystemConfigInput = (config: INewSystemConfigInput) => {
+    return {
+        type: SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT,
+        data: config,
+    } as const;
+};
+
+export const submitSystemConfigInputFailure = (errors: string[]) => {
+    return {
+        type: SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE,
+        data: errors,
+    } as const;
+};
+
+export const submitSystemConfigInputSuccess = (config: ISystemConfigInput) => {
+    return {
+        type: SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS,
+        data: config,
+    } as const;
+};
+
 export type ISystemAction = ReturnType<
     typeof fetchSystem |
     typeof fetchSystemSuccess |
@@ -211,7 +259,10 @@ export type ISystemAction = ReturnType<
     typeof selectFeatureRedo |
     typeof submitValidateConfiguration |
     typeof submitValidateConfigurationSuccess |
-    typeof submitValidateConfigurationFailure
+    typeof submitValidateConfigurationFailure |
+    typeof submitSystemConfigInput |
+    typeof submitSystemConfigInputFailure |
+    typeof submitSystemConfigInputSuccess
 >;
 
 // Reducers

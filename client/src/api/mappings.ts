@@ -1,4 +1,4 @@
-import { ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from '../state/system';
+import { ISelectionType, ValidateResult, ISystemEntry, SelectionMode, ISystemConfigInput } from '../state/system';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { IWorkflow } from '../state/workflow';
 
@@ -38,12 +38,22 @@ export interface IValidateResponse {
     configured_feature_model: IFeatureModel,
 }
 
+export interface IServersideSysConfigInput {
+    sysConfigId: number;
+    workflowId: number;
+    label: string;
+    createdAt: string;
+    updatedAt?: string;
+    nixConfigFilename: string;
+    nixConfig: string;
+}
+
 export interface IServersideWorkflow {
     workflowId: number;
     label: string;
     createdAt: string;
     updatedAt?: string;
-    sysConfigId?: number;
+    systemConfigurationInput?: IServersideSysConfigInput;
     testConfigId?: number;
     reportId?: number;
 }
@@ -108,6 +118,18 @@ const mapIConfigToISelectionType = (c: IConfig): ISelectionType => {
 
 }
 
+export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystemConfigInput => {
+    return {
+        id: config.sysConfigId,
+        workflowId: config.workflowId,
+        label: config.label,
+        createdAt: config.createdAt,
+        filename: config.nixConfigFilename,
+        config: config.nixConfig,
+        ...(config.updatedAt ? { updatedAt: config.updatedAt } : null),
+    };
+};
+
 export const mapValidateRequestForServer = (validateRequest: ISelectionType[]): IConfig[] => {
     const configs = validateRequest.map<IConfig>((c: ISelectionType) => {
         return {
@@ -136,8 +158,8 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
         createdAt: workflow.createdAt,
         updatedAt: workflow.updatedAt,
         label: workflow.label,
-        ...(workflow.sysConfigId ? {
-            systemConfig: { id: workflow.sysConfigId, },
+        ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
+            systemConfig: { id: workflow.systemConfigurationInput.sysConfigId, },
         } : null),
         ...(workflow.testConfigId ? {
             testConfig: { id: workflow.testConfigId, },
