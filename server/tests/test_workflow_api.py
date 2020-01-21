@@ -71,7 +71,6 @@ class TestWorkflowApi(unittest.TestCase):
             headers={'Content-type': 'application/json'},
             data=json.dumps(dict(
                 label=label,
-                sysConfigId=1
             )))
 
         self.assertEqual(response.status_code, 200)
@@ -81,7 +80,7 @@ class TestWorkflowApi(unittest.TestCase):
     def test_update_with_missing_data(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
-        w = Workflow(label='w1', sysConfigId=1)
+        w = Workflow(label='w1')
         db.session.add(w)
         db.session.commit()
 
@@ -90,16 +89,14 @@ class TestWorkflowApi(unittest.TestCase):
         response = self.client.put(
             f'/api/workflow/{w.workflowId}',
             headers={'Content-type': 'application/json'},
-            data=json.dumps(dict(
-                syConfigId=w.sysConfigId,
-            )))
+            data=json.dumps(dict()))
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
             'errors': {'label': "'label' is a required property"},
             'message': 'Input payload validation failed'})
 
-    def test_update_sysconfig(self):
+    def test_update_label(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
         w = Workflow(label='w1')
@@ -112,14 +109,12 @@ class TestWorkflowApi(unittest.TestCase):
             f'/api/workflow/{w.workflowId}',
             headers={'Content-type': 'application/json'},
             data=json.dumps(dict(
-                label=w.label,
-                sysConfigId=1
+                label=w.label + '-NEW',
             )))
 
         self.assertEqual(response.status_code, 200)
-        updated_workflow = Workflow.query.filter_by(label='w1').first()
+        updated_workflow = Workflow.query.filter_by(label='w1-NEW').first()
         self.assertIsNotNone(updated_workflow)
-        self.assertEqual(updated_workflow.sysConfigId, 1)
 
     def test_get(self):
         # add workflows

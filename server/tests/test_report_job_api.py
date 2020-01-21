@@ -21,7 +21,11 @@ class TestReportJobApi(unittest.TestCase):
         self.app.logger.setLevel(logging.CRITICAL)
         db.create_all()
         JobStatus.load_allowed_statuses()
-        s = SystemConfigurationInput(label='test sysconfig', nixConfig='{ my: nix: config }')
+        s = SystemConfigurationInput(
+            label='test sysconfig',
+            nixConfigFilename='foo.nix',
+            nixConfig='{ my: nix: config }',
+            workflowId=1)
         db.session.add(s)
         db.session.commit()
         s = SystemConfigurationInput().query.filter_by(label='test sysconfig').first()

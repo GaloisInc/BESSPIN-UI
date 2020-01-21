@@ -4,9 +4,10 @@ from flask_restplus import Resource, fields
 
 from . import api
 from app.models import db, Workflow
+from app.api.system_configuration_inputs import existing_sysconfig_input
 
 """
-    Since all the routes here are for managing our Workflow 
+    Since all the routes here are for managing our Workflow
     we set up a root namespace that is the prefix for all routes
     defined below
 """
@@ -42,15 +43,11 @@ existing_workflow = api.inherit(
         'updatedAt': fields.String(
             required=False,
             description='Date workflow was last updated'),
-        'sysConfigId': fields.Integer(
+        'systemConfigurationInput': fields.Nested(
+            existing_sysconfig_input,
             required=False,
-            description='SystemConfigurationInputs identifier'),
-        'testRunId': fields.Integer(
-            required=False,
-            description='TestRunInputs identifier'),
-        'reportJobId': fields.Integer(
-            required=False,
-            description='ReportJob identifier'),
+            description='SystemConfigurationInput associated with this workflow'
+        )
     }
 )
 
@@ -92,8 +89,6 @@ class WorkflowApi(Resource):
         existing_workflow = Workflow.query.get_or_404(workflowId)
         existing_workflow.label = workflow_input['label']
 
-        if 'sysConfigId' in workflow_input:
-            existing_workflow.sysConfigId = workflow_input['sysConfigId']
         if 'testConfigInd' in workflow_input:
             existing_workflow.testRunId = workflow_input['testRunId']
         if 'reportJobId' in workflow_input:
