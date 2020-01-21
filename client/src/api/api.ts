@@ -4,6 +4,10 @@ import {
     IConfig,
 } from '../api/mappings';
 
+import {
+    INewSystemConfigInput,
+} from '../state/system';
+
 const trapHTMLError = (response: AxiosResponse) => {
     if (response.headers && response.headers['Content-type'] === 'text/html') {
         throw new Error('Server errored with HTML. Check server logs for details');
@@ -76,6 +80,17 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
     .then(trapHTMLError)
     .then(extractData);
 }
+
+export const submitSystemConfigurationInput = async (config: INewSystemConfigInput) => {
+    return axios.request({
+        url: `/api/system-config-input`,
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: config,
+    });
+};
 
 export const submitWorkflow = async (workflowLabel: string) => {
 
