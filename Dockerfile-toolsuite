@@ -71,5 +71,5 @@ WORKDIR /home/besspinuser/tool-suite
 RUN git checkout develop
 
 
-RUN sudo curl --netrc-file /home/besspinuser/.config/nix/netrc https://artifactory.galois.com/besspin_generic-nix/nix-cache-info
+RUN sudo curl https://$BINCACHE_LOGIN:$BINCACHE_APIKEY@artifactory.galois.com/besspin_generic-nix/nix-cache-info
 RUN . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell
