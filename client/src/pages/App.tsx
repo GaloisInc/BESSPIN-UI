@@ -23,6 +23,7 @@ export const App: React.FC = () => {
                     <Route path='/dashboard' component={ ConnectedDashboard } />
                     <Route path='/configure-cpu/:systemUid?' component={ ConnectedConfigureCpu } />
                     <Route path='/system-configuration/create/:workflowId' component={ ConnectedSystemConfigInput } />
+                    <Route path='/system-configuration/edit/:systemConfigId' component={ ConnectedSystemConfigInput } />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>
             </Router>

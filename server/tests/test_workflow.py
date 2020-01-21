@@ -41,4 +41,4 @@ class WorkFlowModelTestCase(unittest.TestCase):
         )
         db.session.commit()
         test_workflow = Workflow.query.first()
-        self.assertEqual(test_workflow.sysconfig.label, 'test sysconfig')
+        self.assertEqual(test_workflow.systemConfigurationInput.label, 'test sysconfig')
