@@ -9,6 +9,7 @@ import {
 import { ConnectedDashboard } from './Dashboard';
 import { ConnectedConfigureCpu } from './ConfigureCpu';
 import { ConnectedOverview } from './Overview';
+import { ConnectedSystemConfigInput } from './SystemConfigInput';
 
 import { store } from '../state';
 
@@ -21,6 +22,7 @@ export const App: React.FC = () => {
                 <Switch>
                     <Route path='/dashboard' component={ ConnectedDashboard } />
                     <Route path='/configure-cpu/:systemUid?' component={ ConnectedConfigureCpu } />
+                    <Route path='/system-configuration/create/:workflowId' component={ ConnectedSystemConfigInput } />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>
             </Router>
