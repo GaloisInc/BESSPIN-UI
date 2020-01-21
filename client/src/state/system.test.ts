@@ -1,7 +1,4 @@
 import {
-    fetchSystems,
-    fetchSystemsFailure,
-    fetchSystemsSuccess,
     SystemActionTypes,
     ISystemEntry,
     selectFeature,
@@ -49,55 +46,6 @@ const generateTestState = (overrides = {}) => {
 describe('systems', () => {
 
     describe('action creators', () => {
-
-        describe('fetchSystems', () => {
-
-            it('should generate an action with no data', () => {
-
-                expect(fetchSystems()).toEqual({
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS,
-                });
-            });
-        });
-
-        describe('fetchSystemsFailure', () => {
-
-            it('should generate an action with error data', () => {
-
-                expect(fetchSystemsFailure(['TEST ERROR'])).toEqual({
-                    data: {
-                        errors: ['TEST ERROR'],
-                    },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_FAILURE,
-                });
-            });
-        });
-
-        describe('fetchSystemsSuccess', () => {
-
-            it('should generate an action with empty systems data', () => {
-
-                expect(fetchSystemsSuccess({})).toEqual({
-                    data: {
-                        systems: {},
-                    },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
-                });
-            });
-
-            it('should generate an action with systems data', () => {
-                const testSystem = generateTestSystem();
-
-                expect(fetchSystemsSuccess({ [testSystem.uid]: testSystem })).toEqual({
-                    data: {
-                        systems: {
-                            [testSystem.uid]: testSystem,
-                        },
-                    },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
-                });
-            });
-        });
 
         describe('selectFeature', () => {
             const TEST_UID = 'TEST-UID';

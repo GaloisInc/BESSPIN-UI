@@ -34,10 +34,6 @@ export interface ValidateResult {
     configuredFeatureModel: IFeatureModel;
 }
 
-export interface ISystemMap {
-    [uid: string]: ISystemEntry
-}
-
 export enum SelectionMode {
     selected = 'selected',
     unselected = 'unselected',
@@ -56,14 +52,6 @@ export interface ISelectionMap {
 }
 
 export type ISelection = ISelectionType[]
-
-export interface ISystemState {
-    systems: ISystemMap;
-}
-
-export const DEFAULT_STATE: ISystemState = {
-    systems: {},
-}
 
 export interface ISystemConfigState {
     system: ISystemEntry,
@@ -100,8 +88,8 @@ export enum SystemActionTypes {
     SUBMIT_SYSTEM_FAILURE = 'system/submit/failure',
     SUBMIT_SYSTEM_SUCCESS = 'system/submit/success',
     SUBMIT_VALIDATE_CONFIGURATION= 'system/submit/validate',
-    SUBMIT_VALIDATE_CONFIGURATION_FAILURE= 'system/submit/validate/failure',
-    SUBMIT_VALIDATE_CONFIGURATION_SUCCESS= 'system/submit/validate/success',
+    SUBMIT_VALIDATE_CONFIGURATION_FAILURE = 'system/submit/validate/failure',
+    SUBMIT_VALIDATE_CONFIGURATION_SUCCESS = 'system/submit/validate/success',
 }
 
 export const fetchSystem = (systemUid: string) => {
@@ -127,30 +115,6 @@ export const fetchSystemSuccess = (system: ISystemEntry) => {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS,
         data: {
             system,
-        },
-    } as const;
-};
-
-export const fetchSystems = () => {
-    return {
-        type: SystemActionTypes.FETCH_TEST_SYSTEMS,
-    } as const;
-};
-
-export const fetchSystemsFailure = (errors: string[]) => {
-    return {
-        type: SystemActionTypes.FETCH_TEST_SYSTEMS_FAILURE,
-        data: {
-            errors,
-        },
-    } as const;
-};
-
-export const fetchSystemsSuccess = (systems: ISystemMap) => {
-    return {
-        type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
-        data: {
-            systems,
         },
     } as const;
 };
@@ -182,7 +146,6 @@ export const submitSystemSuccess = (system: ISystemEntry) => {
         }
     } as const;
 };
-
 
 export const selectFeature = (uid: string) => {
     return {
@@ -240,9 +203,6 @@ export type ISystemAction = ReturnType<
     typeof fetchSystem |
     typeof fetchSystemSuccess |
     typeof fetchSystemFailure |
-    typeof fetchSystems |
-    typeof fetchSystemsSuccess |
-    typeof fetchSystemsFailure |
     typeof submitSystem |
     typeof submitSystemSuccess |
     typeof submitSystemFailure |
@@ -285,20 +245,6 @@ function circle_selection(conftree: IFeatureModel, selected_nodes: ISelection, u
             return selected_nodes;
     };
 };
-
-export const reducerSystems = (state = DEFAULT_STATE, action: ISystemAction): ISystemState => {
-    switch (action.type) {
-        case SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS:
-            return {
-                ...state,
-                systems: action.data.systems,
-            };
-        default:
-            return state;
-    }
-};
-
-
 
 export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISystemAction): ISystemConfigState => {
     switch (action.type) {
@@ -371,16 +317,10 @@ export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISyst
     }
 };
 
-
-
 // Selectors
 
 interface IState {
-    systems: ISystemState;
     system: ISystemConfigState;
 }
 
-export const getSystems = (state: IState) => state.systems.systems;
-
 export const getSystem = (state: IState) => state.system.system;
-

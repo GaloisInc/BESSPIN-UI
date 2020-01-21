@@ -6,7 +6,6 @@ import {
 
 import {
     fetchConfigurator,
-    fetchConfigurators,
     fetchWorkflows as fetchApiWorkflows,
     submitConfigurator,
     submitWorkflow as submitApiWorkflow,
@@ -15,7 +14,6 @@ import {
 
 import {
     mapConfiguratorToSystem,
-    mapConfiguratorsToSystems,
     mapUploadConfiguratorToSystem,
     mapValidateResponse,
     mapValidateRequestForServer,
@@ -27,8 +25,6 @@ import {
     fetchSystem as fetchSystemAction,
     fetchSystemFailure,
     fetchSystemSuccess,
-    fetchSystemsFailure,
-    fetchSystemsSuccess,
     submitSystemFailure,
     submitSystemSuccess,
     SystemActionTypes,
@@ -55,17 +51,6 @@ function* fetchSystem(action: ReturnType<typeof fetchSystemAction>) {
     } catch (e) {
         console.error(e);
         yield put(fetchSystemFailure(e.message));
-    }
-}
-
-function* fetchSystems() {
-    try {
-        const configurators = yield call(fetchConfigurators);
-        const mappedConfigurators = mapConfiguratorsToSystems(configurators);
-		yield put(fetchSystemsSuccess(mappedConfigurators));
-    } catch (e) {
-        console.error(e);
-        yield put(fetchSystemsFailure(e.message));
     }
 }
 
@@ -121,7 +106,6 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
 // Register all the actions that should trigger our sagas
 export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
-    yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEMS, fetchSystems);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOWS, fetchWorkflows);

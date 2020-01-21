@@ -98,14 +98,6 @@ export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): IS
     };
 };
 
-
-export const mapConfiguratorsToSystems = (configurators: IConfigurator[]): ISystemMap => {
-    return configurators.reduce((configurators: ISystemMap, c: IConfigurator) => ({
-        ...configurators,
-        [c.uid]: mapConfiguratorToSystem(c),
-    }), {});
-};
-
 const mapIConfigToISelectionType = (c: IConfig): ISelectionType => {
     return {
         uid: c.uid,
