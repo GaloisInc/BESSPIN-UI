@@ -1,9 +1,9 @@
 import unittest
-from sqlalchemy.exc import IntegrityError
 
 from app import create_app
 from app.models import (
     db,
+    SystemConfigurationInput,
     Workflow,
 )
 
@@ -21,24 +21,24 @@ class WorkFlowModelTestCase(unittest.TestCase):
         db.drop_all()
         self.app_context.pop()
 
-    def test_unique_constraint(self):
+    def test_sysconfig_input(self):
 
         db.session.add(
             Workflow(
-                label='test workflow 1',
-                sysConfigId=1,
-                testRunId=1,
-                reportJobId=1,
+                label='test workflow',
             )
         )
+        db.session.commit()
+        test_workflow = Workflow.query.first()
+        self.assertIsNotNone(test_workflow.workflowId)
         db.session.add(
-            Workflow(
-                label='test workflow 2',
-                sysConfigId=1,
-                testRunId=1,
-                reportJobId=1,
+            SystemConfigurationInput(
+                label='test sysconfig',
+                nixConfigFilename='test.nix',
+                nixConfig='{ nix: config }',
+                workflowId=test_workflow.workflowId
             )
         )
-
-        with self.assertRaises(IntegrityError):
-            db.session.commit()
+        db.session.commit()
+        test_workflow = Workflow.query.first()
+        self.assertEqual(test_workflow.sysconfig.label, 'test sysconfig')

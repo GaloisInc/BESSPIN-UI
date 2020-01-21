@@ -28,7 +28,9 @@ class ReportJobsModelTestCase(unittest.TestCase):
         db.session.add(
             SystemConfigurationInput(
                 label='test sys-config 1',
+                nixConfigFilename='foo.nix',
                 nixConfig='{ test: { nix-config } }',
+                workflowId=1
             )
         )
 

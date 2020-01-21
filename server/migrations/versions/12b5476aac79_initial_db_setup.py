@@ -109,16 +109,42 @@ def upgrade():
         sa.PrimaryKeyConstraint('jobId')
     )
     op.create_table(
+        'reportJobs',
+        sa.Column('jobId', sa.Integer(), nullable=False),
+        sa.Column('sysConfigId', sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(['jobId'], ['jobs.jobId'], ),
+        sa.ForeignKeyConstraint(['sysConfigId'], ['systemConfigurationInputs.sysConfigId'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('jobId')
+    )
+    op.create_table(
+        'workflows',
+        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+        sa.Column('createdAt', sa.DateTime(), nullable=False),
+        sa.Column('updatedAt', sa.DateTime(), nullable=True),
+        sa.Column('workflowId', sa.Integer(), nullable=False),
+        sa.PrimaryKeyConstraint('workflowId'),
+    )
+    op.create_table(
         'systemConfigurationInputs',
         sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
         sa.Column('createdAt', sa.DateTime(), nullable=False),
         sa.Column('updatedAt', sa.DateTime(), nullable=True),
+        sa.Column('workflowId', sa.Integer(), nullable=False),
+        sa.Column(
+            'nixConfigFilename',
+            sa.String(length=256),
+            nullable=True,
+            comment='Along with "nixConfig", this is a temporary column until we get full support for versioned resources'),
         sa.Column(
             'nixConfig',
             sa.Text(),
             nullable=True,
             comment='This column is our temporary one for the initial UI sys-config screen where we will simply provide a way to upload a nix config'
         ),
+        sa.Column('sysConfigId', sa.Integer(), nullable=False),
+        sa.PrimaryKeyConstraint('sysConfigId'),
+        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='SET NULL'),
+        sa.UniqueConstraint('nixConfig', 'workflowId', name='sys_config_workflow_uc')
     )
     op.create_table(
         'testRunInputs',
@@ -161,6 +187,8 @@ def downgrade():
     op.drop_table('feature_models')
     op.drop_table('testRunInputs')
     op.drop_table('systemConfigurationInputs')
+    op.drop_table('workflows')
+    op.drop_table('reportJobs')
     op.drop_table('featureExtractionJobs')
     op.drop_table('featureConfigurationInputs')
     op.drop_table('featureModelInputs')
