@@ -6,10 +6,10 @@ import {
 
 import {
     fetchConfigurator,
-    fetchWorkflows as fetchApiWorkflows,
+    fetchWorkflows as fetchWorkflowsApi,
     submitConfigurator,
-    submitWorkflow as submitApiWorkflow,
-    submitValidateConfiguration as submitValidateConfigurationFunction,
+    submitWorkflow as submitWorkflowApi,
+    submitValidateConfiguration as submitValidateConfigurationApi,
 } from '../api/api';
 
 import {
@@ -56,7 +56,7 @@ function* fetchSystem(action: ReturnType<typeof fetchSystemAction>) {
 
 function* fetchWorkflows() {
     try {
-        const workflows = yield call(fetchApiWorkflows);
+        const workflows = yield call(fetchWorkflowsApi);
         const mappedWorkflows = mapWorkflows(workflows);
         yield put(fetchWorkflowsSuccess(mappedWorkflows));
     } catch (e) {
@@ -91,7 +91,7 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
     try {
         const selectionServer = mapValidateRequestForServer(action.data.selection);
         const validateResponse = yield call(
-            submitValidateConfigurationFunction,
+            submitValidateConfigurationApi,
             action.data.uid,
             selectionServer,
         );
