@@ -128,11 +128,11 @@ export const fetchSystem = (systemUid: string) => {
     } as const;
 };
 
-export const fetchSystemFailure = (errors: string[]) => {
+export const fetchSystemFailure = (error: string) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_FAILURE,
         data: {
-            errors,
+            error,
         },
     } as const;
 };
@@ -156,11 +156,11 @@ export const submitSystem = (systemName: string, systemJsonString: string) => {
     } as const;
 }
 
-export const submitSystemFailure = (errors: string[]) => {
+export const submitSystemFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_SYSTEM_FAILURE,
         data: {
-            errors,
+            error,
         },
     } as const;
 };
@@ -207,12 +207,12 @@ export const submitValidateConfiguration = (uid: string, selection: ISelectionTy
     } as const;
 };
 
-export const submitValidateConfigurationFailure = (errors: string[]) => {
+export const submitValidateConfigurationFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_FAILURE,
         data: {
-            errors
-        }
+            error,
+        },
     } as const;
 };
 
@@ -233,10 +233,10 @@ export const submitSystemConfigInput = (config: INewSystemConfigInput) => {
     } as const;
 };
 
-export const submitSystemConfigInputFailure = (errors: string[]) => {
+export const submitSystemConfigInputFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE,
-        data: errors,
+        data: error,
     } as const;
 };
 

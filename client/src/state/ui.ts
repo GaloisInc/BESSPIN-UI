@@ -7,11 +7,13 @@ import {
 } from './workflow';
 
 export interface IUiState {
+    error: string;
     isLoading: boolean;
     dataRequested: boolean
 }
 
-export const DEFAULT_STATE = {
+export const DEFAULT_STATE: IUiState = {
+    error: '',
     isLoading: true,
     dataRequested: false,
 };
@@ -19,7 +21,7 @@ export const DEFAULT_STATE = {
 // Actions
 
 export enum UiActionTypes {
-    IS_LOADING = 'is/is-loading',
+    IS_LOADING = 'ui/is-loading',
 }
 
 export const isLoading = () => {
@@ -48,6 +50,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
         case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
             return {
                 ...state,
+                error: '',
                 isLoading: false,
             };
         case UiActionTypes.IS_LOADING:
@@ -76,4 +79,9 @@ export const getIsLoading = createSelector(
 export const getDataRequested = createSelector(
     [getUiState],
     (uiState) => uiState.dataRequested,
+);
+
+export const getError = createSelector(
+    [getUiState],
+    (uiState) => uiState.error,
 );
