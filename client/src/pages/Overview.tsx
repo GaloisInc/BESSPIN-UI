@@ -85,14 +85,14 @@ const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabl
     );
 };
 
-const ViewCreateButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config, path, disabled, label, noNextStep }) => {
+const CreateEditButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config, path, disabled, label, noNextStep }) => {
   if (config) {
     return <WorkflowButton
       disabled={disabled}
       label={label}
       noNextStep={noNextStep}
       tooltipError={config.error && config.error.message}
-      url={`${path}/view/${config.id}`}
+      url={`${path}/edit/${workflowId}/${config.id}`}
       variant='success'
     />;
   } else {
@@ -101,16 +101,16 @@ const ViewCreateButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config
 };
 
 const SystemConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  return <ViewCreateButton label='System' path='/system-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
+  return <CreateEditButton label='System' path='/system-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
 };
 
 const TestConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  return <ViewCreateButton label='Test' path='/test-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
+  return <CreateEditButton label='Test' path='/test-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
 };
 
 const ReportButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
   const label = config && !config.error ? 'View' : 'Build/Run';
-  return <ViewCreateButton label={label} path='/report' workflowId={workflowId} config={config} disabled={disabled} noNextStep={true} />;
+  return <CreateEditButton label={label} path='/report' workflowId={workflowId} config={config} disabled={disabled} noNextStep={true} />;
 };
 
 const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
