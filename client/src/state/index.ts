@@ -8,7 +8,9 @@ import createSagaMiddleware from 'redux-saga';
 
 import {
     reducerSystem as system,
+    reducerSystemConfigInput as systemConfigInput,
     ISystemConfigState,
+    ISystemConfigInputState,
 } from './system';
 import {
     reducer as workflow,
@@ -26,6 +28,7 @@ import { rootSaga } from './sagas';
 
 export interface IState {
     system: ISystemConfigState,
+    systemConfigInput: ISystemConfigInputState,
     testResults: ITestResultsState,
     ui: IUiState,
     workflow: IWorkflowState,
@@ -33,6 +36,7 @@ export interface IState {
 
 const rootReducer = combineReducers({
     system,
+    systemConfigInput,
     testResults,
     ui,
     workflow,
