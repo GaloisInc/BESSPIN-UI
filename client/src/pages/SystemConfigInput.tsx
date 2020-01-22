@@ -106,9 +106,23 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
 
     const onSubmitHandler = useCallback(() => {
         if (workflowId && nixConfig) {
+            const trimmedLabel = label.trim();
+
             sysConfig ?
-                updateSystemConfig({ id: sysConfig.id, createdAt: sysConfig.createdAt, workflowId, label, nixConfig, nixConfigFilename: configFilename }) :
-                createSystemConfig({ workflowId, label, nixConfigFilename: configFilename, nixConfig: nixConfig });
+                updateSystemConfig({
+                    id: sysConfig.id,
+                    createdAt: sysConfig.createdAt,
+                    workflowId,
+                    label: trimmedLabel,
+                    nixConfigFilename: configFilename,
+                    nixConfig,
+                }) :
+                createSystemConfig({
+                    workflowId,
+                    label: trimmedLabel,
+                    nixConfigFilename: configFilename,
+                    nixConfig: nixConfig
+                });
         }
     }, [label, workflowId, configFilename, nixConfig, createSystemConfig, updateSystemConfig, sysConfig]);
 
@@ -127,7 +141,7 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                                 className='new-sysconfig-label'
                                 type='input'
                                 value={ label }
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value.trim()) } />
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value) } />
                         </Col>
                     </Form.Group>
                     <Form.Group as={Row}>
