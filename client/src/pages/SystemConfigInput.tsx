@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 
@@ -29,8 +29,12 @@ import {
     getIsLoading,
 } from '../state/ui';
 
+import {
+    fetchSystemConfigInput,
+    getSystemConfigInput,
     submitSystemConfigInput,
     INewSystemConfigInput,
+    ISystemConfigInput,
 } from '../state/system';
 
 import { IState } from '../state';
@@ -38,19 +42,27 @@ import { IState } from '../state';
 interface IStateFromProps {
     errors: string[];
     isLoading: boolean;
+    sysConfig?: ISystemConfigInput;
+    sysConfigId?: number;
     workflowId?: number;
 }
 
 interface IDispatchFromProps {
-  createSystemConfig: typeof submitSystemConfigInput;
+    dispatch: Dispatch;
+    createSystemConfig: typeof submitSystemConfigInput;
+    updateSystemConfig: typeof updateSystemConfigInput;
 }
 
 export type ISystemConfigInputProps  = IStateFromProps & IDispatchFromProps;
 
 export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
     createSystemConfig,
+    dispatch,
     errors,
     isLoading,
+    sysConfig,
+    sysConfigId,
+    updateSystemConfig,
     workflowId,
 }) => {
 
@@ -58,6 +70,20 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
     const [label, setLabel] = useState('');
     const [configFilename, setConfigFilename] = useState('');
     const [nixConfig, setNixConfig] = useState('');
+
+    useEffect(() => {
+        if (sysConfigId) {
+            dispatch(fetchSystemConfigInput(sysConfigId));
+        }
+    }, [sysConfigId, dispatch]);
+
+    useEffect(() => {
+        if (sysConfig) {
+            setLabel(sysConfig.label);
+            setConfigFilename(sysConfig.nixConfigFilename);
+            setNixConfig(sysConfig.nixConfig);
+        }
+    }, [sysConfig]);
 
     const nixConfigInputCallback = useCallback(() => {
         // @ts-ignore - typescript does not like the ref, so I gave up and just ignore this line
@@ -96,9 +122,10 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                         <Form.Label column sm={2}>Name</Form.Label>
                         <Col sm={10}>
                             <Form.Control
-                            className='new-sysconfig-label'
-                            type='input'
-                            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value.trim()) } />
+                                className='new-sysconfig-label'
+                                type='input'
+                                value={ label }
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value.trim()) } />
                         </Col>
                     </Form.Group>
                     <Form.Group as={Row}>
@@ -114,6 +141,7 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                                         aria-describedby='new-nix-config-upload'
                                         onChange={ nixConfigInputCallback }
                                         ref={ fileInputRef }
+                                        text={ configFilename }
                                         accept='.nix' />
                                     <Form.Label className='custom-file-label'>{ configFilename }</Form.Label>
                                 </div>
@@ -145,27 +173,37 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
 
 interface IMatchParams {
     workflowId?: string;
+    systemConfigId?: string;
 }
 
 interface IOwnProps {
-    match: { params: IMatchParams; };
+    match: { params: IMatchParams; path: string; };
 }
 
 const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps => {
     const workflowId = ownProps.match.params.workflowId && Number(ownProps.match.params.workflowId);
+    const sysConfigId = ownProps.match.params.systemConfigId && Number(ownProps.match.params.systemConfigId);
+    const isEditView = /edit/.test(ownProps.match.path);
+    const sysConfig = getSystemConfigInput(state);
     const error = getError(state);
     const isLoading = getIsLoading(state);
+
     const errors = error ? [error] : [];
+
     if (!workflowId) errors.push('Missing or invalid workflow in the URL');
+    if (isEditView && !sysConfigId) errors.push('Missing or invalid system configuration in the URL');
 
     return {
         errors,
         isLoading,
         ...( workflowId ? { workflowId } : null ),
+        ...( isEditView && sysConfigId ? { sysConfigId } : null ),
+        ...( isEditView && sysConfigId && sysConfig && sysConfig.id === sysConfigId ? { sysConfig } : null ),
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
+    dispatch,
     createSystemConfig: (config: INewSystemConfigInput) => dispatch(submitSystemConfigInput(config)),
 });
 
