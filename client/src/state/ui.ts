@@ -14,7 +14,7 @@ export interface IUiState {
 
 export const DEFAULT_STATE: IUiState = {
     error: '',
-    isLoading: true,
+    isLoading: false,
     dataRequested: false,
 };
 
