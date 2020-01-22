@@ -2,10 +2,12 @@ import axios, { AxiosResponse } from 'axios';
 
 import {
     IConfig,
+    IServersideSysConfigInput,
 } from '../api/mappings';
 
 import {
     INewSystemConfigInput,
+    ISystemConfigInput,
 } from '../state/system';
 
 const trapHTMLError = (response: AxiosResponse) => {
@@ -81,6 +83,18 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
     .then(extractData);
 }
 
+export const fetchSystemConfigurationInput = async (sysConfigId: number) => {
+    return axios.request({
+        url: `/api/system-config-input/${sysConfigId}`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
 export const submitSystemConfigurationInput = async (config: INewSystemConfigInput) => {
     return axios.request({
         url: `/api/system-config-input`,
@@ -89,8 +103,23 @@ export const submitSystemConfigurationInput = async (config: INewSystemConfigInp
             ...DEFAULT_HEADERS,
         },
         data: config,
-    });
+    })
+    .then(trapHTMLError)
+    .then(extractData);
 };
+
+export const updateSystemConfigurationInput = async (config: IServersideSysConfigInput) => {
+    return axios.request({
+        url: `/api/system-config-input/${config.sysConfigId}`,
+        method: 'put',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: config,
+    })
+    .then(trapHTMLError)
+    .then(extractData); 
+}
 
 export const submitWorkflow = async (workflowLabel: string) => {
 

@@ -130,6 +130,17 @@ export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystem
     };
 };
 
+export const mapSystemConfigInputToServerside = (config: ISystemConfigInput): IServersideSysConfigInput => {
+    return {
+        sysConfigId: config.id,
+        workflowId: config.workflowId,
+        label: config.label,
+        createdAt: config.createdAt,
+        nixConfig: config.nixConfig,
+        nixConfigFilename: config.nixConfigFilename,
+    };
+};
+
 export const mapValidateRequestForServer = (validateRequest: ISelectionType[]): IConfig[] => {
     const configs = validateRequest.map<IConfig>((c: ISelectionType) => {
         return {
