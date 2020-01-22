@@ -3,6 +3,7 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 
 import {
+    Alert,
     Button,
     Col,
     Container,
@@ -21,8 +22,13 @@ import 'ace-builds/src-noconflict/mode-json';
 import '../style/SystemConfigInput.scss';
 
 import { Header } from '../components/Header';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 import {
+    getError,
+    getIsLoading,
+} from '../state/ui';
+
     submitSystemConfigInput,
     INewSystemConfigInput,
 } from '../state/system';
@@ -30,7 +36,9 @@ import {
 import { IState } from '../state';
 
 interface IStateFromProps {
-  workflowId: number;
+    errors: string[];
+    isLoading: boolean;
+    workflowId?: number;
 }
 
 interface IDispatchFromProps {
@@ -39,7 +47,12 @@ interface IDispatchFromProps {
 
 export type ISystemConfigInputProps  = IStateFromProps & IDispatchFromProps;
 
-export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({ workflowId, createSystemConfig }) => {
+export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
+    createSystemConfig,
+    errors,
+    isLoading,
+    workflowId,
+}) => {
 
     const fileInputRef = useRef(null);
     const [label, setLabel] = useState('');
@@ -76,6 +89,8 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({ workflowI
             <Header />
             <h1>System Configuration</h1>
             <Container className='sysconfig-form'>
+                { isLoading && <LoadingIndicator /> }
+                { errors && errors.length > 0 && <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }</Alert> }
                 <Form>
                     <Form.Group as={Row}>
                         <Form.Label column sm={2}>Name</Form.Label>
@@ -137,9 +152,16 @@ interface IOwnProps {
 }
 
 const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps => {
-    const workflowId = ownProps.match.params.workflowId ? Number(ownProps.match.params.workflowId) : -1; // TODO: MORE ROBUST...
+    const workflowId = ownProps.match.params.workflowId && Number(ownProps.match.params.workflowId);
+    const error = getError(state);
+    const isLoading = getIsLoading(state);
+    const errors = error ? [error] : [];
+    if (!workflowId) errors.push('Missing or invalid workflow in the URL');
+
     return {
-        workflowId: workflowId,
+        errors,
+        isLoading,
+        ...( workflowId ? { workflowId } : null ),
     };
 };
 
