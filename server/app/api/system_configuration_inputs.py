@@ -94,6 +94,8 @@ class SystemConfigurationInputApi(Resource):
         sysconfig_input = json.loads(request.data)
         existing_sysconfig_input = SystemConfigurationInput.query.get_or_404(sysConfigInputId)
         existing_sysconfig_input.label = sysconfig_input['label']
+        existing_sysconfig_input.nixConfig = sysconfig_input['nixConfig']
+        existing_sysconfig_input.nixConfigFilename = sysconfig_input['nixConfigFilename']
 
         db.session.add(existing_sysconfig_input)
         db.session.commit()

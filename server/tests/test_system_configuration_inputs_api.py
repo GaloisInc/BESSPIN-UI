@@ -74,19 +74,26 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
         self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
 
         label = f'{sc.label}-{datetime.now()}'
+        config = f'{sc.nixConfig}-{datetime.now()}'
+        filename = f'new-{sc.nixConfigFilename}'
         response = self.client.put(
             f'/api/system-config-input/{sc.sysConfigId}',
             headers={'Content-type': 'application/json'},
             data=json.dumps(dict(
+                sysConfigId=sc.sysConfigId,
                 label=label,
-                nixConfigFilename=sc.nixConfigFilename,
-                nixConfig=sc.nixConfig,
+                nixConfigFilename=filename,
+                nixConfig=config,
                 workflowId=sc.workflowId
             )))
 
         self.assertEqual(response.status_code, 200)
-        updated_sysconfig = SystemConfigurationInput.query.filter_by(label=label)
+        updated_sysconfig = SystemConfigurationInput.query.filter_by(label=label).first()
         self.assertIsNotNone(updated_sysconfig)
+        self.assertEqual(updated_sysconfig.label, label)
+        self.assertEqual(updated_sysconfig.nixConfig, config)
+        self.assertEqual(updated_sysconfig.nixConfigFilename, filename)
+        self.assertNotEqual(updated_sysconfig.updatedAt, db.null())
 
     def test_update_with_missing_data(self):
         sc = SystemConfigurationInput().query.all()
@@ -125,6 +132,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
             f'/api/system-config-input/{sc.sysConfigId}',
             headers={'Content-type': 'application/json'},
             data=json.dumps(dict(
+                sysConfigId=sc.sysConfigId,
                 label=sc.label + '-NEW',
                 nixConfigFilename=sc.nixConfigFilename,
                 nixConfig=sc.nixConfig,
