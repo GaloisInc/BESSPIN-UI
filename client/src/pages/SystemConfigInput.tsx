@@ -197,9 +197,15 @@ interface IOwnProps {
 }
 
 const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps => {
-    const workflowId = ownProps.match.params.workflowId && Number(ownProps.match.params.workflowId);
-    const sysConfigId = ownProps.match.params.systemConfigId && Number(ownProps.match.params.systemConfigId);
-    const isEditView = /edit/.test(ownProps.match.path);
+    const {
+        match: {
+            params,
+            path,
+        },
+    } = ownProps;
+    const workflowId = params.workflowId && Number(params.workflowId);
+    const sysConfigId = params.systemConfigId && Number(params.systemConfigId);
+    const isEditView = /edit/.test(path);
     const sysConfig = getSystemConfigInput(state);
     const error = getError(state);
     const isLoading = getIsLoading(state);
