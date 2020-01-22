@@ -7,7 +7,6 @@ import {
 
 import {
     INewSystemConfigInput,
-    ISystemConfigInput,
 } from '../state/system';
 
 const trapHTMLError = (response: AxiosResponse) => {

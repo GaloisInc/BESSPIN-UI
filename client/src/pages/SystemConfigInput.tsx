@@ -110,7 +110,7 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                 updateSystemConfig({ id: sysConfig.id, createdAt: sysConfig.createdAt, workflowId, label, nixConfig, nixConfigFilename: configFilename }) :
                 createSystemConfig({ workflowId, label, nixConfigFilename: configFilename, nixConfig: nixConfig });
         }
-    }, [label, workflowId, configFilename, nixConfig, createSystemConfig]);
+    }, [label, workflowId, configFilename, nixConfig, createSystemConfig, updateSystemConfig, sysConfig]);
 
     return (
         <Container className='SystemConfigInput'>
