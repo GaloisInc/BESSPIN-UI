@@ -39,7 +39,6 @@ import {
     submitSystem as submitSystemAction,
     submitSystemConfigInput as submitSystemConfigurationInputAction,
     submitSystemConfigInputFailure,
-    submitSystemConfigInputSuccess,
     submitValidateConfiguration as submitValidateConfigurationAction,
     submitValidateConfigurationSuccess,
     submitValidateConfigurationFailure,
@@ -54,6 +53,14 @@ import {
     submitWorkflowSuccess,
     WorkflowActionTypes,
 } from './workflow';
+
+function redirectTo(path: string): void {
+    if (window && window.location && window.location.href) {
+        window.location.href = path;
+    } else {
+        console.error('No window location to redirect to');
+    }
+}
 
 function* fetchSystem(action: ReturnType<typeof fetchSystemAction>) {
     try {
@@ -101,9 +108,15 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
 
 function* submitSystemConfigInput(action: ReturnType<typeof submitSystemConfigurationInputAction>) {
     try {
-        const createdSysConfigInput = yield call(submitSystemConfigurationInputApi, action.data);
-        const mappedSysConfig = mapSystemConfigInput(createdSysConfigInput);
-        yield put(submitSystemConfigInputSuccess(mappedSysConfig));
+        yield call(submitSystemConfigurationInputApi, action.data);
+        redirectTo('/');
+        // The lines below are for the case that we want to either use history to have a SPA or want
+        // to use the submitSystemConfigInputSuccess to otherwise continue within the app
+        // const createdSysConfigInput = yield call(submitSystemConfigurationInputApi, action.config);
+        // const mappedSysConfig = mapSystemConfigInput(createdSysConfigInput);
+        // const mappedSysConfig = mapSystemConfigInput(createdSysConfigInput);
+        // action.data.history.push('/'); // NOTE: if we do this, we will have to add history as an action parameter from the page component
+        // yield put(submitSystemConfigInputSuccess(mappedSysConfig));
     } catch (e) {
         console.error(e);
         yield put(submitSystemConfigInputFailure(e.message));
@@ -140,9 +153,14 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
 function* updateSystemConfigInput(action: ReturnType<typeof updateSystemConfigInputAction>) {
     try {
         const serversideConfig = mapSystemConfigInputToServerside(action.data);
-        const updatedSystemConfigInput = yield call(updateSystemConfigurationInputApi, serversideConfig);
-        const mappedSysConfig = mapSystemConfigInput(updatedSystemConfigInput);
-        yield put(submitSystemConfigInputSuccess(mappedSysConfig));
+        yield call(updateSystemConfigurationInputApi, serversideConfig);
+        redirectTo('/');
+        // The lines below are for the case that we want to either use history to have a SPA or want
+        // to use the submitSystemConfigInputSuccess to otherwise continue within the app
+        // const updatedSystemConfigInput = yield call(updateSystemConfigurationInputApi, serversideConfig);
+        // const mappedSysConfig = mapSystemConfigInput(updatedSystemConfigInput);
+        // action.data.history.push('/'); // NOTE: if we do this, we will have to add history as an action parameter from the page component
+        // yield put(submitSystemConfigInputSuccess(mappedSysConfig));
     } catch (e) {
         console.error(e);
         yield put(submitSystemConfigInputFailure(e.message));
