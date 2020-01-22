@@ -12,6 +12,7 @@ import {
     submitWorkflow as submitWorkflowApi,
     submitSystemConfigurationInput as submitSystemConfigurationInputApi,
     submitValidateConfiguration as submitValidateConfigurationApi,
+    updateSystemConfigurationInput as updateSystemConfigurationInputApi,
 } from '../api/api';
 
 import {
@@ -22,6 +23,7 @@ import {
     mapValidateRequestForServer,
     mapWorkflow,
     mapWorkflows,
+    mapSystemConfigInputToServerside,
 } from '../api/mappings';
 
 import {
@@ -41,6 +43,7 @@ import {
     submitValidateConfiguration as submitValidateConfigurationAction,
     submitValidateConfigurationSuccess,
     submitValidateConfigurationFailure,
+    updateSystemConfigInput as updateSystemConfigInputAction,
 } from './system';
 
 import {
@@ -134,6 +137,18 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
     }
 }
 
+function* updateSystemConfigInput(action: ReturnType<typeof updateSystemConfigInputAction>) {
+    try {
+        const serversideConfig = mapSystemConfigInputToServerside(action.data);
+        const updatedSystemConfigInput = yield call(updateSystemConfigurationInputApi, serversideConfig);
+        const mappedSysConfig = mapSystemConfigInput(updatedSystemConfigInput);
+        yield put(submitSystemConfigInputSuccess(mappedSysConfig));
+    } catch (e) {
+        console.error(e);
+        yield put(submitSystemConfigInputFailure(e.message));
+    }
+}
+
 // Register all the actions that should trigger our sagas
 export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
@@ -143,4 +158,5 @@ export function* rootSaga() {
     yield takeLatest(WorkflowActionTypes.SUBMIT_WORKFLOW, submitWorkflow);
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT, submitSystemConfigInput);
     yield takeLatest(SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT, fetchSystemConfigInput);
+    yield takeLatest(SystemActionTypes.UPDATE_SYSTEM_CONFIG_INPUT, updateSystemConfigInput);
 };

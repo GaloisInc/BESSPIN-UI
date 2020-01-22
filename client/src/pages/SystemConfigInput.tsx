@@ -35,6 +35,7 @@ import {
     submitSystemConfigInput,
     INewSystemConfigInput,
     ISystemConfigInput,
+    updateSystemConfigInput,
 } from '../state/system';
 
 import { IState } from '../state';
@@ -104,8 +105,9 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
     }, []);
 
     const onSubmitHandler = useCallback(() => {
-        if (nixConfig) {
-            createSystemConfig({ workflowId, label, filename: configFilename, config: nixConfig });
+        if (workflowId && nixConfig) {
+            sysConfig ?
+                updateSystemConfig({ id: sysConfig.id, createdAt: sysConfig.createdAt, workflowId, label, nixConfig, nixConfigFilename: configFilename }) :
                 createSystemConfig({ workflowId, label, nixConfigFilename: configFilename, nixConfig: nixConfig });
         }
     }, [label, workflowId, configFilename, nixConfig, createSystemConfig]);
@@ -205,6 +207,7 @@ const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps =>
 const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
     dispatch,
     createSystemConfig: (config: INewSystemConfigInput) => dispatch(submitSystemConfigInput(config)),
+    updateSystemConfig: (config: ISystemConfigInput) => dispatch(updateSystemConfigInput(config)),
 });
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
