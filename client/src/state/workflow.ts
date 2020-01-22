@@ -52,10 +52,10 @@ export const fetchWorkflows = () => {
     } as const;
 };
 
-export const fetchWorkflowsError = (error: Error) => {
+export const fetchWorkflowsError = (error: string) => {
     return {
         type: WorkflowActionTypes.FETCH_WORKFLOWS_FAILURE,
-        payload: error,
+        data: error,
     } as const;
 };
 
@@ -69,14 +69,14 @@ export const fetchWorkflowsSuccess = (workflows: IWorkflow[]) => {
 export const submitWorkflow = (newWorkflowLabel: string) => {
     return {
         type: WorkflowActionTypes.SUBMIT_WORKFLOW,
-        payload: newWorkflowLabel,
+        data: newWorkflowLabel,
     } as const;
 };
 
-export const submitWorkflowError = (error: Error) => {
+export const submitWorkflowError = (error: string) => {
     return {
         type: WorkflowActionTypes.SUBMIT_WORKFLOW_FAILURE,
-        payload: error,
+        data: error,
     } as const;
 };
 

@@ -78,7 +78,7 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
 
 function* submitWorkflow(action: ReturnType<typeof submitWorkflowAction>) {
     try {
-        const workflow = yield call(submitApiWorkflow, action.payload);
+        const workflow = yield call(submitWorkflowApi, action.data);
         const mappedWorkflow = yield call(mapWorkflow, workflow);
         yield put(submitWorkflowSuccess(mappedWorkflow));
     } catch (e) {
