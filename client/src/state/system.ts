@@ -85,8 +85,8 @@ export const DEFAULT_CONFIG_SYSTEM_STATE: ISystemConfigState = {
 export interface INewSystemConfigInput {
     label: string;
     workflowId: number;
-    filename: string;
-    config: string;
+    nixConfigFilename: string;
+    nixConfig: string;
 }
 
 export interface ISystemConfigInput extends INewSystemConfigInput {

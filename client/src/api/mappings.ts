@@ -124,8 +124,8 @@ export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystem
         workflowId: config.workflowId,
         label: config.label,
         createdAt: config.createdAt,
-        filename: config.nixConfigFilename,
-        config: config.nixConfig,
+        nixConfigFilename: config.nixConfigFilename,
+        nixConfig: config.nixConfig,
         ...(config.updatedAt ? { updatedAt: config.updatedAt } : null),
     };
 };

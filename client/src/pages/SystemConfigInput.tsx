@@ -67,6 +67,7 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({ workflowI
     const onSubmitHandler = useCallback(() => {
         if (nixConfig) {
             createSystemConfig({ workflowId, label, filename: configFilename, config: nixConfig });
+                createSystemConfig({ workflowId, label, nixConfigFilename: configFilename, nixConfig: nixConfig });
         }
     }, [label, workflowId, configFilename, nixConfig, createSystemConfig]);
 
