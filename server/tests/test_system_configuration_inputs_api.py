@@ -7,6 +7,7 @@ from app import create_app
 from app.models import (
     db,
     SystemConfigurationInput,
+    Workflow,
 )
 
 
@@ -65,9 +66,18 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
             'message': 'Input payload validation failed'})
 
     def test_update(self):
+        test_workflow_label = 'TEST WORKFLOW'
+        wf = Workflow(label=test_workflow_label)
+
+        db.session.add(wf)
+        db.session.commit()
+        
+        self.assertIsNotNone(wf.workflowId)
+        self.assertIsNone(wf.updatedAt)
+
         sc = SystemConfigurationInput().query.all()
         self.assertListEqual(sc, [])
-        sc = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=1)
+        sc = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=wf.workflowId)
         db.session.add(sc)
         db.session.commit()
 
@@ -95,6 +105,9 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
         self.assertEqual(updated_sysconfig.nixConfigFilename, filename)
         self.assertNotEqual(updated_sysconfig.updatedAt, db.null())
 
+        updated_wf = Workflow.query.filter_by(workflowId=wf.workflowId).first()
+        self.assertIsNotNone(updated_wf.updatedAt)
+
     def test_update_with_missing_data(self):
         sc = SystemConfigurationInput().query.all()
         self.assertListEqual(sc, [])
@@ -120,9 +133,14 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
             'message': 'Input payload validation failed'})
 
     def test_update_label(self):
+        wf = Workflow(label='test-wf')
+
+        db.session.add(wf)
+        db.session.commit()
+
         sc = SystemConfigurationInput().query.all()
         self.assertListEqual(sc, [])
-        sc = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=1)
+        sc = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=wf.workflowId)
         db.session.add(sc)
         db.session.commit()
 

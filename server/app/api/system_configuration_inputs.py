@@ -1,6 +1,7 @@
 from flask import current_app, request
 import json
 from flask_restplus import Resource, fields
+from datetime import datetime
 
 from . import api
 from app.models import db, SystemConfigurationInput
@@ -97,7 +98,9 @@ class SystemConfigurationInputApi(Resource):
         existing_sysconfig_input.nixConfig = sysconfig_input['nixConfig']
         existing_sysconfig_input.nixConfigFilename = sysconfig_input['nixConfigFilename']
 
+        existing_sysconfig_input.workflow.updatedAt = datetime.now()
         db.session.add(existing_sysconfig_input)
+        db.session.add(existing_sysconfig_input.workflow)
         db.session.commit()
 
         return existing_sysconfig_input
