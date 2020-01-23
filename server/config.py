@@ -20,6 +20,7 @@ class Config(object):
         ),
     )
     DATABASE = os.path.join(DB_PATH, 'besspin.db')
+    print(f'Using database({DATABASE})')
     # SCHEMA_PATH = os.path.abspath(os.path.join(__file__, '..', '..', 'db', 'schema.sql'))
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///' + DATABASE)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
