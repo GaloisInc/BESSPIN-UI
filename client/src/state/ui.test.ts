@@ -7,6 +7,7 @@ import {
 
 const DEFAULT_STATE = {
     ui: {
+        error: '',
         isLoading: false,
         dataRequested: false,
     },
@@ -42,6 +43,7 @@ describe('ui', () => {
     describe('selectors', () => {
         const testState = generateTestState({
             ui: {
+                error: '',
                 isLoading: true,
                 dataRequested: true,
             },
