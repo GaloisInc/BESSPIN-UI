@@ -1,14 +1,16 @@
 import {
-    fetchSystems,
-    fetchSystemsFailure,
-    fetchSystemsSuccess,
-    getSystems,
     SystemActionTypes,
     ISystemEntry,
     selectFeature,
     SelectionMode,
-    getSystem,
     reducerSystem,
+    reducerSystemConfigInput,
+    ISystemConfigInput,
+    ISystemConfigInputState,
+    fetchSystemConfigInput,
+    fetchSystemConfigInputFailure,
+    fetchSystemConfigInputSuccess,
+    INewSystemConfigInput,
 } from './system';
 
 import { DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
@@ -29,21 +31,35 @@ const DEFAULT_SYSTEM: ISystemEntry = {
     selectionUndos: [],
 };
 
-const DEFAULT_STATE = {
-    systems: {},
+const DEFAULT_NEW_SYSTEM_CONFIG_INPUT: INewSystemConfigInput = {
+    workflowId: 2,
+    label: 'TEST SYS CONFIG INPUT',
+    nixConfig: '{ some: nix: { config } }',
+    nixConfigFilename: 'foo.nix',
+};
+
+const DEFAULT_SYSTEM_CONFIG_INPUT: ISystemConfigInput = {
+    ...DEFAULT_NEW_SYSTEM_CONFIG_INPUT,
+    id: 1,
+    createdAt: genDate(),
+};
+
+const DEFAULT_SYSTEM_STATE = {
     system: DEFAULT_SYSTEM,
 };
 
-const generateTestSystem = (overrides: Partial<ISystemEntry> = {}): ISystemEntry => {
+const generateTestSystemConfigInputState = (overrides: Partial<ISystemConfigInput> = {}): ISystemConfigInputState => {
     return {
-        ...DEFAULT_SYSTEM,
-        ...overrides,
+        systemConfigInput: {
+            ...DEFAULT_SYSTEM_CONFIG_INPUT,
+            ...overrides,
+        },
     };
 };
 
 const generateTestState = (overrides = {}) => {
     return {
-        ...DEFAULT_STATE,
+        ...DEFAULT_SYSTEM_STATE,
         ...overrides,
     };
 };
@@ -51,55 +67,6 @@ const generateTestState = (overrides = {}) => {
 describe('systems', () => {
 
     describe('action creators', () => {
-
-        describe('fetchSystems', () => {
-
-            it('should generate an action with no data', () => {
-
-                expect(fetchSystems()).toEqual({
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS,
-                });
-            });
-        });
-
-        describe('fetchSystemsFailure', () => {
-
-            it('should generate an action with error data', () => {
-
-                expect(fetchSystemsFailure(['TEST ERROR'])).toEqual({
-                    data: {
-                        errors: ['TEST ERROR'],
-                    },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_FAILURE,
-                });
-            });
-        });
-
-        describe('fetchSystemsSuccess', () => {
-
-            it('should generate an action with empty systems data', () => {
-
-                expect(fetchSystemsSuccess({})).toEqual({
-                    data: {
-                        systems: {},
-                    },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
-                });
-            });
-
-            it('should generate an action with systems data', () => {
-                const testSystem = generateTestSystem();
-
-                expect(fetchSystemsSuccess({ [testSystem.uid]: testSystem })).toEqual({
-                    data: {
-                        systems: {
-                            [testSystem.uid]: testSystem,
-                        },
-                    },
-                    type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
-                });
-            });
-        });
 
         describe('selectFeature', () => {
             const TEST_UID = 'TEST-UID';
@@ -125,7 +92,6 @@ describe('systems', () => {
 
                 it('should add the selection', () => {
                     const testState = generateTestState({
-                        systems: {},
                         system: {
                             ...DEFAULT_SYSTEM,
                             configs: [],
@@ -145,7 +111,6 @@ describe('systems', () => {
 
                 it('should add the selection', () => {
                     const testState = generateTestState({
-                        systems: {},
                         system: {
                             ...DEFAULT_SYSTEM,
                             configs: [
@@ -158,7 +123,6 @@ describe('systems', () => {
 
                     const reducedState = reducerSystem(testState, selectFeature(TEST_UID));
                     expect(reducedState).toEqual({
-                        systems: {},
                         system: {
                             ...DEFAULT_SYSTEM,
                             configs: [
@@ -173,4 +137,40 @@ describe('systems', () => {
         });
     });
 
+});
+
+describe('systemConfigInput', () => {
+
+    describe('reducer', () => {
+
+        describe('on initiation of a system configuration input fetch', () => {
+
+            it('should clear out any previous system config input state', () => {
+                const testState = generateTestSystemConfigInputState();
+
+                expect(reducerSystemConfigInput(testState, fetchSystemConfigInput(1)).systemConfigInput).toBeUndefined();
+            });
+        });
+
+        describe('on error during a system configuration input fetch', () => {
+
+            it('should clear out any previous system config input state', () => {
+                const testState = generateTestSystemConfigInputState();
+
+                expect(reducerSystemConfigInput(testState, fetchSystemConfigInputFailure('test-error')).systemConfigInput).toBeUndefined();
+            });
+        });
+
+        describe('on successful fetch of system configuration input', () => {
+
+            it('should add the fetched system input config to the state', () => {
+                const testState = generateTestSystemConfigInputState({});
+                const testSystem = {
+                    ...DEFAULT_SYSTEM_CONFIG_INPUT,
+                };
+
+                expect(reducerSystemConfigInput(testState, fetchSystemConfigInputSuccess(testSystem))).toEqual(generateTestSystemConfigInputState());
+            });
+        });
+    });
 });

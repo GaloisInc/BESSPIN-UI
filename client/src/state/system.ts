@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */ // disabling for now
 import { IFeatureModel, DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
 import {
@@ -33,10 +34,6 @@ export interface ValidateResult {
     configuredFeatureModel: IFeatureModel;
 }
 
-export interface ISystemMap {
-    [uid: string]: ISystemEntry
-}
-
 export enum SelectionMode {
     selected = 'selected',
     unselected = 'unselected',
@@ -56,14 +53,6 @@ export interface ISelectionMap {
 
 export type ISelection = ISelectionType[]
 
-export interface ISystemState {
-    systems: ISystemMap;
-}
-
-export const DEFAULT_STATE: ISystemState = {
-    systems: {},
-}
-
 export interface ISystemConfigState {
     system: ISystemEntry,
 }
@@ -82,10 +71,43 @@ export const DEFAULT_CONFIG_SYSTEM_STATE: ISystemConfigState = {
     },
 }
 
+/**
+ * NOTE: We have two related, but different models going on here
+ * 
+ *  - System: this is the original proof-of-concept feature-model system
+ *  - SystemConfigInput: The inputs necessasry to build a system in ToolSuite
+ * 
+ * This could be a source of confusion and should be cleaned up.
+ * One possibility is to remove "systems" as that does not appear to be used.
+ * "system" could be renamed to "architecture" or "systemFeatureModel" to disambiguate...
+ */
+
+export interface INewSystemConfigInput {
+    label: string;
+    workflowId: number;
+    nixConfigFilename: string;
+    nixConfig: string;
+}
+
+export interface ISystemConfigInput extends INewSystemConfigInput {
+    id: number;
+    createdAt: string;
+    updatedAt?: string;
+}
+
+export interface ISystemConfigInputState {
+    systemConfigInput?: ISystemConfigInput;
+}
+
+export const DEFAULT_SYSTEM_CONFIG_INPUT_STATE: ISystemConfigInputState = {};
+
 // Actions
 
 export enum SystemActionTypes {
     CLEAR_FEATURE_SELECTIONS = 'system/clear-feature-selections',
+    FETCH_SYSTEM_CONFIG_INPUT = 'system-config/fetch',
+    FETCH_SYSTEM_CONFIG_INPUT_FAILURE = 'system-config/fetch/failure',
+    FETCH_SYSTEM_CONFIG_INPUT_SUCCESS = 'system-config/fetch/success',
     FETCH_TEST_SYSTEM = 'system/fetch-one',
     FETCH_TEST_SYSTEM_FAILURE = 'system/fetch-one/failure',
     FETCH_TEST_SYSTEM_SUCCESS = 'system/fetch-one/success',
@@ -99,8 +121,12 @@ export enum SystemActionTypes {
     SUBMIT_SYSTEM_FAILURE = 'system/submit/failure',
     SUBMIT_SYSTEM_SUCCESS = 'system/submit/success',
     SUBMIT_VALIDATE_CONFIGURATION= 'system/submit/validate',
-    SUBMIT_VALIDATE_CONFIGURATION_FAILURE= 'system/submit/validate/failure',
-    SUBMIT_VALIDATE_CONFIGURATION_SUCCESS= 'system/submit/validate/success',
+    SUBMIT_VALIDATE_CONFIGURATION_FAILURE = 'system/submit/validate/failure',
+    SUBMIT_VALIDATE_CONFIGURATION_SUCCESS = 'system/submit/validate/success',
+    SUBMIT_SYSTEM_CONFIG_INPUT = 'system-config/submit',
+    SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE = 'system-config/submit/failure',
+    SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS = 'system-config/submit/success',
+    UPDATE_SYSTEM_CONFIG_INPUT = 'system-config/update',
 }
 
 export const fetchSystem = (systemUid: string) => {
@@ -112,11 +138,11 @@ export const fetchSystem = (systemUid: string) => {
     } as const;
 };
 
-export const fetchSystemFailure = (errors: string[]) => {
+export const fetchSystemFailure = (error: string) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_FAILURE,
         data: {
-            errors,
+            error,
         },
     } as const;
 };
@@ -126,30 +152,6 @@ export const fetchSystemSuccess = (system: ISystemEntry) => {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS,
         data: {
             system,
-        },
-    } as const;
-};
-
-export const fetchSystems = () => {
-    return {
-        type: SystemActionTypes.FETCH_TEST_SYSTEMS,
-    } as const;
-};
-
-export const fetchSystemsFailure = (errors: string[]) => {
-    return {
-        type: SystemActionTypes.FETCH_TEST_SYSTEMS_FAILURE,
-        data: {
-            errors,
-        },
-    } as const;
-};
-
-export const fetchSystemsSuccess = (systems: ISystemMap) => {
-    return {
-        type: SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS,
-        data: {
-            systems,
         },
     } as const;
 };
@@ -164,11 +166,11 @@ export const submitSystem = (systemName: string, systemJsonString: string) => {
     } as const;
 }
 
-export const submitSystemFailure = (errors: string[]) => {
+export const submitSystemFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_SYSTEM_FAILURE,
         data: {
-            errors,
+            error,
         },
     } as const;
 };
@@ -181,7 +183,6 @@ export const submitSystemSuccess = (system: ISystemEntry) => {
         }
     } as const;
 };
-
 
 export const selectFeature = (uid: string) => {
     return {
@@ -216,12 +217,12 @@ export const submitValidateConfiguration = (uid: string, selection: ISelectionTy
     } as const;
 };
 
-export const submitValidateConfigurationFailure = (errors: string[]) => {
+export const submitValidateConfigurationFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_FAILURE,
         data: {
-            errors
-        }
+            error,
+        },
     } as const;
 };
 
@@ -235,13 +236,62 @@ export const submitValidateConfigurationSuccess = (uid: string, validateResult: 
     } as const;
 };
 
+export const submitSystemConfigInput = (config: INewSystemConfigInput) => {
+    return {
+        type: SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT,
+        data: config,
+    } as const;
+};
+
+export const submitSystemConfigInputFailure = (error: string) => {
+    return {
+        type: SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const submitSystemConfigInputSuccess = (config: ISystemConfigInput) => {
+    return {
+        type: SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS,
+        data: config,
+    } as const;
+};
+
+export const fetchSystemConfigInput = (systemConfigInputId: number) => {
+    return {
+        type: SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT,
+        data: systemConfigInputId,
+    } as const;
+};
+
+export const fetchSystemConfigInputFailure = (error: string) => {
+    return {
+        type: SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const fetchSystemConfigInputSuccess = (systemConfigInput: ISystemConfigInput) => {
+    return {
+        type: SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_SUCCESS,
+        data: systemConfigInput,
+    } as const;
+};
+
+export const updateSystemConfigInput = (systemConfigInput: ISystemConfigInput) => {
+    return {
+        type: SystemActionTypes.UPDATE_SYSTEM_CONFIG_INPUT,
+        data: systemConfigInput,
+    } as const;
+};
+
 export type ISystemAction = ReturnType<
     typeof fetchSystem |
     typeof fetchSystemSuccess |
     typeof fetchSystemFailure |
-    typeof fetchSystems |
-    typeof fetchSystemsSuccess |
-    typeof fetchSystemsFailure |
+    typeof fetchSystemConfigInput |
+    typeof fetchSystemConfigInputSuccess |
+    typeof fetchSystemConfigInputFailure |
     typeof submitSystem |
     typeof submitSystemSuccess |
     typeof submitSystemFailure |
@@ -250,7 +300,11 @@ export type ISystemAction = ReturnType<
     typeof selectFeatureRedo |
     typeof submitValidateConfiguration |
     typeof submitValidateConfigurationSuccess |
-    typeof submitValidateConfigurationFailure
+    typeof submitValidateConfigurationFailure |
+    typeof submitSystemConfigInput |
+    typeof submitSystemConfigInputFailure |
+    typeof submitSystemConfigInputSuccess |
+    typeof updateSystemConfigInput
 >;
 
 // Reducers
@@ -284,20 +338,6 @@ function circle_selection(conftree: IFeatureModel, selected_nodes: ISelection, u
             return selected_nodes;
     };
 };
-
-export const reducerSystems = (state = DEFAULT_STATE, action: ISystemAction): ISystemState => {
-    switch (action.type) {
-        case SystemActionTypes.FETCH_TEST_SYSTEMS_SUCCESS:
-            return {
-                ...state,
-                systems: action.data.systems,
-            };
-        default:
-            return state;
-    }
-};
-
-
 
 export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISystemAction): ISystemConfigState => {
     switch (action.type) {
@@ -370,16 +410,29 @@ export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISyst
     }
 };
 
-
+export const reducerSystemConfigInput = (state = DEFAULT_SYSTEM_CONFIG_INPUT_STATE, action: ISystemAction): ISystemConfigInputState => {
+    switch (action.type) {
+        case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT:
+        case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_FAILURE:
+            return {};  
+        case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_SUCCESS:
+        case SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS:
+            return {
+                ...state,
+                systemConfigInput: action.data,
+            };
+        default:
+            return state;
+    }
+};
 
 // Selectors
 
 interface IState {
-    systems: ISystemState;
     system: ISystemConfigState;
+    systemConfigInput: ISystemConfigInputState;
 }
-
-export const getSystems = (state: IState) => state.systems.systems;
 
 export const getSystem = (state: IState) => state.system.system;
 
+export const getSystemConfigInput = (state: IState) => state.systemConfigInput.systemConfigInput;

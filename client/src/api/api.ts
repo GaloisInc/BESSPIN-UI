@@ -2,7 +2,12 @@ import axios, { AxiosResponse } from 'axios';
 
 import {
     IConfig,
+    IServersideSysConfigInput,
 } from '../api/mappings';
+
+import {
+    INewSystemConfigInput,
+} from '../state/system';
 
 const trapHTMLError = (response: AxiosResponse) => {
     if (response.headers && response.headers['Content-type'] === 'text/html') {
@@ -52,6 +57,18 @@ export const fetchConfigurators = async () => {
     .then(extractData);
 };
 
+export const fetchWorkflows = async () => {
+    return axios.request({
+        url: '/api/workflow',
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+}
+
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
     return axios.request({
         url: `/api/configurator/upload/${systemName}/global_var_cpu`,
@@ -64,6 +81,60 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
     .then(trapHTMLError)
     .then(extractData);
 }
+
+export const fetchSystemConfigurationInput = async (sysConfigId: number) => {
+    return axios.request({
+        url: `/api/system-config-input/${sysConfigId}`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
+export const submitSystemConfigurationInput = async (config: INewSystemConfigInput) => {
+    return axios.request({
+        url: `/api/system-config-input`,
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: config,
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
+export const updateSystemConfigurationInput = async (config: IServersideSysConfigInput) => {
+    return axios.request({
+        url: `/api/system-config-input/${config.sysConfigId}`,
+        method: 'put',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: config,
+    })
+    .then(trapHTMLError)
+    .then(extractData); 
+}
+
+export const submitWorkflow = async (workflowLabel: string) => {
+
+    return axios.request({
+        url: '/api/workflow',
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: {
+            label: workflowLabel,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
 
 export const submitValidateConfiguration = async (uid: string, selectedNodes: IConfig[]) => {
     return axios.request({

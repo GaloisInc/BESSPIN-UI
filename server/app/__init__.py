@@ -7,6 +7,9 @@ def create_app(config_name=None):
     config_obj = config[config_name or 'default']
     app.config.from_object(config_obj)
 
+    if not app.config['TESTING']:
+        app.logger.debug(f"Using database({app.config['DATABASE']})")
+
     from .models import db
     db.init_app(app)
     from .models import migrate

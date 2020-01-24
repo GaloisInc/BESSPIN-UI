@@ -3,10 +3,10 @@ import json
 from flask_restplus import Resource, fields
 
 from . import api
-from app.models import db, VersionedResources, VersionedResourceTypes
+from app.models import db, VersionedResource, VersionedResourceType
 
 """
-    Since all the routes here are for managing our VersionedResources
+    Since all the routes here are for managing our VersionedResource
     we set up a root namespace that is the prefix for all routes
     defined below
 """
@@ -23,12 +23,10 @@ ns = api.namespace(
 versioned_resource_type = api.model('VersionedResourceType', {
     'label': fields.String(
         required=True,
-        description='Human-readable resource type label',
-    ),
+        description='Human-readable resource type label'),
     'resourceTypeId': fields.Integer(
         required=True,
-        description='Id of resource type',
-    ),
+        description='Id of resource type'),
 })
 
 new_versioned_resource = api.model('NewVersionedResource', {
@@ -44,8 +42,7 @@ new_versioned_resource = api.model('NewVersionedResource', {
     'resourceType': fields.Nested(
         versioned_resource_type,
         required=True,
-        description='Label for the versioned resource type categorizing this resource'  # noqa E501
-    )
+        description='type of resource we are dealing with'),
 })
 
 """
@@ -59,14 +56,13 @@ existing_versioned_resource = api.inherit(
     {
         'resourceId': fields.Integer(
             required=True,
-            description='Resource identifier'
-        ),
+            description='Resource identifier'),
     }
 )
 
 
 @ns.route('')
-class VersionedResourceList(Resource):
+class VersionedResourceListApi(Resource):
     # by declaring which swagger model we use to marshal data,
     # flask will automagically convert any returned data to be
     # limited to that shape. This means that can effectively be
@@ -74,17 +70,17 @@ class VersionedResourceList(Resource):
     @ns.marshal_list_with(existing_versioned_resource)
     def get(self):
         current_app.logger.debug(f'fetching all versioned resources')
-        return VersionedResources.query.all()
+        return VersionedResource.query.all()
 
     # we can also declare the expected shape of input data to allow
     # for flask to validate that the correct data is supplied in a POST/PUT
     @ns.marshal_with(existing_versioned_resource)
-    @ns.expect(new_versioned_resource)
+    @ns.expect(new_versioned_resource, validate=True)
     def post(self):
         resource_input = json.loads(request.data)
         current_app.logger.debug(resource_input['resourceType'])
-        resource_type = VersionedResourceTypes.query.get(resource_input['resourceType']['resourceTypeId'])
-        new_resource = VersionedResources(
+        resource_type = VersionedResourceType.query.get(resource_input['resourceType']['resourceTypeId'])
+        new_resource = VersionedResource(
             label=resource_input['label'],
             url=resource_input['url'],
             version=resource_input['version'],
@@ -97,15 +93,15 @@ class VersionedResourceList(Resource):
 
 
 @ns.route('/<int:resourceId>')
-class VersionedResource(Resource):
+class VersionedResourceApi(Resource):
     @ns.doc('update a versioned resource')
     @ns.marshal_list_with(existing_versioned_resource)
-    @ns.expect(new_versioned_resource)
+    @ns.expect(new_versioned_resource, validate=True)
     def put(self, resourceId):
         current_app.logger.debug(f'updating resourceId: {resourceId}')
         resource_input = json.loads(request.data)
-        resource_type = VersionedResourceTypes.query.get(resource_input['resourceType']['resourceTypeId'])
-        existing_resource = VersionedResources.query.get_or_404(resourceId)
+        resource_type = VersionedResourceType.query.get(resource_input['resourceType']['resourceTypeId'])
+        existing_resource = VersionedResource.query.get_or_404(resourceId)
         existing_resource.label = resource_input['label']
         existing_resource.url = resource_input['url']
         existing_resource.version = resource_input['version']
@@ -119,4 +115,4 @@ class VersionedResource(Resource):
     @ns.marshal_with(existing_versioned_resource)
     def get(self, resourceId):
         current_app.logger.debug(f'fetching resourceId: {resourceId}')
-        return VersionedResources.query.get(resourceId)
+        return VersionedResource.query.get(resourceId)

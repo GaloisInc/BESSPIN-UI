@@ -13,3 +13,6 @@ from app.api import versioned_resource  # noqa: E402, F401
 from app.api import feature_model_input  # noqa: E402, F401
 from app.api import feature_extraction_job  # noqa: E402, F401
 from app.api import feature_model  # noqa E402, F401
+from app.api import report_job  # noqa E402, F401
+from app.api import workflow  # noqa E402, F401
+from app.api import system_configuration_inputs  # noqa E402, F401

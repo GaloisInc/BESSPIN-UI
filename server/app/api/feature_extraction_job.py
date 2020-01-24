@@ -2,7 +2,7 @@ from flask import current_app
 from flask_restplus import Resource, fields
 
 from . import api
-from app.models import db, JobStatuses, FeatureExtractionJobs
+from app.models import db, JobStatus, FeatureExtractionJob
 
 
 ns = api.namespace(
@@ -30,7 +30,7 @@ existing_feature_extraction_job = api.inherit(
 
 @ns.route('')
 @ns.route('/<int:jobId>')
-class FeatureExtractionJob(Resource):
+class FeatureExtractionJobApi(Resource):
     @ns.doc('create feature extraction job')
     @ns.marshal_list_with(existing_feature_extraction_job)
     @ns.expect(new_feature_extraction_job)
@@ -38,8 +38,8 @@ class FeatureExtractionJob(Resource):
         new_job_data = api.payload
         # ...assume we are creating an actual job here and
         # that it succeeds in starting, but has not completed...
-        running_status = JobStatuses.query.filter_by(label='running').first()
-        new_feat_extraction_job = FeatureExtractionJobs(
+        running_status = JobStatus.query.filter_by(label='running').first()
+        new_feat_extraction_job = FeatureExtractionJob(
             label=new_job_data['label'],
             featModelId=new_job_data['featModelId'],
             statusId=running_status.statusId,
@@ -53,4 +53,4 @@ class FeatureExtractionJob(Resource):
     @ns.marshal_with(existing_feature_extraction_job)
     def get(self, jobId):
         current_app.logger.debug(f'jobId: {jobId}')
-        return FeatureExtractionJobs.query.filter_by(jobId=jobId).first()  # noqa E501
+        return FeatureExtractionJob.query.filter_by(jobId=jobId).first()  # noqa E501

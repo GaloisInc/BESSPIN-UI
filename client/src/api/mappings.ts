@@ -1,5 +1,6 @@
-import { ISelectionType, ValidateResult, ISystemMap, ISystemEntry, SelectionMode } from "../state/system";
-import { IFeatureMap, IFeatureModel } from "../components/graph-helper";
+import { ISelectionType, ValidateResult, ISystemEntry, SelectionMode, ISystemConfigInput } from '../state/system';
+import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
+import { IWorkflow } from '../state/workflow';
 
 
 export interface IConfig {
@@ -36,6 +37,27 @@ export interface IValidateResponse {
     validated_features: IConfig[],
     configured_feature_model: IFeatureModel,
 }
+
+export interface IServersideSysConfigInput {
+    sysConfigId: number;
+    workflowId: number;
+    label: string;
+    createdAt: string;
+    updatedAt?: string;
+    nixConfigFilename: string;
+    nixConfig: string;
+}
+
+export interface IServersideWorkflow {
+    workflowId: number;
+    label: string;
+    createdAt: string;
+    updatedAt?: string;
+    systemConfigurationInput?: IServersideSysConfigInput;
+    testConfigId?: number;
+    reportId?: number;
+}
+
 /* eslint-enable camelcase */
 
 const mapSelectionMode = (mode: string): SelectionMode => {
@@ -86,14 +108,6 @@ export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): IS
     };
 };
 
-
-export const mapConfiguratorsToSystems = (configurators: IConfigurator[]): ISystemMap => {
-    return configurators.reduce((configurators: ISystemMap, c: IConfigurator) => ({
-        ...configurators,
-        [c.uid]: mapConfiguratorToSystem(c),
-    }), {});
-};
-
 const mapIConfigToISelectionType = (c: IConfig): ISelectionType => {
     return {
         uid: c.uid,
@@ -103,6 +117,29 @@ const mapIConfigToISelectionType = (c: IConfig): ISelectionType => {
     }
 
 }
+
+export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystemConfigInput => {
+    return {
+        id: config.sysConfigId,
+        workflowId: config.workflowId,
+        label: config.label,
+        createdAt: config.createdAt,
+        nixConfigFilename: config.nixConfigFilename,
+        nixConfig: config.nixConfig,
+        ...(config.updatedAt ? { updatedAt: config.updatedAt } : null),
+    };
+};
+
+export const mapSystemConfigInputToServerside = (config: ISystemConfigInput): IServersideSysConfigInput => {
+    return {
+        sysConfigId: config.id,
+        workflowId: config.workflowId,
+        label: config.label,
+        createdAt: config.createdAt,
+        nixConfig: config.nixConfig,
+        nixConfigFilename: config.nixConfigFilename,
+    };
+};
 
 export const mapValidateRequestForServer = (validateRequest: ISelectionType[]): IConfig[] => {
     const configs = validateRequest.map<IConfig>((c: ISelectionType) => {
@@ -124,4 +161,26 @@ export const mapValidateResponse = (validateResponse: IValidateResponse): Valida
         validatedFeatures: validateResponse.validated_features.map(mapIConfigToISelectionType),
         configuredFeatureModel: validateResponse.configured_feature_model,
     };
+};
+
+export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
+    return {
+        id: workflow.workflowId,
+        createdAt: workflow.createdAt,
+        updatedAt: workflow.updatedAt,
+        label: workflow.label,
+        ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
+            systemConfig: { id: workflow.systemConfigurationInput.sysConfigId, },
+        } : null),
+        ...(workflow.testConfigId ? {
+            testConfig: { id: workflow.testConfigId, },
+        } : null),
+        ...(workflow.reportId ? {
+            report: { id: workflow.reportId, },
+        } : null),
+    };
+};
+
+export const mapWorkflows = (workflows: IServersideWorkflow[]): IWorkflow[] => {
+    return workflows.map(mapWorkflow);
 };

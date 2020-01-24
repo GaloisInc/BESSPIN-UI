@@ -2,7 +2,7 @@ from . import db
 from .metadata_mixin import MetaDataColumnsMixin
 
 
-class JobStatuses(db.Model):
+class JobStatus(db.Model):
     __tablename__ = 'jobStatuses'
 
     statusId = db.Column(db.Integer, primary_key=True)
@@ -12,12 +12,21 @@ class JobStatuses(db.Model):
     )
 
     def __repr__(self):
-        return '<JobStatuses "{}" {}>'.format(self.statusId, self.label)
+        return '<JobStatus "{}" {}>'.format(self.statusId, self.label)
 
     ALLOWED_STATUSES = ['running', 'failed', 'succeeded']
 
+    @staticmethod
+    def load_allowed_statuses(db_conn=db.session):
+        for t in JobStatus.ALLOWED_STATUSES:
+            job_status = JobStatus.query.filter_by(label=t).first()
+            if job_status is None:
+                job_status = JobStatus(label=t)
+            db_conn.add(job_status)
+        db_conn.commit()
 
-class Jobs(db.Model, MetaDataColumnsMixin):
+
+class Job(db.Model, MetaDataColumnsMixin):
     __tablename__ = 'jobs'
 
     jobId = db.Column(db.Integer, primary_key=True)
@@ -44,6 +53,7 @@ class Jobs(db.Model, MetaDataColumnsMixin):
         nullable=False,
         comment='internal polymorphic type-tracking',
     )
+    status = db.relationship('JobStatus')
 
     __mapper_args__ = {
         'polymorphic_identity': 'job',
@@ -51,10 +61,10 @@ class Jobs(db.Model, MetaDataColumnsMixin):
     }
 
     def __repr__(self):
-        return f'<Jobs id="{self.jobId}" label="{self.label}">'
+        return f'<Job id="{self.jobId}" label="{self.label}" status="{self.status.label}">'
 
 
-class FeatureExtractionJobs(Jobs):
+class FeatureExtractionJob(Job):
     __tablename__ = 'featureExtractionJobs'
 
     jobId = db.Column(db.Integer, db.ForeignKey('jobs.jobId'), primary_key=True)  # noqa E501
@@ -66,4 +76,19 @@ class FeatureExtractionJobs(Jobs):
 
     __mapper_args__ = {
         'polymorphic_identity': 'feature-extraction',
+    }
+
+
+class ReportJob(Job):
+    __tablename__ = 'reportJobs'
+
+    jobId = db.Column(db.Integer, db.ForeignKey('jobs.jobId'), primary_key=True)  # noqa E501
+    sysConfigId = db.Column(
+        db.Integer,
+        db.ForeignKey('systemConfigurationInputs.sysConfigId', ondelete='CASCADE'),  # noqa E501
+        nullable=False
+    )
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'report',
     }

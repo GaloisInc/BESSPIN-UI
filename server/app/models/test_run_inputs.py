@@ -2,7 +2,7 @@ from . import db
 from .metadata_mixin import MetaDataColumnsMixin
 
 
-class TestRunInputs(db.Model, MetaDataColumnsMixin):
+class TestRunInput(db.Model, MetaDataColumnsMixin):
     __tablename__ = 'testRunInputs'
 
     testRunId = db.Column(db.Integer, primary_key=True)
@@ -24,4 +24,4 @@ class TestRunInputs(db.Model, MetaDataColumnsMixin):
     )
 
     def __repr__(self):
-        return f'<TestRunInputs id="{self.testRunId}" label="{self.label}">'
+        return f'<TestRunInput id="{self.testRunId}" label="{self.label}">'

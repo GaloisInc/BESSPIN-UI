@@ -2,7 +2,7 @@ from . import db
 from .metadata_mixin import MetaDataColumnsMixin
 
 
-class FeatureConfigurationInputs(db.Model, MetaDataColumnsMixin):
+class FeatureConfigurationInput(db.Model, MetaDataColumnsMixin):
     __tablename__ = 'featureConfigurationInputs'
 
     featConfigId = db.Column(db.Integer, primary_key=True)
@@ -26,4 +26,4 @@ class FeatureConfigurationInputs(db.Model, MetaDataColumnsMixin):
     )
 
     def __repr__(self):
-        return f'<FeatureConfigurationInputs id="{self.featConfigId}" label="{self.label}" featModelId="{self.featModelId}">'  # noqa E501
+        return f'<FeatureConfigurationInput id="{self.featConfigId}" label="{self.label}" featModelId="{self.featModelId}">'  # noqa E501

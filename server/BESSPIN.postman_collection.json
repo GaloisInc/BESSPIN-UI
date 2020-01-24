@@ -77,14 +77,14 @@
 				"header": [
 					{
 						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
+						"type": "text",
+						"value": "application/json"
 					},
 					{
 						"key": "Content-Type",
 						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
+						"type": "text",
+						"value": "application/json"
 					}
 				],
 				"body": {
@@ -242,8 +242,8 @@
 					{
 						"key": "Content-Type",
 						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
+						"type": "text",
+						"value": "application/json"
 					}
 				],
 				"body": {
@@ -263,6 +263,98 @@
 					"path": [
 						"api",
 						"versioned-resource",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all workflows",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiHost}}/api/workflow",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"workflow"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a workflow",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"my newer first workflow\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/workflow",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"workflow"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a workflow",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"my first, renamed workflow\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/workflow/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"workflow",
 						"1"
 					]
 				}
