@@ -1,4 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+    useParams
+  } from "react-router-dom";
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux'
 
 import {
@@ -8,24 +12,43 @@ import {
     Row,
     Col,
     Button,
+    Alert,
 } from 'react-bootstrap';
 
 import { IState } from '../state';
 
+import { LoadingIndicator } from '../components/LoadingIndicator';
+
 import {
-    ITestEntry,
-    getEntries
-} from '../state/test-results';
+    getError,
+    getIsLoading,
+} from '../state/ui';
 
 import { Header } from '../components/Header';
 
 import '../style/VulnClassSelector.scss';
 
-export interface IVulnClassSelectorProps {
-    entries: ITestEntry[];
+interface IStateFromProps {
+    errors: string[];
+    isLoading: boolean;
+    isEditMode: boolean,
 }
 
-export const VulnClassSelector: React.FC<IVulnClassSelectorProps> = (props) => {
+interface IDispatchFromProps {
+    dispatch: Dispatch;
+    //createSystemConfig: typeof submitSystemConfigInput;
+    //updateSystemConfig: typeof updateSystemConfigInput;
+}
+
+export type IVulnClassSelectorProps  = IStateFromProps & IDispatchFromProps;
+
+export const VulnClassSelector: React.FC<IVulnClassSelectorProps> = ( {
+        isEditMode,
+        isLoading,
+        errors,
+    }) => {
+
+    const { workflowId, testId } = useParams();
     const [checkboxes, setCheckboxes] = useState([false, false, false, false]);
 
     /* TODO this def is current unused but the goal is to create the checkboxes
@@ -53,6 +76,11 @@ export const VulnClassSelector: React.FC<IVulnClassSelectorProps> = (props) => {
 
     return (
         <Container className='VulnClassSelector'>
+            { isLoading && <LoadingIndicator /> }
+            { errors && errors.length > 0 &&
+                <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }
+                </Alert>
+            }
             <Header />
             <h1>Vulnerability Class Selector</h1>
             <Form>
@@ -65,36 +93,41 @@ export const VulnClassSelector: React.FC<IVulnClassSelectorProps> = (props) => {
                         label={`Buffer Errors`}
                         id={`buffer-errors`}
                         onChange = { () => doTheCheckbox(0) }
+                        multiple
                     />
                     <Form.Check
                         type='checkbox'
                         label={`PPAC`}
                         id={`ppac`}
                         onChange = { () => doTheCheckbox(1) }
+                        multiple = {false}
                     />
                     <Form.Check
                         type='checkbox'
                         label={`Resource Management`}
                         id={`resource-management`}
                         onChange = { () => doTheCheckbox(2) }
+                        multiple = {false}
                     />
                     <Form.Check
                         type='checkbox'
                         label={`Information Leakage`}
                         id={`information leakage`}
                         onChange = { () => doTheCheckbox(3) }
+                        multiple
                     />
                     <Form.Check
                         type='checkbox'
                         label={`Numeric Errors`}
                         id={`numeric-errors`}
                         onChange = { () => doTheCheckbox(4) }
+                        multiple = {false}
                     />
                     </Col>
 
                     <Form.Group as={Row}>
                         <Col sm={{ span: 10, offset: 2 }}>
-                            <Button href= { "/api/configure-test/" + getChoice() } >
+                            <Button href= { `/api/configure-test/${workflowId}/` + getChoice() } >
                                 Configure
                             </Button>
                         </Col>
@@ -105,10 +138,27 @@ export const VulnClassSelector: React.FC<IVulnClassSelectorProps> = (props) => {
   );
 }
 
-const mapStateToProps = (state: IState): IVulnClassSelectorProps => {
+interface IOwnProps {
+    isEditMode: boolean,
+}
+
+const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps => {
+    const error = getError(state);
+    const isLoading = getIsLoading(state);
+
     return {
-        entries: getEntries(state),
+        errors: [],
+        isLoading,
+        isEditMode: ownProps.isEditMode,
     };
 };
 
-export const ConnectedVulnClassSelector = connect(mapStateToProps)(VulnClassSelector);
+const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
+    dispatch,
+    //createSystemConfig: (config: INewSystemConfigInput) => dispatch(submitSystemConfigInput(config)),
+    //updateSystemConfig: (config: ISystemConfigInput) => dispatch(updateSystemConfigInput(config)),
+});
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+export const ConnectedVulnClassSelector = connector(VulnClassSelector);

@@ -22,10 +22,15 @@ export const App: React.FC = () => {
             <Router>
                 <Switch>
                     <Route path='/dashboard' component={ ConnectedDashboard } />
-                    <Route path='/vuln-class-selector/:systemUid?' component={ ConnectedVulnClassSelector } />
                     <Route path='/configure-cpu/:systemUid?' component={ ConnectedConfigureCpu } />
                     <Route path='/system-configuration/create/:workflowId' component={ ConnectedSystemConfigInput } />
                     <Route path='/system-configuration/edit/:workflowId/:systemConfigId' component={ ConnectedSystemConfigInput } />
+                    <Route path='/test-configuration/create/:workflowId'>
+                        <ConnectedVulnClassSelector isEditMode = {false} />
+                    </Route>
+                    <Route path='/test-configuration/create/:workflowId/:testId'>
+                        <ConnectedVulnClassSelector isEditMode = {true} />
+                    </Route>
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>
             </Router>
