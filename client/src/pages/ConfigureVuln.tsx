@@ -1,19 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { match, useParams } from 'react-router-dom';
 
 import {
-    InputGroup,
     Col,
     Container,
-    Form,
     ButtonGroup,
     Button,
     Row,
 } from 'react-bootstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUndo, faRedo, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/mode-json';
@@ -24,13 +22,12 @@ import { getDataRequested } from '../state/ui';
 import {
     fetchSystem,
     getSystem,
-    ISystemEntry,
-    submitSystem,
+    IFeatureModelRecord,
     submitValidateConfiguration,
     selectFeature,
     selectFeatureUndo,
     selectFeatureRedo,
-} from '../state/system';
+} from '../state/feature-model';
 
 
 import { Header } from '../components/Header';
@@ -41,13 +38,12 @@ import '../style/ConfigureVuln.scss';
 
 export interface IConfigureVulnProps {
     dataRequested: boolean;
-    submitSystem: typeof submitSystem;
     fetchSystem: typeof fetchSystem;
     selectFeature: typeof selectFeature,
     selectFeatureUndo: typeof selectFeatureUndo,
     selectFeatureRedo: typeof selectFeatureRedo,
     submitValidateConfiguration: typeof submitValidateConfiguration;
-    system: ISystemEntry;
+    system: IFeatureModelRecord;
     systemUid: string;
 }
 
@@ -58,9 +54,7 @@ export const DEFAULT_FEATURE_MODEL: IFeatureModel = {
     version: { base: 1 },
 };
 
-
 export const ConfigureVuln: React.FC<IConfigureVulnProps> = ({
-    submitSystem,
     fetchSystem,
     selectFeature,
     selectFeatureUndo,
@@ -70,13 +64,7 @@ export const ConfigureVuln: React.FC<IConfigureVulnProps> = ({
     systemUid,
 }) => {
 
-    // NOTE: I prefer functional components and use React Hooks to manage form
-    //       state. However, this makes testing interactions that use state
-    //       very difficult
     const { workflowId, testId, vulnClass } = useParams();
-    const fileInputRef = useRef(null);
-    const [configuratorModel, setConfiguratorModel] = useState("");
-    const [modelName, setModelName] = useState('');
 
     useEffect(() => {
         if (systemUid && !system.uid ) {
@@ -84,69 +72,10 @@ export const ConfigureVuln: React.FC<IConfigureVulnProps> = ({
         }
     }, [systemUid, fetchSystem, system]);
 
-    const modelInputCallback = useCallback(() => {
-        // @ts-ignore - typescript does not like the ref, so I gave up and just ignore this line
-        const fileToRead = fileInputRef.current.files[0];
-
-        if (fileToRead) {
-            setModelName(fileToRead.name);
-
-            const reader = new FileReader();
-            reader.readAsText(fileToRead);
-            reader.onload = (e) => {
-                const configuratorModelString = e && e.target ? e.target.result as string : null;
-                if (configuratorModelString) {
-                    if (fileToRead.name.endsWith('.fm.json')) {
-                        const configModelAsJSON = JSON.parse(configuratorModelString);
-                        console.log(configModelAsJSON);
-                        setConfiguratorModel(JSON.stringify(configModelAsJSON));
-                    } else if (fileToRead.name.endsWith('.cfr')) {
-                        setConfiguratorModel(configuratorModelString);
-                    }
-                }
-            };
-        }
-    }, []);
-
-    const onSubmitHandler = useCallback(() => {
-        if (configuratorModel) {
-            // TODO: pass model object rather than string
-            submitSystem(modelName, configuratorModel);
-        }
-    }, [modelName, configuratorModel, submitSystem]);
-
     return (
         <Container className='ConfigureVuln'>
             <Header />
-            <h1>Configure CPU</h1>
-            <Form inline={ true }>
-                <Form.Row>
-                    <Col>
-                        <InputGroup>
-                            <div className='custom-file'>
-                                <Form.Control
-                                    as='input'
-                                    type='file'
-                                    id='new-model-upload-input'
-                                    className='custom-file-input'
-                                    aria-describedby='new-model-upload'
-                                    onChange={ modelInputCallback }
-                                    ref={ fileInputRef }
-                                    accept='.cfr,.json' />
-                                <Form.Label className='custom-file-label'>{ modelName }</Form.Label>
-                            </div>
-                        </InputGroup>
-                    </Col>
-                    <Col>
-                        <Button
-                            className="btn btn-light btn-outline-secondary"
-                            onClick={ onSubmitHandler }>
-                            <FontAwesomeIcon icon={ faPlus }/>
-                            <span> Upload Model </span>
-                        </Button>
-                    </Col>
-                </Form.Row>
-            </Form>
+            <h1>Configure Vulnerability { vulnClass }</h1>
             <ButtonGroup className="mr-2" aria-label="First group">
                 <Button
                     className="btn-light btn-outline-secondary"
@@ -227,7 +156,6 @@ const mapStateToProps = (state: IState, props: IConfigureVulnMapProps): IConfigu
 };
 
 const mapDispatchToProps = {
-    submitSystem,
     fetchSystem,
     selectFeature,
     selectFeatureUndo,
