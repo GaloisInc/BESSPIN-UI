@@ -1,4 +1,4 @@
-import { ISelectionType, ValidateResult, ISystemEntry, SelectionMode, ISystemConfigInput } from '../state/system';
+import { ISelectionType, ValidateResult, IFeatureModelRecord, SelectionMode, ISystemConfigInput } from '../state/feature-model';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { IWorkflow } from '../state/workflow';
 
@@ -74,7 +74,7 @@ const mapSelectionMode = (mode: string): SelectionMode => {
     }
 };
 
-export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEntry => {
+export const mapConfiguratorToSystem = (configurator: IConfigurator): IFeatureModelRecord => {
     return {
         uid: configurator.uid,
         createdAt: configurator.date,
@@ -94,7 +94,7 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
     };
 };
 
-export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): ISystemEntry => {
+export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): IFeatureModelRecord => {
     return {
         uid: configurator.uid,
         source: configurator.source,

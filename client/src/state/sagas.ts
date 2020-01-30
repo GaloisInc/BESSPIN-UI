@@ -43,7 +43,7 @@ import {
     submitValidateConfigurationSuccess,
     submitValidateConfigurationFailure,
     updateSystemConfigInput as updateSystemConfigInputAction,
-} from './system';
+} from './feature-model';
 
 import {
     fetchWorkflowsError,

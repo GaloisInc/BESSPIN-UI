@@ -7,7 +7,7 @@ import {
 
 import {
     INewSystemConfigInput,
-} from '../state/system';
+} from '../state/feature-model';
 
 const trapHTMLError = (response: AxiosResponse) => {
     if (response.headers && response.headers['Content-type'] === 'text/html') {

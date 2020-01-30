@@ -1,6 +1,6 @@
 import {
     SystemActionTypes,
-    ISystemEntry,
+    IFeatureModelRecord,
     selectFeature,
     SelectionMode,
     reducerSystem,
@@ -11,7 +11,7 @@ import {
     fetchSystemConfigInputFailure,
     fetchSystemConfigInputSuccess,
     INewSystemConfigInput,
-} from './system';
+} from './feature-model';
 
 import { DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
@@ -20,7 +20,7 @@ const genDate = (): string => {
     return new Date(Date.now()).toISOString();
 };
 
-const DEFAULT_SYSTEM: ISystemEntry = {
+const DEFAULT_SYSTEM: IFeatureModelRecord = {
     configs: [],
     conftree: DEFAULT_FEATURE_MODEL,
     uid: 'TEST-HASH',
@@ -101,7 +101,7 @@ describe('systems', () => {
                             }
                         },
                     });
-                    expect(reducerSystem(testState, selectFeature(TEST_UID)).system.configs).toEqual(
+                    expect(reducerSystem(testState, selectFeature(TEST_UID)).featureModelRecord.configs).toEqual(
                         [ { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false } ],
                     );
                 });

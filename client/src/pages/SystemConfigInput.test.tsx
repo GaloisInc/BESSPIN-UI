@@ -9,7 +9,7 @@ import {
 import {
   submitSystemConfigInput,
   updateSystemConfigInput,
-} from '../state/system';
+} from '../state/feature-model';
 
 const genSystemConfigInputWrapper = () => {
     const props: ISystemConfigInputProps = {

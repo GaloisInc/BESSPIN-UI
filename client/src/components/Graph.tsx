@@ -3,8 +3,8 @@ import React, { useRef, useEffect, RefObject } from 'react';
 import '../style/Graph.scss';
 
 import {
-    ISystemEntry,
-} from '../state/system';
+    IFeatureModelRecord,
+} from '../state/feature-model';
 
 import {
     graphFeatureModel,
@@ -12,7 +12,7 @@ import {
 } from './graph-helper';
 
 export interface IGraphProps {
-    system: ISystemEntry;
+    system: IFeatureModelRecord;
     selectFeature: SelectFeatureCallback;
 }
 
