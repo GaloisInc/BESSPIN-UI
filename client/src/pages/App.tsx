@@ -11,6 +11,7 @@ import { ConnectedConfigureCpu } from './ConfigureCpu';
 import { ConnectedOverview } from './Overview';
 import { ConnectedSystemConfigInput } from './SystemConfigInput';
 import { ConnectedVulnClassSelector } from './VulnClassSelector';
+import { ConnectedConfigureVuln } from './ConfigureVuln';
 
 import { store } from '../state';
 
@@ -31,6 +32,7 @@ export const App: React.FC = () => {
                     <Route path='/test-configuration/create/:workflowId/:testId'>
                         <ConnectedVulnClassSelector isEditMode = {true} />
                     </Route>
+                    <Route path='/test-configuration/configure-vulnerability/:workflowId/:testId/:vulnClass' component={ConnectedConfigureVuln} />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>
             </Router>
