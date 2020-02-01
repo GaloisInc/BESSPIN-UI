@@ -35,18 +35,16 @@ def upgrade():
     op.create_index(op.f('ix_versionedResourceTypes_label'), 'versionedResourceTypes', ['label'], unique=True)
     op.create_table(
         'vulnerabilityConfigurationInputs',
+        sa.Column('vulnConfigId', sa.Integer(), nullable=False),
         sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
         sa.Column('createdAt', sa.DateTime(), nullable=False),
         sa.Column('updatedAt', sa.DateTime(), nullable=True),
-        sa.Column('vulnConfigId', sa.Integer(), nullable=False),
-        sa.Column(
-            'configuration',
-            sa.TEXT(),
-            nullable=True,
-            comment='text to contain actual configuration (NOTE: this may change to point to a file upload path if the text is too large)'
-        ),
+        sa.Column('workflowId', sa.Integer(), nullable=False),
+        sa.Column('vulnClass', sa.String(32), nullable=False),
+        sa.Column('featureModelUid', sa.String(64), nullable=False),
         sa.PrimaryKeyConstraint('vulnConfigId'),
-        sa.UniqueConstraint('configuration')
+        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='SET NULL'),
+        sa.ForeignKeyConstraint(['featureModelUid'], ['feature_models.uid']),
     )
     op.create_table(
         'jobs',
