@@ -162,13 +162,14 @@ def upgrade():
     op.create_table(
         'feature_models',
         sa.Column('uid', sa.Text(), unique=True),
-        sa.Column('filename', sa.Text()),
-        sa.Column('source', sa.Text()),
-        sa.Column('conftree', sa.Text()),
-        sa.Column('date', sa.DateTime(), nullable=False, default=datetime.utcnow),
-        sa.Column('hash', sa.Text()),
-        sa.Column('configs', sa.Text()),
-        sa.Column('last_update', sa.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow),
+        sa.Column('filename', sa.Text(), nullable=True),
+        sa.Column('source', sa.Text(), nullable=True),
+        sa.Column('conftree', sa.Text(), nullable=True),
+        sa.Column('hash', sa.Text(), nullable=True),
+        sa.Column('configs', sa.Text(), nullable=True),
+        sa.Column('createdAt', sa.DateTime(), nullable=False),
+        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+        sa.Column('updatedAt', sa.DateTime(), nullable=True)
     )
     # ### end Alembic commands ###
 
