@@ -8,6 +8,7 @@ import subprocess
 from shlex import quote
 import tempfile
 import copy
+from flask import current_app
 
 # pylint: disable=invalid-name
 
@@ -31,6 +32,7 @@ CMD_CONFIGURATION_ALGO = (
 )
 USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
 
+
 def load_json(filename):
     """
     Loads a file as json
@@ -38,6 +40,7 @@ def load_json(filename):
     with open(filename) as f:
         page = f.read()
     return json.loads(page)
+
 
 def convert_model_to_json(source):
     """
@@ -70,7 +73,9 @@ def convert_model_to_json(source):
         raise RuntimeError('unsupported json format version {}'.format(version))
     return json_feat_model
 
+
 CMD_PRINT_CLAFER = "besspin-feature-model-tool print-clafer {}"
+
 
 def fmjson_to_clafer(source):
     """
@@ -81,7 +86,6 @@ def fmjson_to_clafer(source):
         return source.decode('utf8')
 
     filename = os.path.join(WORK_DIR, 'generated_file')
-    filename_cfr = filename + '.cfr'
     filename_json = filename + '.fm.json'
     with open(filename_json, 'wb') as f:
         f.write(source)
@@ -100,6 +104,7 @@ def fmjson_to_clafer(source):
 
     return cp.stdout.decode('utf8')
 
+
 def selected_features_to_constraints(feats, even_not_validated=False):
     """
     Convert a set of selected features to constraints.
@@ -109,6 +114,8 @@ def selected_features_to_constraints(feats, even_not_validated=False):
     :return: str
     """
     res = ""
+
+    current_app.logger.debug(f'feats({feats})')
 
     for sel in reversed(feats):
         sel_str = sel['other']
@@ -120,6 +127,7 @@ def selected_features_to_constraints(feats, even_not_validated=False):
             elif mode == 'rejected':
                 res += "[ !" + sel_str + " ]" + "\n"
     return res
+
 
 def combine_featmodel_cfgs(model, cfgs):
     """
@@ -157,7 +165,6 @@ def combine_featmodel_cfgs(model, cfgs):
     return cfg_model
 
 
-
 def _find_answer_in_configuration_algo_output(out):
     split_out = out.split('\n')
     logging.debug('SPLIY: ' + str(split_out))
@@ -168,6 +175,7 @@ def _find_answer_in_configuration_algo_output(out):
         except ValueError:
             continue
 
+
 def validate_all_features(feature_selection):
     """
     Validates all the features selected.
@@ -177,6 +185,7 @@ def validate_all_features(feature_selection):
         e['validated'] = True
 
     return feat_sel
+
 
 def configuration_algo(cfr_source, feature_selection):
     """

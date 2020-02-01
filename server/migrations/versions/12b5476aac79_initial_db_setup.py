@@ -1,13 +1,13 @@
-"""initial db setup
+""" initial db setup
 
 Revision ID: 12b5476aac79
-Revises: 
+Revises:
 Create Date: 2019-12-20 14:29:39.176940
 
 """
+
 from alembic import op
 import sqlalchemy as sa
-from datetime import datetime
 
 from app.models import JobStatus, VersionedResourceType
 
@@ -175,7 +175,7 @@ def upgrade():
     # add our initial resource types and job statuses
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    
+
     VersionedResourceType.load_allowed_types(session)
     JobStatus.load_allowed_statuses(session)
 

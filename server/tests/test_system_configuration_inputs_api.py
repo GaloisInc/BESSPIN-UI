@@ -71,7 +71,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
 
         db.session.add(wf)
         db.session.commit()
-        
+
         self.assertIsNotNone(wf.workflowId)
         self.assertIsNone(wf.updatedAt)
 
