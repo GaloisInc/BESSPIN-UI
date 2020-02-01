@@ -29,6 +29,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     HOST = os.getenv('HOST', '0.0.0.0')
+    VALID_VULN_CLASSES = ('BOF', 'PPAC', 'NUMERIC', 'IEX', 'RESOURCE_MANAGEMENT')
 
 
 class ProductionConfig(Config):
