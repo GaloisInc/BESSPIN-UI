@@ -5,14 +5,10 @@ from flask import (
     json,
     request,
 )
+from uuid import uuid4
+from hashlib import sha3_256
 
 from . import api
-from app.lib.database import (
-    list_models_from_db,
-    insert_feature_model_db,
-    update_configs_db,
-    retrieve_model_from_db_by_uid
-)
 from app.lib.configurator_shim import (
     convert_model_to_json,
     fmjson_to_clafer,
@@ -21,6 +17,10 @@ from app.lib.configurator_shim import (
     validate_all_features,
     configuration_algo,
 )
+from app.models import (
+    db,
+    FeatureModel,
+)
 
 
 # API Models
@@ -28,8 +28,8 @@ from app.lib.configurator_shim import (
 overviewModel = api.model('Overview', {
     'uid': fields.String,
     'filename': fields.String,
-    'date': fields.String,
-    'last_update': fields.String,
+    'createdAt': fields.String,
+    'updatedAt': fields.String,
     'nb_features_selected': fields.Integer
 })
 
@@ -75,12 +75,41 @@ configuratorModel = api.model('Configurator', {
     'uid': fields.String,
     'source': fields.String,
     'filename': fields.String,
-    'date': fields.String,
+    'createdAt': fields.String,
     'conftree': fields.Nested(featureModel),
     'configs': fields.List(fields.Nested(configModel)),
     'configs_pp': fields.String,
     'configured_feature_model': fields.Raw
 })
+
+configuratorModelFetch = api.model('ConfiguratorFetch', {
+    'model_uid': fields.String(
+        required=True,
+        description='UID for the configurator you are requesting'
+    )
+})
+
+
+def record_to_info(record):
+    """
+    Transform a record into a dict with useful information
+    """
+    current_app.logger.debug(record)
+    return {
+        'filename': record.filename,
+        'createdAt': record.createdAt.strftime('%Y-%m-%d %H:%M:%S'),
+        'uid': record.uid,
+        'updatedAt': record.updatedAt.strftime('%Y-%m-%d %H:%M:%S') if record.updatedAt else '',
+        'nb_features_selected': len(decode_json_db(record.configs)),
+    }
+
+
+def encode_json_db(content) -> str:
+    return json.dumps(content)
+
+
+def decode_json_db(content) -> dict:
+    return json.loads(content)
 
 
 # API Routes
@@ -89,29 +118,24 @@ configuratorModel = api.model('Configurator', {
 class OverviewModels(Resource):
     @api.marshal_with(overviewModel)
     def get(self):
-        """
-        list db models
-        """
-        current_app.logger.debug('list_db_models')
-        models = list_models_from_db()
-        return models
+        current_app.logger.debug(f'fetching all feature models')
+        return FeatureModel.query.all()
 
 
 @api.route('/configurator/upload/<path:subpath>')
 class ConfiguratorUpload(Resource):
+    @api.doc('upload a clafer or fm.json file to create a feature model')
     def post(self, subpath):
-        """
-        upload a clafer or fm.json file
-        """
-
         name, cfg_type = subpath.split('/')
+
         current_app.logger.debug('name is: ' + name + ', cfg_type is: ' + cfg_type)
+
         if name.endswith('.cfr'):
             try:
                 json_feat_model = convert_model_to_json(request.data)
                 cfr_feature_model_source = request.data.decode('utf8')
             except RuntimeError as err:
-                current_app.logger.info(str(err))
+                current_app.logger.error(str(err))
                 return abort(500, str(err))
         elif name.endswith('.fm.json'):
             try:
@@ -120,17 +144,39 @@ class ConfiguratorUpload(Resource):
                     fmjson_to_clafer(request.data)
                 )
             except RuntimeError as err:
-                current_app.logger.info(str(err))
+                current_app.logger.error(str(err))
                 return abort(500, str(err))
         else:
             return abort(400, 'Unsupported file extension for filename: ' + name)
-        uid = insert_feature_model_db(name, cfr_feature_model_source, json_feat_model)
-        return {
-            'uid': uid,
-            'tree': json_feat_model,
-            'configured_feature_model': combine_featmodel_cfgs(json_feat_model, []),
-            'source': cfr_feature_model_source,
-        }
+
+        uid = str(uuid4())
+        the_hash = str(sha3_256(bytes(cfr_feature_model_source, 'utf8')))
+
+        current_app.logger.debug(f'going to store {name} with uid({uid}) and hash({the_hash})')
+
+        try:
+            new_feature_model = FeatureModel(
+                uid=uid,
+                label=name,
+                filename=name,
+                hash=the_hash,
+                conftree=encode_json_db(json_feat_model),
+                configs=encode_json_db([]),
+            )
+            db.session.add(new_feature_model)
+            db.session.commit()
+
+            current_app.logger.debug(f'created feature model ({new_feature_model})')
+
+            return {
+                'uid': new_feature_model.uid,
+                'tree': json_feat_model,
+                'configured_feature_model': combine_featmodel_cfgs(json_feat_model, []),
+                'source': cfr_feature_model_source,
+            }
+        except Exception as err:
+            current_app.logger.error(err)
+            return abort(500, str(err))
 
 
 @api.route('/configurator/configure/')
@@ -142,17 +188,18 @@ class ConfiguratorConfigure(Resource):
         current_app.logger.debug('configure')
 
         data = json.loads(request.data)
-        # filename = data['filename']
         uid = data['uid']
         feature_selection = data['feature_selection']
-        entry = retrieve_model_from_db_by_uid(uid)
-        file_content = entry.get('source', '')
-        conftree = entry['conftree']
-        old_feature_selection = entry['configs']
+
+        entry = FeatureModel.query.filter_by(uid=uid).first()
+
+        file_content = entry.source
+        conftree = decode_json_db(entry.conftree)
+        old_feature_selection = decode_json_db(entry.configs)
 
         try:
             is_selection_valid = configuration_algo(
-                entry['source'],
+                entry.source,
                 feature_selection,
             )
         except RuntimeError as err:
@@ -164,20 +211,29 @@ class ConfiguratorConfigure(Resource):
             if is_selection_valid
             else old_feature_selection
         )
-        update_configs_db(uid, validated_features)
-        constraints = selected_features_to_constraints(validated_features)
+        enc_cfgs = encode_json_db(validated_features)
 
-        # pylint: disable=line-too-long
-        # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
-        # app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
-        # d = load_json(filename_json)
+        try:
+            entry.configs = enc_cfgs
+            current_app.logger.debug(f'updating feature_model({entry})')
+            db.session.commit()
 
-        return {
-            'server_source': file_content,
-            'server_constraints': constraints,
-            'validated_features': validated_features,
-            'configured_feature_model': combine_featmodel_cfgs(conftree, validated_features)
-        }
+            constraints = selected_features_to_constraints(validated_features)
+
+            # pylint: disable=line-too-long
+            # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
+            # app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
+            # d = load_json(filename_json)
+
+            return {
+                'server_source': file_content,
+                'server_constraints': constraints,
+                'validated_features': validated_features,
+                'configured_feature_model': combine_featmodel_cfgs(conftree, validated_features)
+            }
+        except Exception as err:
+            current_app.logger.error(err)
+            return abort(500, str(err))
 
 
 @api.route('/configurator/list_db_models/')
@@ -187,30 +243,38 @@ class ConfiguratorList(Resource):
         list db models
         """
         current_app.logger.debug('list_db_models')
-        models = list_models_from_db()
-        return models
+
+        entries = FeatureModel.query.all()
+        list_models = [record_to_info(record) for record in entries]
+        list_models.reverse()
+
+        return list_models
 
 
 @api.route('/configurator/load_from_db/')
 class ConfiguratorModel(Resource):
     @api.marshal_with(configuratorModel)
+    @api.expect(configuratorModelFetch)
     def post(self):
-        """
-        Load model from db
-        """
         current_app.logger.debug('load from db')
 
         data = json.loads(request.data)
         uid = data['model_uid']
-        current_app.logger.debug('load from db with uid: ' + uid)
-        model = retrieve_model_from_db_by_uid(uid)
-        configs = model['configs']
-        conftree = model['conftree']
+
+        current_app.logger.debug(f'going to fetch feature_model({uid})')
+
+        model = FeatureModel.query.filter_by(uid=uid).first()
+
+        current_app.logger.debug(f'fetched feature_model({model})')
+
+        configs = decode_json_db(model.configs)
+        conftree = decode_json_db(model.conftree)
+
         return {
-            'uid': model['uid'],
-            'source': model['source'],
-            'filename': model['filename'],
-            'date': model['date'],
+            'uid': model.uid,
+            'source': model.source,
+            'filename': model.filename,
+            'createdAt': model.createdAt,
             'conftree': conftree,
             'configs': configs,
             'configs_pp': selected_features_to_constraints(configs),

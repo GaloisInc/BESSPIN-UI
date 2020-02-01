@@ -481,7 +481,7 @@ function refresh_db_models() {
 
             $.each(JSON.parse(xhr.responseText), function(key, value) {
                 var opt = document.createElement('option');
-                opt.text = value['filename'] + ' ' + value['date'];
+                opt.text = value['filename'] + ' ' + value['createdAt'];
                 opt.value = value['uid'];
                 db_models_options.add(opt, null);
             });

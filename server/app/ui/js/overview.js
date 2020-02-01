@@ -43,8 +43,8 @@ function refresh_db_models() {
                 cell_number.innerHTML = make_hyperlink("configurator", value['uid'], String(row_index));
                 cell_filename.innerHTML = value['filename'];
                 cell_uid.innerHTML = value['uid'];
-                cell_start.innerHTML = value['date'];
-                cell_last.innerHTML = value['last_update'];
+                cell_start.innerHTML = value['createdAt'];
+                cell_last.innerHTML = value['updatedAt'] || '';
                 cell_nb_features_selected.innerHTML = value['nb_features_selected'];
                 cell_configure.innerHTML = make_button("configurator", 'cpu' + '/' + value['uid'], "CONF");
                 cell_testconfig.innerHTML = make_button("configurator", 'test' + '/' + value['uid'], "TEST");
