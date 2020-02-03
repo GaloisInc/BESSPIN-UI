@@ -1,5 +1,6 @@
 import {
     SystemActionTypes,
+    IFeatureModelConfigState,
     IFeatureModelRecord,
     selectFeature,
     SelectionMode,
@@ -45,7 +46,7 @@ const DEFAULT_SYSTEM_CONFIG_INPUT: ISystemConfigInput = {
 };
 
 const DEFAULT_SYSTEM_STATE = {
-    system: DEFAULT_SYSTEM,
+    featureModelRecord: DEFAULT_SYSTEM,
 };
 
 const generateTestSystemConfigInputState = (overrides: Partial<ISystemConfigInput> = {}): ISystemConfigInputState => {
@@ -57,7 +58,7 @@ const generateTestSystemConfigInputState = (overrides: Partial<ISystemConfigInpu
     };
 };
 
-const generateTestState = (overrides = {}) => {
+const generateTestState = (overrides = {}): IFeatureModelConfigState => {
     return {
         ...DEFAULT_SYSTEM_STATE,
         ...overrides,
@@ -92,7 +93,7 @@ describe('systems', () => {
 
                 it('should add the selection', () => {
                     const testState = generateTestState({
-                        system: {
+                        featureModelRecord: {
                             ...DEFAULT_SYSTEM,
                             configs: [],
                             conftree: {
@@ -111,7 +112,7 @@ describe('systems', () => {
 
                 it('should add the selection', () => {
                     const testState = generateTestState({
-                        system: {
+                        featureModelRecord: {
                             ...DEFAULT_SYSTEM,
                             configs: [
                                 { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
@@ -123,7 +124,7 @@ describe('systems', () => {
 
                     const reducedState = reducerSystem(testState, selectFeature(TEST_UID));
                     expect(reducedState).toEqual({
-                        system: {
+                        featureModelRecord: {
                             ...DEFAULT_SYSTEM,
                             configs: [
                                 { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
