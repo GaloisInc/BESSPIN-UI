@@ -15,7 +15,7 @@ function make_button(path, subpath, cont){
 
 function refresh_db_models() {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/api/overview/get_db_models');
+    xhr.open('GET', '/api/feature-model/overview');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onload = function() {
         if (xhr.status === 200) {

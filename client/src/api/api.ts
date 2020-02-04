@@ -30,7 +30,7 @@ const DEFAULT_HEADERS = {
 
 export const fetchConfigurator = async (systemUid: string) => {
     return axios.request({
-        url: '/api/configurator/load_from_db/',
+        url: '/api/feature-model/fetch-by-uid',
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
@@ -47,7 +47,7 @@ export const fetchConfigurator = async (systemUid: string) => {
 
 export const fetchConfigurators = async () => {
     return axios.request({
-        url: '/api/configurator/list_db_models/',
+        url: '/api/feature-model',
         method: 'get',
         headers: {
             ...DEFAULT_HEADERS,
@@ -71,7 +71,7 @@ export const fetchWorkflows = async () => {
 
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
     return axios.request({
-        url: `/api/configurator/upload/${systemName}/global_var_cpu`,
+        url: `/api/feature-model/upload/${systemName}/global_var_cpu`,
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
@@ -138,7 +138,7 @@ export const submitWorkflow = async (workflowLabel: string) => {
 
 export const submitValidateConfiguration = async (uid: string, selectedNodes: IConfig[]) => {
     return axios.request({
-        url: '/api/configurator/configure/',
+        url: '/api/feature-model/configure',
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,

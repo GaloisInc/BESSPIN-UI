@@ -1,10 +1,12 @@
-from flask import current_app
 from flask_restplus import Resource, fields
 from flask import (
     abort,
+    current_app,
     json,
+    jsonify,
     request,
 )
+from werkzeug.http import HTTP_STATUS_CODES
 from uuid import uuid4
 from hashlib import sha3_256
 
@@ -22,6 +24,15 @@ from app.models import (
     FeatureModel,
 )
 
+"""
+    Since all the routes here are for managing our Feature Models
+    we set up a root namespace that is the prefix for all routes
+    defined below
+"""
+ns = api.namespace(
+    'feature-model',
+    description='Operations on feature models'
+)
 
 # API Models
 
@@ -112,19 +123,31 @@ def decode_json_db(content) -> dict:
     return json.loads(content)
 
 
+def missing_record_response(message=None):
+    payload = {'error': HTTP_STATUS_CODES.get(404, 'Unknown error')}
+    if message:
+        payload['message'] = message
+    response = jsonify(payload)
+    response.status_code = 404
+    return abort(response)
+
+
 # API Routes
 
-@api.route('/overview/get_db_models/')
+@ns.route('/overview')
 class OverviewModels(Resource):
-    @api.marshal_with(overviewModel)
+    @ns.doc('fetch all feature-models for display on the version 1 "overview" page')
+    @ns.marshal_with(overviewModel)
     def get(self):
         current_app.logger.debug(f'fetching all feature models')
         return FeatureModel.query.all()
 
 
-@api.route('/configurator/upload/<path:subpath>')
+@ns.route('/upload/<path:subpath>')
 class ConfiguratorUpload(Resource):
-    @api.doc('upload a clafer or fm.json file to create a feature model')
+    @ns.doc('upload a clafer or fm.json file to create a feature model')
+    # TODO: add @ns.marshal_with(...)
+    # TODO: add @ns.expect(...)
     def post(self, subpath):
         name, cfg_type = subpath.split('/')
 
@@ -179,8 +202,11 @@ class ConfiguratorUpload(Resource):
             return abort(500, str(err))
 
 
-@api.route('/configurator/configure/')
+@ns.route('/configure')
 class ConfiguratorConfigure(Resource):
+    @ns.doc('validates a given configuration for a feature-model')
+    # TODO: add @ns.marshal_with(...)
+    # TODO: add @ns.expect(...)
     def post(self):
         """
         process feature configurations
@@ -236,13 +262,15 @@ class ConfiguratorConfigure(Resource):
             return abort(500, str(err))
 
 
-@api.route('/configurator/list_db_models/')
+@ns.route('')
 class ConfiguratorList(Resource):
+    @ns.doc('fetch list of feature models ordered by creation date in descending order')
+    # TODO: add @ns.marshal_with(...)
     def get(self):
         """
         list db models
         """
-        current_app.logger.debug('list_db_models')
+        current_app.logger.debug('fetching feature-models sorted by creation-date in descending order')
 
         entries = FeatureModel.query.all()
         list_models = [record_to_info(record) for record in entries]
@@ -251,10 +279,11 @@ class ConfiguratorList(Resource):
         return list_models
 
 
-@api.route('/configurator/load_from_db/')
+@ns.route('/fetch-by-uid')
 class ConfiguratorModel(Resource):
-    @api.marshal_with(configuratorModel)
-    @api.expect(configuratorModelFetch)
+    @ns.doc('fetch a single feature-model by the UID passed in the POST body')
+    @ns.marshal_with(configuratorModel)
+    @ns.expect(configuratorModelFetch)
     def post(self):
         current_app.logger.debug('load from db')
 
@@ -263,7 +292,11 @@ class ConfiguratorModel(Resource):
 
         current_app.logger.debug(f'going to fetch feature_model({uid})')
 
-        model = FeatureModel.query.filter_by(uid=uid).first()
+        model = FeatureModel.query.get(uid)
+
+        if model is None:
+            current_app.logger.debug(f'Unable to find feature-model{uid}')
+            return missing_record_response('Unable to find given feature-model')
 
         current_app.logger.debug(f'fetched feature_model({model})')
 

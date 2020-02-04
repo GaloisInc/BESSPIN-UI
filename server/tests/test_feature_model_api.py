@@ -44,7 +44,7 @@ class TestFeatureModelApi(unittest.TestCase):
         upload_file = load_test_fmjson()
 
         response = self.client.post(
-            f'/api/configurator/upload/{test_filename}/',
+            f'/api/feature-model/upload/{test_filename}/',
             headers=DEAFAULT_HEADERS,
             data=upload_file
         )
@@ -69,7 +69,7 @@ class TestFeatureModelApi(unittest.TestCase):
         db.session.commit()
 
         response = self.client.post(
-            '/api/configurator/load_from_db/',
+            '/api/feature-model/fetch-by-uid',
             headers=DEAFAULT_HEADERS,
             data=json.dumps(dict(model_uid=test_uid))
         )
@@ -102,12 +102,12 @@ class TestFeatureModelApi(unittest.TestCase):
         db.session.commit()
 
         response = self.client.get(
-            '/api/configurator/list_db_models/',
+            '/api/feature-model',
             headers=DEAFAULT_HEADERS
         )
 
         self.assertEqual(response.status_code, 200, msg='expected request for all models to succeed')
-        
+
         models = json.loads(response.data)
 
         self.assertEqual(len(models), 2, msg='expected to get two models')
