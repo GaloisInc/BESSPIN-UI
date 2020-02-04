@@ -27,17 +27,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://0.0.0.0:3784/configurator/upload/piccolo.fm.json/foo",
-					"protocol": "http",
+					"raw": "{{apiHost}}/api/feature-model/upload/piccolo.fm.json/foo",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{apiHost}}"
 					],
-					"port": "3784",
 					"path": [
-						"configurator",
+						"api",
+						"feature-model",
 						"upload",
 						"piccolo.fm.json",
 						"foo"
@@ -47,7 +43,7 @@
 			"response": []
 		},
 		{
-			"name": "Get all feature configurations",
+			"name": "Get all feature models",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -63,15 +59,13 @@
 					}
 				],
 				"url": {
-					"raw": "{{apiHost}}/api/configurator/list_db_models/",
+					"raw": "{{apiHost}}/api/feature-model",
 					"host": [
 						"{{apiHost}}"
 					],
 					"path": [
 						"api",
-						"configurator",
-						"list_db_models",
-						""
+						"feature-model"
 					]
 				}
 			},
@@ -198,26 +192,6 @@
 					"path": [
 						"api",
 						"feature-extraction-job"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET configurator db models",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{apiHost}}/api/configurator/list_db_models/",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"configurator",
-						"list_db_models",
-						""
 					]
 				}
 			},
