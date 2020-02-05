@@ -69,7 +69,7 @@ export const VulnClassSelector: React.FC<IVulnClassSelectorProps> = ( {
         setCheckboxes(newArray);
     };
 
-    const getChoice = () => {
+    const getVulnChoice = () => {
         const i = checkboxes.reduce(((acc,b) => b? (acc+1) : acc), 0);
         return i;
     };
@@ -127,7 +127,7 @@ export const VulnClassSelector: React.FC<IVulnClassSelectorProps> = ( {
 
                     <Form.Group as={Row}>
                         <Col sm={{ span: 10, offset: 2 }}>
-                            <Button href= { `/api/configure-test/${workflowId}/` + getChoice() } >
+                            <Button href= { `/test-configuration/configure-vulnerability/${workflowId}/${getVulnChoice()}/${testId}` } >
                                 Configure
                             </Button>
                         </Col>
