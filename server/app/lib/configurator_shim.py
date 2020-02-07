@@ -2,7 +2,6 @@
 Interface to feature model configurator
 """
 import os
-import logging
 import json
 import subprocess
 from shlex import quote
@@ -11,8 +10,6 @@ import copy
 from flask import current_app
 
 # pylint: disable=invalid-name
-
-logging.basicConfig(level=logging.DEBUG)
 
 if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
     WORK_DIR_OBJ = tempfile.TemporaryDirectory()
@@ -63,13 +60,13 @@ def convert_model_to_json(source):
     else:
         cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
 
-    logging.debug('Clafer stdout: ' + str(cp.stdout))
-    logging.debug('Clafer stderr: ' + str(cp.stderr))
+    current_app.logger.debug('Clafer stdout: ' + str(cp.stdout))
+    current_app.logger.debug('Clafer stderr: ' + str(cp.stderr))
     json_feat_model = load_json(filename_json)
 
     version = json_feat_model['version']['base']
     if version not in FORMAT_VERSIONS:
-        logging.debug(version)
+        current_app.logger.debug(version)
         raise RuntimeError('unsupported json format version {}'.format(version))
     return json_feat_model
 
@@ -96,8 +93,8 @@ def fmjson_to_clafer(source):
         "cd ~/tool-suite &&" +
         "nix-shell --run " + cmd],
         capture_output=True)
-    logging.debug('besspin-feature-model-tool stdout: ' + str(cp.stdout))
-    logging.debug('besspin-feature-model-tool stderr: ' + str(cp.stderr))
+    current_app.logger.debug('besspin-feature-model-tool stdout: ' + str(cp.stdout))
+    current_app.logger.debug('besspin-feature-model-tool stderr: ' + str(cp.stderr))
 
     if cp.stderr:
         raise RuntimeError(cp.stderr)
@@ -114,8 +111,6 @@ def selected_features_to_constraints(feats, even_not_validated=False):
     :return: str
     """
     res = ""
-
-    current_app.logger.debug(f'feats({feats})')
 
     for sel in reversed(feats):
         sel_str = sel['other']
@@ -167,7 +162,7 @@ def combine_featmodel_cfgs(model, cfgs):
 
 def _find_answer_in_configuration_algo_output(out):
     split_out = out.split('\n')
-    logging.debug('SPLIY: ' + str(split_out))
+    current_app.logger.debug('SPLIY: ' + str(split_out))
     for line in reversed(split_out):
         try:
             i = int(line.strip())
@@ -205,14 +200,14 @@ def configuration_algo(cfr_source, feature_selection):
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.fm.json'
 
-    logging.debug('CFR source: ' + cfr_source)
+    current_app.logger.debug('CFR source: ' + cfr_source)
     with open(filename_cfr, 'w') as f:
         f.write(cfr_source)
         f.write(selected_features_to_constraints(feature_selection, even_not_validated=True))
 
     with open(filename_cfr, 'r') as f:
         text = f.read()
-        logging.debug('CFR+CONSTRAINTS: \n' + text)
+        current_app.logger.debug('CFR+CONSTRAINTS: \n' + text)
 
     cmd = quote(CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json))
     cp = subprocess.run([
@@ -220,8 +215,8 @@ def configuration_algo(cfr_source, feature_selection):
         "cd ~/tool-suite &&" +
         "nix-shell --run " + cmd],
         capture_output=True)
-    logging.debug('configuration algo stdout: ' + str(cp.stdout))
-    logging.debug('configuration algo stderr: ' + str(cp.stderr))
+    current_app.logger.debug('configuration algo stdout: ' + str(cp.stdout))
+    current_app.logger.debug('configuration algo stderr: ' + str(cp.stderr))
 
     if cp.stderr:
         raise RuntimeError(cp.stderr)
