@@ -141,19 +141,22 @@ def missing_record_response(message=None):
 
 @ns.route('/overview')
 class OverviewModels(Resource):
-    @ns.doc('fetch all feature-models for display on the version 1 "overview" page')
     @ns.marshal_with(overviewModel)
     def get(self):
-        current_app.logger.debug(f'fetching all feature models')
+        """
+            fetch all feature-models for display on the version 1 "overview" page
+        """
         return FeatureModel.query.all()
 
 
 @ns.route('/upload/<path:subpath>')
 class ConfiguratorUpload(Resource):
-    @ns.doc('upload a clafer or fm.json file to create a feature model')
     # NOTE: we cannot use "expect" here because we are using file-upload
     @ns.marshal_with(uploadResponse)
     def post(self, subpath):
+        """
+        upload a clafer or fm.json file to create a feature model
+        """
         name, cfg_type = subpath.split('/')
 
         current_app.logger.debug('name is: ' + name + ', cfg_type is: ' + cfg_type)
@@ -205,12 +208,11 @@ class ConfiguratorUpload(Resource):
 
 @ns.route('/configure')
 class ConfiguratorConfigure(Resource):
-    @ns.doc('validates a given configuration for a feature-model')
     @ns.marshal_with(configureResponse)
     @ns.expect(configureParams)
     def post(self):
         """
-        process feature configurations
+        validates a given configuration for a feature-model
         """
         current_app.logger.debug('configure')
 
@@ -255,11 +257,10 @@ class ConfiguratorConfigure(Resource):
 
 @ns.route('')
 class ConfiguratorList(Resource):
-    @ns.doc('fetch list of feature models ordered by creation date in descending order')
     @ns.marshal_with(featureModelSwagger)
     def get(self):
         """
-        list db models
+        fetch list of feature models ordered by creation date in descending order
         """
         current_app.logger.debug('fetching feature-models sorted by creation-date in descending order')
 
@@ -272,10 +273,12 @@ class ConfiguratorList(Resource):
 
 @ns.route('/fetch-by-uid')
 class ConfiguratorModel(Resource):
-    @ns.doc('fetch a single feature-model by the UID passed in the POST body')
     @ns.marshal_with(featureModelSwagger)
     @ns.expect(featureModelFetch)
     def post(self):
+        """
+        fetch a single feature-model by the UID passed in the POST body
+        """
         current_app.logger.debug('load from db')
 
         data = json.loads(request.data)

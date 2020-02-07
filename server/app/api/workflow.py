@@ -60,6 +60,9 @@ class WorkflowListApi(Resource):
     # hidden by not including them in the definition
     @ns.marshal_list_with(existing_workflow)
     def get(self):
+        """
+            fetch all the current workflows
+        """
         current_app.logger.debug(f'fetching all workflows')
         return Workflow.query.all()
 
@@ -68,6 +71,9 @@ class WorkflowListApi(Resource):
     @ns.marshal_with(existing_workflow)
     @ns.expect(new_workflow, validate=True)
     def post(self):
+        """
+            create a new workflow
+        """
         workflow_input = json.loads(request.data)
         new_workflow = Workflow(
             label=workflow_input['label'],
@@ -80,10 +86,12 @@ class WorkflowListApi(Resource):
 
 @ns.route('/<int:workflowId>')
 class WorkflowApi(Resource):
-    @ns.doc('update a workflow')
     @ns.marshal_list_with(existing_workflow)
     @ns.expect(new_workflow, validate=True)
     def put(self, workflowId):
+        """
+            update a workflow
+        """
         current_app.logger.debug(f'updating workflowId: {workflowId}')
         workflow_input = json.loads(request.data)
         existing_workflow = Workflow.query.get_or_404(workflowId)
@@ -99,8 +107,10 @@ class WorkflowApi(Resource):
 
         return existing_workflow
 
-    @ns.doc('fetch a workflow')
     @ns.marshal_with(existing_workflow)
     def get(self, workflowId):
+        """
+            fetch a workflow for the given workflowId
+        """
         current_app.logger.debug(f'fetching workflowId: {workflowId}')
         return Workflow.query.get_or_404(workflowId)
