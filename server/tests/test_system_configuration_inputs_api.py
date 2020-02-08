@@ -1,9 +1,7 @@
-import unittest
+from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
 import json
 from datetime import datetime
-import logging
 
-from app import create_app
 from app.models import (
     db,
     SystemConfigurationInput,
@@ -11,21 +9,7 @@ from app.models import (
 )
 
 
-class TestSystemConfigurationInputApi(unittest.TestCase):
-
-    def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        self.app.logger.setLevel(logging.CRITICAL)
-        db.create_all()
-        self.client = self.app.test_client()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-        self.app.logger.setLevel(logging.NOTSET)
+class TestSystemConfigurationInputApi(BesspinTestApiBaseClass):
 
     def test_create(self):
         r = SystemConfigurationInput().query.all()
@@ -34,7 +18,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
         label = f'created system-config-input {datetime.utcnow()}'
         response = self.client.post(
             '/api/system-config-input',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
                 nixConfigFilename='foo.nix',
@@ -52,7 +36,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
 
         response = self.client.post(
             '/api/system-config-input',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict()))
 
         self.assertEqual(response.status_code, 400)
@@ -88,7 +72,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
         filename = f'new-{sc.nixConfigFilename}'
         response = self.client.put(
             f'/api/system-config-input/{sc.sysConfigId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 sysConfigId=sc.sysConfigId,
                 label=label,
@@ -119,7 +103,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
 
         response = self.client.put(
             f'/api/system-config-input/{sc.sysConfigId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict()))
 
         self.assertEqual(response.status_code, 400)
@@ -148,7 +132,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
 
         response = self.client.put(
             f'/api/system-config-input/{sc.sysConfigId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 sysConfigId=sc.sysConfigId,
                 label=sc.label + '-NEW',

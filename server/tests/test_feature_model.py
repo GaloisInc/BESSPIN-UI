@@ -1,37 +1,17 @@
-import os
-import unittest
+from helpers import BesspinTestBaseClass
 import json
 from uuid import uuid4
 
-from app import create_app
 from app.models import (
     db,
     FeatureModel,
 )
+from helpers import (
+    load_test_fmjson,
+)
 
 
-FM_JSON_TEST_FILEPATH = os.path.join(os.path.dirname(__file__), '../app/ui/examples/flute.fm.json')
-
-
-def load_test_fmjson() -> str:
-    data = ''
-    with open(FM_JSON_TEST_FILEPATH, 'r') as myfile:
-        data = ''.join(myfile.readlines())
-    return data
-
-
-class FeatureModelTestCase(unittest.TestCase):
-
-    def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
+class FeatureModelTestCase(BesspinTestBaseClass):
 
     def test_minimum_viable_record(self):
         feature_model = FeatureModel(uid=str(uuid4()))

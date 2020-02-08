@@ -1,9 +1,7 @@
-import unittest
+from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
 import json
 from datetime import datetime
-import logging
 
-from app import create_app
 from app.models import (
     db,
     JobStatus,
@@ -12,31 +10,25 @@ from app.models import (
 )
 
 
-class TestReportJobApi(unittest.TestCase):
+class TestReportJobApi(BesspinTestApiBaseClass):
 
     def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        self.app.logger.setLevel(logging.CRITICAL)
-        db.create_all()
+        super(TestReportJobApi, self).setUp()
+
         JobStatus.load_allowed_statuses()
+
         s = SystemConfigurationInput(
             label='test sysconfig',
             nixConfigFilename='foo.nix',
             nixConfig='{ my: nix: config }',
             workflowId=1)
+
         db.session.add(s)
         db.session.commit()
-        s = SystemConfigurationInput().query.filter_by(label='test sysconfig').first()
-        self.sysConfigId = s.sysConfigId
-        self.client = self.app.test_client()
 
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-        self.app.logger.setLevel(logging.NOTSET)
+        s = SystemConfigurationInput().query.filter_by(label='test sysconfig').first()
+
+        self.sysConfigId = s.sysConfigId
 
     def test_create(self):
         r = ReportJob().query.all()
@@ -47,7 +39,7 @@ class TestReportJobApi(unittest.TestCase):
         label = f'created report job {datetime.utcnow()}'
         response = self.client.post(
             '/api/report-job',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
                 jobStatus=dict(statusId=t.statusId, label=t.label),
@@ -65,7 +57,7 @@ class TestReportJobApi(unittest.TestCase):
         label = f'created report job {datetime.utcnow()}'
         response = self.client.post(
             '/api/report-job',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
                 sysConfigId=self.sysConfigId
@@ -89,7 +81,7 @@ class TestReportJobApi(unittest.TestCase):
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
             f'/api/report-job/{r.jobId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 jobId=r.jobId,
                 label=label,
@@ -113,7 +105,7 @@ class TestReportJobApi(unittest.TestCase):
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
             f'/api/report-job/{r.jobId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 jobId=r.jobId,
                 label=label,
