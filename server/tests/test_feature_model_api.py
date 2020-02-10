@@ -1,40 +1,13 @@
-import unittest
-import logging
-import os
+from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS, load_test_fmjson
 import json
 
-from app import create_app
 from app.models import (
     db,
     FeatureModel,
 )
 
-DEAFAULT_HEADERS = {'Content-type': 'application/json'}
-FM_JSON_TEST_FILEPATH = os.path.join(os.path.dirname(__file__), '../app/ui/examples/flute.fm.json')
 
-
-def load_test_fmjson() -> str:
-    data = ''
-    with open(FM_JSON_TEST_FILEPATH, 'r') as myfile:
-        data = ''.join(myfile.readlines())
-    return data
-
-
-class TestFeatureModelApi(unittest.TestCase):
-
-    def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        self.app.logger.setLevel(logging.CRITICAL)
-        db.create_all()
-        self.client = self.app.test_client()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-        self.app.logger.setLevel(logging.NOTSET)
+class TestFeatureModelApi(BesspinTestApiBaseClass):
 
     def test_upload_with_fmjson(self):
         r = FeatureModel().query.all()
@@ -45,12 +18,18 @@ class TestFeatureModelApi(unittest.TestCase):
 
         response = self.client.post(
             f'/api/feature-model/upload/{test_filename}/',
-            headers=DEAFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             data=upload_file
         )
 
         self.assertEqual(response.status_code, 200, msg='expected post of new feature model to succeed')
+
+        response_json = json.loads(response.data)
+        self.assertIsNotNone(response_json)
+        self.assertEqual(response_json['tree'], json.loads(upload_file))
+
         created_feat_model = FeatureModel.query.filter_by(filename=test_filename).first()
+
         self.assertIsNotNone(created_feat_model.conftree, msg='expected "conftree" to be populated')
         self.assertEqual(created_feat_model.filename, test_filename, msg='expected filename used in request URL to be stored in the feature model')
 
@@ -62,7 +41,8 @@ class TestFeatureModelApi(unittest.TestCase):
         fm = FeatureModel(
             uid=test_uid,
             filename=test_filename,
-            conftree=test_conftree
+            source=test_conftree,
+            conftree=json.loads(test_conftree)
         )
 
         db.session.add(fm)
@@ -70,7 +50,7 @@ class TestFeatureModelApi(unittest.TestCase):
 
         response = self.client.post(
             '/api/feature-model/fetch-by-uid',
-            headers=DEAFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(model_uid=test_uid))
         )
 
@@ -80,21 +60,24 @@ class TestFeatureModelApi(unittest.TestCase):
 
         self.assertEqual(json_response['uid'], test_uid, msg='expected to get the uid in the return')
         self.assertIsNotNone(json_response['conftree'], msg='expected "conftree" to be populated')
+        self.assertDictEqual(json_response['conftree'], json.loads(test_conftree), msg='expected "conftree" to be fully hydrated')
 
     def test_list_models(self):
-        test_conftree = load_test_fmjson()
+        test_fmjson = load_test_fmjson()
         test_uid_1 = 'TEST-UID-1'
         test_uid_2 = 'TEST-UID-2'
 
         fm1 = FeatureModel(
             uid=test_uid_1,
             filename='test1.fm.json',
-            conftree=test_conftree
+            source=test_fmjson,
+            conftree=json.loads(test_fmjson)
         )
         fm2 = FeatureModel(
             uid=test_uid_2,
             filename='test2.fm.json',
-            conftree=test_conftree
+            source=test_fmjson,
+            conftree=json.loads(test_fmjson)
         )
 
         db.session.add(fm1)
@@ -103,7 +86,7 @@ class TestFeatureModelApi(unittest.TestCase):
 
         response = self.client.get(
             '/api/feature-model',
-            headers=DEAFAULT_HEADERS
+            headers=DEFAULT_HEADERS
         )
 
         self.assertEqual(response.status_code, 200, msg='expected request for all models to succeed')

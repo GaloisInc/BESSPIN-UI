@@ -1,6 +1,5 @@
-import unittest
+from helpers import BesspinTestBaseClass
 
-from app import create_app
 from app.models import (
     db,
     JobStatus,
@@ -9,19 +8,11 @@ from app.models import (
 )
 
 
-class ReportJobsModelTestCase(unittest.TestCase):
+class ReportJobsModelTestCase(BesspinTestBaseClass):
 
     def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
+        super(ReportJobsModelTestCase, self).setUp()
         JobStatus.load_allowed_statuses()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
 
     def test_basic_functionality(self):
 

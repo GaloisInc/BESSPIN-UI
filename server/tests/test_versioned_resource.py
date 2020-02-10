@@ -1,7 +1,6 @@
-import unittest
+from helpers import BesspinTestBaseClass
 from sqlalchemy.exc import IntegrityError
 
-from app import create_app
 from app.models import (
     db,
     VersionedResource,
@@ -9,19 +8,11 @@ from app.models import (
 )
 
 
-class VersionedResourceModelTestCase(unittest.TestCase):
+class VersionedResourceModelTestCase(BesspinTestBaseClass):
 
     def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
+        super(VersionedResourceModelTestCase, self).setUp()
         VersionedResourceType.load_allowed_types()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
 
     def test_resource_types_loaded(self):
         types = VersionedResourceType().query.all()
