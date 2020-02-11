@@ -36,6 +36,8 @@ import { IFeatureModel } from '../components/graph-helper';
 
 import '../style/ConfigureVuln.scss';
 
+
+
 export interface IConfigureVulnProps {
     dataRequested: boolean;
     fetchSystem: typeof fetchSystem;

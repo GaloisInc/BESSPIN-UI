@@ -82,6 +82,21 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
     .then(extractData);
 }
 
+export const submitVulnerabilityClass = async (workflowId: string, vulnClass: string) => {
+    return axios.request({
+        url: `/api/feature-model/create-test/${workflowId}/${vulnClass}`,
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        /* eslint-disable camelcase */
+        data: {},
+        /* eslint-enable camelcase */
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
 export const fetchSystemConfigurationInput = async (sysConfigId: number) => {
     return axios.request({
         url: `/api/system-config-input/${sysConfigId}`,
@@ -117,7 +132,7 @@ export const updateSystemConfigurationInput = async (config: IServersideSysConfi
         data: config,
     })
     .then(trapHTMLError)
-    .then(extractData); 
+    .then(extractData);
 }
 
 export const submitWorkflow = async (workflowLabel: string) => {

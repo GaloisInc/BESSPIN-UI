@@ -1,3 +1,4 @@
+import os
 from flask_restplus import Resource, fields
 from flask import (
     abort,
@@ -182,6 +183,60 @@ class ConfiguratorUpload(Resource):
 
         uid = str(uuid4())
         the_hash = str(sha3_256(bytes(cfr_feature_model_source, 'utf8')))
+
+        current_app.logger.debug(f'going to store {name} with uid({uid}) and hash({the_hash})')
+
+        try:
+            new_feature_model = FeatureModel(
+                uid=uid,
+                label=name,
+                filename=name,
+                hash=the_hash,
+                conftree=json_feat_model,
+                configs=[],
+                source=cfr_feature_model_source
+            )
+            db.session.add(new_feature_model)
+            db.session.commit()
+
+            current_app.logger.debug(f'created feature model ({new_feature_model})')
+
+            return new_feature_model
+        except Exception as err:
+            current_app.logger.error(err)
+            return abort(500, str(err))
+
+@ns.route('/create-test/<path:subpath>')
+class ConfiguratorUpload(Resource):
+    # NOTE: we cannot use "expect" here because we are using file-upload
+    @ns.marshal_with(uploadResponse)
+    def post(self, subpath):
+        """
+        create a test-configuration, given a vulnerability class
+        """
+        workflowId = subpath.split('/')
+
+        current_app.logger.debug('workflowId: ' + str(workflowId[0]))
+
+        name = '../ui/examples/bof.cfr'
+
+        os.chdir(os.path.dirname(__file__))
+        current_app.logger.debug('FGSDFDSF: ' + os.getcwd())
+        if name.endswith('.cfr'):
+            try:
+                with open(name, 'r') as f:
+                    cfr_feature_model_source = f.read()
+                cfr_source_bytes = cfr_feature_model_source.encode('utf8')
+                json_feat_model = convert_model_to_json(cfr_source_bytes)
+                # cfr_feature_model_source = request.data.decode('utf8')
+            except RuntimeError as err:
+                current_app.logger.error(str(err))
+                return abort(500, str(err))
+        else:
+            return abort(400, 'Unsupported file extension for filename: ' + name)
+
+        uid = str(uuid4())
+        the_hash = str(sha3_256(cfr_source_bytes))
 
         current_app.logger.debug(f'going to store {name} with uid({uid}) and hash({the_hash})')
 
