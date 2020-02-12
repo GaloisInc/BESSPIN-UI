@@ -11,6 +11,7 @@ from werkzeug.http import HTTP_STATUS_CODES
 from uuid import uuid4
 from hashlib import sha3_256
 
+from config import config
 from . import api
 from app.lib.configurator_shim import (
     convert_model_to_json,
@@ -22,6 +23,7 @@ from app.models import (
     db,
     FeatureModel,
 )
+
 
 """
     Since all the routes here are for managing our Feature Models
@@ -109,7 +111,7 @@ configureParams = api.model('FeatureModelConfigureParams', {
 
 configureResponse = api.model('FeatureModelConfigureResponse', {
     'server_source': fields.String(description=source_desc),
-    'server_constraints': fields.List(fields.Nested(featureModelConstraint), description=constraints_desc),
+    'server_constraints': fields.String(description=constraints_desc),
     'validated_features': fields.Raw,  # TODO: what is this really supposed to be?
     'configured_feature_model': fields.Raw(description=configured_feat_model_desc)
 })
@@ -214,12 +216,15 @@ class ConfiguratorUpload(Resource):
         """
         create a test-configuration, given a vulnerability class
         """
-        workflowId = subpath.split('/')
+        workflowId, vuln_name = subpath.split('/')
 
-        current_app.logger.debug('workflowId: ' + str(workflowId[0]))
+        current_app.logger.debug('workflowId: ' + workflowId + 'Vuln: ' + vuln_name)
 
-        name = '../ui/examples/bof.cfr'
+        if vuln_name not in config['default'].VALID_VULN_CLASSES.keys():
+            return abort(500, "Invalid vulnerability class name: " + vuln_name)
 
+        name = os.path.join('../../testgen_fm/', config['default'].VALID_VULN_CLASSES[vuln_name])
+        current_app.logger.debug('sdfsdfsdfs: '+ name)
         os.chdir(os.path.dirname(__file__))
         current_app.logger.debug('FGSDFDSF: ' + os.getcwd())
         if name.endswith('.cfr'):
@@ -248,7 +253,7 @@ class ConfiguratorUpload(Resource):
                 hash=the_hash,
                 conftree=json_feat_model,
                 configs=[],
-                source=cfr_feature_model_source
+                source=cfr_source_bytes
             )
             db.session.add(new_feature_model)
             db.session.commit()
