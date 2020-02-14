@@ -36,7 +36,7 @@ export const App: React.FC = () => {
                     */}
                     <Route path='/test-configuration/create/:workflowId' component={ConnectedVulnerability}>
                     </Route>
-                    <Route path='/test-configuration/create/:workflowId/:testId' component={ConnectedVulnerability}>
+                    <Route path='/test-configuration/edit/:workflowId/:testId' component={ConnectedVulnerability}>
                     </Route>
                     {/*
                     <Route path='/test-configuration/configure-vulnerability/:workflowId/:testId/:vulnClass' component={ConnectedConfigureVuln} />

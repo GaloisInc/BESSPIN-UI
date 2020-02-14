@@ -32,7 +32,7 @@ class Config(object):
     VALID_VULN_CLASSES = {
         'BOF': 'BufferErrors.cfr',
         'PPAC': 'PPAC.cfr',
-        'NUMERIC': 'NumericErrors.cfr ',
+        'NUMERIC': 'NumericErrors.cfr',
         'IEX': 'InformationLeakage.cfr',
         'RESOURCE_MANAGEMENT': 'ResourceManagement.cfr',
     }

@@ -225,9 +225,8 @@ class ConfiguratorUpload(Resource):
             return abort(500, "Invalid vulnerability class name: " + vuln_name)
 
         name = os.path.join('../../testgen_fm/', config['default'].VALID_VULN_CLASSES[vuln_name])
-        current_app.logger.debug('sdfsdfsdfs: '+ name)
-        os.chdir(os.path.dirname(__file__))
-        current_app.logger.debug('FGSDFDSF: ' + os.getcwd())
+        # os.chdir(os.path.dirname(__file__))
+
         if name.endswith('.cfr'):
             try:
                 with open(name, 'r') as f:
@@ -356,10 +355,11 @@ class ConfiguratorModel(Resource):
 
         current_app.logger.debug(f'going to fetch feature_model({uid})')
 
-        model = FeatureModel.query.get(uid)
+        vuln_conf_input = VulnerabilityConfigurationInput.query.get(uid)
+        model = FeatureModel.query.get(vuln_conf_input.featureModelUid)
 
         if model is None:
-            current_app.logger.debug(f'Unable to find feature-model{uid}')
+            current_app.logger.debug(f'Unable to find feature-model({uid})')
             return missing_record_response('Unable to find given feature-model')
 
         return model
