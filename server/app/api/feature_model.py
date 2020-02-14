@@ -22,6 +22,7 @@ from app.lib.configurator_shim import (
 from app.models import (
     db,
     FeatureModel,
+    VulnerabilityConfigurationInput
 )
 
 
@@ -259,6 +260,15 @@ class ConfiguratorUpload(Resource):
             db.session.commit()
 
             current_app.logger.debug(f'created feature model ({new_feature_model})')
+
+            new_vuln_cfg_input = VulnerabilityConfigurationInput(
+                label='',
+                workflowId=workflowId,
+                vulnClass=vuln_name,
+                featureModelUid=uid
+            )
+            db.session.add(new_vuln_cfg_input)
+            db.session.commit()
 
             return new_feature_model
         except Exception as err:

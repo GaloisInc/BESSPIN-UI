@@ -48,12 +48,22 @@ export interface IServersideSysConfigInput {
     nixConfig: string;
 }
 
+export interface IServersideVulnConfigInput {
+    vulnConfigId: number;
+    workflowId: number;
+    label: string;
+    createdAt: string;
+    updatedAt?: string;
+    featureModel: string;
+}
+
 export interface IServersideWorkflow {
     workflowId: number;
     label: string;
     createdAt: string;
     updatedAt?: string;
     systemConfigurationInput?: IServersideSysConfigInput;
+    vulnerabilityConfigurationInput?: IServersideVulnConfigInput;
     testConfigId?: number;
     reportId?: number;
 }
@@ -172,8 +182,8 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
         ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
             systemConfig: { id: workflow.systemConfigurationInput.sysConfigId, },
         } : null),
-        ...(workflow.testConfigId ? {
-            testConfig: { id: workflow.testConfigId, },
+        ...(workflow.vulnerabilityConfigurationInput && workflow.vulnerabilityConfigurationInput.vulnConfigId ? {
+            testConfig: { id: workflow.vulnerabilityConfigurationInput.vulnConfigId, },
         } : null),
         ...(workflow.reportId ? {
             report: { id: workflow.reportId, },

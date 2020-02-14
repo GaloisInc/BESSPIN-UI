@@ -5,6 +5,7 @@ from flask_restplus import Resource, fields
 from . import api
 from app.models import db, Workflow
 from app.api.system_configuration_inputs import existing_sysconfig_input
+from app.api.vulnerability_configuration_inputs import existing_vulnconfig_input
 
 """
     Since all the routes here are for managing our Workflow
@@ -46,7 +47,11 @@ existing_workflow = api.inherit(
         'systemConfigurationInput': fields.Nested(
             existing_sysconfig_input,
             required=False,
-            description='SystemConfigurationInput associated with this workflow'
+            description='SystemConfigurationInput associated with this workflow'),
+        'vulnerabilityConfigurationInput': fields.Nested(
+            existing_vulnconfig_input,
+            required=False,
+            description='VulnerabilityConfigurationInput associated with this workflow'
         )
     }
 )
