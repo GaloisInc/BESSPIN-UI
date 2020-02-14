@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
 
 import {
     Container,
@@ -6,14 +8,33 @@ import {
 
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-monokai';
-import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-plain_text'
 
 import { Header } from '../components/Header';
+import { IState } from '../state';
+
+import {
+    getError,
+    getIsLoading,
+} from '../state/ui';
 
 export interface IReport {
     id: number;
     log: string;
 }
+
+interface IStateFromProps {
+    errors: string[];
+    isLoading: boolean;
+    report?: IReport;
+    workflowId?: number;
+}
+
+interface IDispatchFromProps {
+    dispatch: Dispatch;
+}
+
+export type IReportProps  = IStateFromProps & IDispatchFromProps;
 
 /**
  * NOTE: the data (below) is hard-coded sample data to help prototype
@@ -1301,7 +1322,23 @@ const sampleReport: IReport = {
     `
 };
 
-export const Report: React.FC = () => {
+const scrollToLine = (ace: AceEditor, line: number): void => {
+    if (ace.editor) {
+        ace.editor.resize(true);
+        ace.editor.scrollToLine(line, true, true, () => {});
+    }
+};
+
+export const Report: React.FC<IReportProps> = () => {
+    const aceRef = useRef<AceEditor>(null);
+
+    useEffect(() => {
+        const editor  = aceRef?.current;
+        if (editor) {
+            const logLineCount = sampleReport.log.split(/\n/).length;
+            scrollToLine(editor, logLineCount);
+        }
+    });
 
     return (
         <Container className='Report'>
@@ -1309,8 +1346,10 @@ export const Report: React.FC = () => {
             <h1>Report</h1>
             <Container>
                 <AceEditor
+                    ref={aceRef}
                     className='report-viewer'
                     mode='plain_text'
+                    cursorStart={10}
                     name='report-log'
                     readOnly={ true }
                     setOptions={{ useWorker: false }}
@@ -1322,3 +1361,40 @@ export const Report: React.FC = () => {
         </Container>
     );
 };
+
+interface IMatchParams {
+    workflowId?: string;
+}
+
+interface IOwnProps {
+    match: { params: IMatchParams; path: string; };
+}
+
+const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps => {
+    const {
+        match: {
+            params,
+        },
+    } = ownProps;
+    const workflowId = params.workflowId && Number(params.workflowId);
+    const error = getError(state);
+    const isLoading = getIsLoading(state);
+
+    const errors = error ? [error] : [];
+
+    if (!workflowId) errors.push('Missing or invalid workflow in the URL');
+
+    return {
+        errors,
+        isLoading,
+        ...( workflowId ? { workflowId } : null ),
+    };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
+    dispatch,
+});
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+export const ConnectedReport = connector(Report);
