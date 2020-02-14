@@ -5,9 +5,18 @@ export interface IWorkflowError {
   message: string;
 }
 
+export enum JobStatus {
+    Running = 'Running',
+    Complete = 'Complete',
+};
+
 export interface IConfig {
   id: number;
   error?: IWorkflowError;
+}
+
+export interface IReportConfig extends IConfig {
+  status: JobStatus;
 }
 
 export interface IWorkflow {
@@ -18,7 +27,7 @@ export interface IWorkflow {
     updatedAt?: string;
     systemConfig?: IConfig;
     testConfig?: IConfig;
-    report?: IConfig;
+    report?: IReportConfig;
 }
 
 export interface IWorkflowMap extends Object {

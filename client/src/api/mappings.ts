@@ -1,6 +1,6 @@
 import { ISelectionType, ValidateResult, ISystemEntry, SelectionMode, ISystemConfigInput } from '../state/system';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
-import { IWorkflow } from '../state/workflow';
+import { IWorkflow, JobStatus } from '../state/workflow';
 
 
 export interface IConfig {
@@ -56,6 +56,10 @@ export interface IServersideWorkflow {
     systemConfigurationInput?: IServersideSysConfigInput;
     testConfigId?: number;
     reportId?: number;
+    report?: {
+        id: number;
+        status: JobStatus;
+    }
 }
 
 /* eslint-enable camelcase */
@@ -175,8 +179,8 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
         ...(workflow.testConfigId ? {
             testConfig: { id: workflow.testConfigId, },
         } : null),
-        ...(workflow.reportId ? {
-            report: { id: workflow.reportId, },
+        ...(workflow.reportId && workflow.report?.status ? {
+            report: { id: workflow.reportId, status: workflow.report.status },
         } : null),
     };
 };

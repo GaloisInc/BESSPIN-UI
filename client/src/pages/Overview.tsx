@@ -14,6 +14,7 @@ import {
   Table,
   Popover,
   PopoverProps,
+  Spinner,
 } from 'react-bootstrap';
 
 import { IState } from '../state';
@@ -25,6 +26,8 @@ import {
   fetchWorkflows,
   IWorkflow,
   IConfig,
+  IReportConfig,
+  JobStatus,
 } from '../state/workflow';
 
 import {
@@ -49,27 +52,34 @@ interface IWorkflowProps {
   config?: IConfig;
   disabled?: boolean;
 }
+interface IReportProps {
+  workflowId?: number;
+  config?: IReportConfig;
+  disabled?: boolean;
+}
 
 interface IViewCreateButtonProps extends IWorkflowProps {
   label: string;
   path: string;
   noNextStep?: boolean;
+  inProgress?: boolean;
 }
 
 interface IWorkflowButton {
   url: string;
   label: string;
-  variant?: 'success' | 'danger';
+  variant?: 'success' | 'warning' | 'danger';
   disabled?: boolean;
   noNextStep?: boolean;
   tooltipError?: string;
+  inProgress?: boolean;
 }
 
 interface IErrorTooltipProps extends PopoverProps {
   label: string;
 }
 
-const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabled, noNextStep, tooltipError }) => {
+const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabled, noNextStep, tooltipError, inProgress }) => {
   const renderTooltip: React.FC<IErrorTooltipProps> = (props) => (<Popover {...props} content={true}>{props.label}</Popover>);
   const variantType = (disabled ? 'secondary' : variant) || 'primary';
 
@@ -79,13 +89,14 @@ const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabl
     </OverlayTrigger>
     : (
       <Button disabled={disabled} variant={variantType} href={url}>
+        { inProgress && <Spinner as='span' animation='grow' size='sm' role='status' aria-hidden='true' /> }
         {label}
         {!(disabled || noNextStep ) && variantType !== 'primary' && <FontAwesomeIcon icon={faChevronRight} />
         }</Button>
     );
 };
 
-const CreateEditButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config, path, disabled, label, noNextStep }) => {
+const CreateEditButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config, path, disabled, label, noNextStep, inProgress }) => {
   if (config) {
     return <WorkflowButton
       disabled={disabled}
@@ -93,7 +104,8 @@ const CreateEditButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config
       noNextStep={noNextStep}
       tooltipError={config.error && config.error.message}
       url={`${path}/edit/${workflowId}/${config.id}`}
-      variant='success'
+      variant={ inProgress ? 'warning' : 'success' }
+      inProgress={inProgress}
     />;
   } else {
     return <WorkflowButton label={label} url={`${path}/create/${workflowId}`} disabled={disabled} noNextStep={noNextStep} />;
@@ -108,9 +120,11 @@ const TestConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabl
   return <CreateEditButton label='Test' path='/test-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
 };
 
-const ReportButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  const label = config && !config.error ? 'View' : 'Build/Run';
-  return <CreateEditButton label={label} path='/report' workflowId={workflowId} config={config} disabled={disabled} noNextStep={true} />;
+const ReportButton: React.FC<IReportProps> = ({ workflowId, config, disabled }) => {
+  const inProgress = config && config.status === JobStatus.Running;
+  const label = !config ? 'Build/Run' :
+                inProgress ? 'Running' : 'View';
+  return <WorkflowButton label={label} url={`/report/${workflowId}`} tooltipError={config && config.error && config.error.message} disabled={disabled} noNextStep={true} inProgress={inProgress} />;
 };
 
 const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
