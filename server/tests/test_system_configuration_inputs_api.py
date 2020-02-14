@@ -28,6 +28,15 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
         self.app.logger.setLevel(logging.NOTSET)
 
     def test_create(self):
+        test_workflow_label = 'TEST WORKFLOW'
+        wf = Workflow(label=test_workflow_label)
+
+        db.session.add(wf)
+        db.session.commit()
+
+        self.assertIsNotNone(wf.workflowId)
+        self.assertIsNone(wf.updatedAt)
+
         r = SystemConfigurationInput().query.all()
         self.assertListEqual(r, [])
 
@@ -45,6 +54,9 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         created_sysconfig = SystemConfigurationInput.query.filter_by(label=label).first()
         self.assertIsNotNone(created_sysconfig)
+
+        updated_wf = Workflow.query.filter_by(workflowId=wf.workflowId).first()
+        self.assertIsNotNone(updated_wf.updatedAt)
 
     def test_create_with_missing_data(self):
         r = SystemConfigurationInput().query.all()
@@ -71,7 +83,7 @@ class TestSystemConfigurationInputApi(unittest.TestCase):
 
         db.session.add(wf)
         db.session.commit()
-        
+
         self.assertIsNotNone(wf.workflowId)
         self.assertIsNone(wf.updatedAt)
 

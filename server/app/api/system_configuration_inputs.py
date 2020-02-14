@@ -4,7 +4,7 @@ from flask_restplus import Resource, fields
 from datetime import datetime
 
 from . import api
-from app.models import db, SystemConfigurationInput
+from app.models import db, SystemConfigurationInput, Workflow
 
 """
     Since all the routes here are for managing our SystemConfigurationInput
@@ -73,13 +73,16 @@ class SystemConfigurationInputListApi(Resource):
     @ns.expect(new_sysconfig_input, validate=True)
     def post(self):
         sysconfig_input = json.loads(request.data)
+        workflow = Workflow.query.get_or_404(sysconfig_input['workflowId'])
         new_sysconfig_input = SystemConfigurationInput(
             label=sysconfig_input['label'],
             nixConfigFilename=sysconfig_input['nixConfigFilename'],
             nixConfig=sysconfig_input['nixConfig'],
-            workflowId=sysconfig_input['workflowId']
+            workflowId=workflow.workflowId
         )
+        workflow.updatedAt = datetime.now()
         db.session.add(new_sysconfig_input)
+        db.session.add(workflow)
         db.session.commit()
 
         return new_sysconfig_input
