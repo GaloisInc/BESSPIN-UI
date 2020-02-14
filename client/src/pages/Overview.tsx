@@ -81,7 +81,9 @@ interface IErrorTooltipProps extends PopoverProps {
 
 const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabled, noNextStep, tooltipError, inProgress }) => {
   const renderTooltip: React.FC<IErrorTooltipProps> = (props) => (<Popover {...props} content={true}>{props.label}</Popover>);
-  const variantType = (disabled ? 'secondary' : variant) || 'primary';
+  const variantType = inProgress ? 'warning' :
+                        disabled ? 'secondary' :
+                         variant ? variant : 'primary';
 
   return tooltipError ?
     <OverlayTrigger placement='bottom' overlay={(props: IErrorTooltipProps) => renderTooltip({ ...props, label: tooltipError })}>
