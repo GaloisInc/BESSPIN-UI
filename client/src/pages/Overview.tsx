@@ -231,15 +231,127 @@ export const Overview: React.FC<IOverviewProps> = ({
   );
 };
 
+/**
+ * NOTE: this data (below) is hard-coded sample data to help prototype the UI
+ *       for fleshing out the "report" screen
+ */
+const DAY_MS = 1000 * 60 * 60 * 24;
+const testWorkflows: IWorkflow[] = [
+  // Fully complete, successful run
+  {
+    id: 1,
+    label: 'PPAC on Chisel P2',
+    createdAt: (new Date(Date.now() - 2*DAY_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - 1*DAY_MS)).toISOString(),
+    systemConfig: {
+      id: 1,
+    },
+    testConfig: {
+      id: 1,
+    },
+    report: {
+      id: 1,
+      status: JobStatus.Complete,
+    },
+  },
+  // Fully set up, failed run
+  {
+    id: 2,
+    label: 'PPAC on Bluespec P1',
+    createdAt: (new Date(Date.now() - 2*DAY_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - 1*DAY_MS)).toISOString(),
+    systemConfig: {
+      id: 2,
+    },
+    testConfig: {
+      id: 2,
+    },
+    report: {
+      id: 2,
+      status: JobStatus.Complete,
+      error: {
+        id: 1,
+        message: 'Error running PPAC tests',
+      },
+    },
+  },
+  // Fully set up, run in progress
+  {
+    id: 3,
+    label: 'IEX on Chisel P1',
+    createdAt: (new Date(Date.now() - 1.5*DAY_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - .75*DAY_MS)).toISOString(),
+    systemConfig: {
+      id: 3,
+    },
+    testConfig: {
+      id: 3,
+    },
+    report: {
+      id: 3,
+      status: JobStatus.Running,
+    },
+  },
+  // Fully set up, ready to run
+  {
+    id: 4,
+    label: 'BOF on Bluespec P2',
+    createdAt: (new Date(Date.now() - .85*DAY_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - .75*DAY_MS)).toISOString(),
+    systemConfig: {
+      id: 4,
+    },
+    testConfig: {
+      id: 4,
+    },
+  },
+  // Test set up, with error
+  {
+    id: 5,
+    label: 'BOF on Bluespec P2',
+    createdAt: (new Date(Date.now() - .75*DAY_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - .55*DAY_MS)).toISOString(),
+    systemConfig: {
+      id: 5,
+    },
+    testConfig: {
+      id: 5,
+      error: {
+        id: 2,
+        message: 'Invalid vulnerability configuration',
+      }
+    },
+  },
+  // System set up, with error
+  {
+    id: 6,
+    label: 'Resource Management on Bluespec P2',
+    createdAt: (new Date(Date.now() - .6*DAY_MS)).toISOString(),
+    updatedAt: (new Date(Date.now() - .5*DAY_MS)).toISOString(),
+    systemConfig: {
+      id: 6,
+      error: {
+        id: 3,
+        message: 'Invalid nix configuration',
+      },
+    },
+  },
+  // Brand new,
+  {
+    id: 7,
+    label: 'Numeric Errors on Chisel P1',
+    createdAt: (new Date(Date.now())).toISOString(),
+  },
+]
 const mapStateToProps = (state: IState): IStateFromProps => {
   const workflowsById = getWorkflowsMap(state);
   const workflowIds = getWorkflowIds(state);
-  const workflows = workflowIds.map((id) => workflowsById[id]);
+  // const workflows = workflowIds.map((id) => workflowsById[id]);
 
   return {
     dataRequested: getDataRequested(state),
     isLoading: getIsLoading(state),
-    workflows,
+    workflows: testWorkflows,
   };
 };
 
