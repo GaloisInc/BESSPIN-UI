@@ -225,7 +225,7 @@ class ConfiguratorUpload(Resource):
             return abort(500, "Invalid vulnerability class name: " + vuln_name)
 
         name = os.path.join('../../testgen_fm/', config['default'].VALID_VULN_CLASSES[vuln_name])
-        # os.chdir(os.path.dirname(__file__))
+        os.chdir(os.path.dirname(__file__))
 
         if name.endswith('.cfr'):
             try:
