@@ -23,8 +23,10 @@ def setup_app():
 @test_cli_bp.cli.command('unit')
 @click.option('--coverage/--no-coverage', default=False,
               help='Run tests under code coverage.')
+@click.option('--failfast/--no-failfast', default=False,
+              help='Stop the test run on the first error or failure.')
 @click.argument('test_names', nargs=-1)
-def test(coverage, test_names):
+def test(coverage, failfast, test_names):
     # setup_app()
     """Run the unit tests."""
     if coverage and not os.environ.get('FLASK_COVERAGE'):
@@ -37,7 +39,7 @@ def test(coverage, test_names):
         tests = unittest.TestLoader().loadTestsFromNames(test_names)
     else:
         tests = unittest.TestLoader().discover('tests')
-    unittest.TextTestRunner(verbosity=2).run(tests)
+    unittest.TextTestRunner(verbosity=2, failfast=failfast).run(tests)
     if COV:
         COV.stop()
         COV.save()

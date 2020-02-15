@@ -2,7 +2,7 @@
 import {
     SelectionMode,
     ISelectionType,
-} from './system';
+} from './feature-model';
 
 
 export type ISelection = ISelectionType[]

@@ -1,4 +1,4 @@
-import { ISelectionType, ValidateResult, ISystemEntry, SelectionMode, ISystemConfigInput } from '../state/system';
+import { ISelectionType, ValidateResult, IFeatureModelRecord, SelectionMode, ISystemConfigInput } from '../state/feature-model';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { IWorkflow } from '../state/workflow';
 
@@ -48,12 +48,22 @@ export interface IServersideSysConfigInput {
     nixConfig: string;
 }
 
+export interface IServersideVulnConfigInput {
+    vulnConfigId: number;
+    workflowId: number;
+    label: string;
+    createdAt: string;
+    updatedAt?: string;
+    featureModel: string;
+}
+
 export interface IServersideWorkflow {
     workflowId: number;
     label: string;
     createdAt: string;
     updatedAt?: string;
     systemConfigurationInput?: IServersideSysConfigInput;
+    vulnerabilityConfigurationInput?: IServersideVulnConfigInput;
     testConfigId?: number;
     reportId?: number;
 }
@@ -74,7 +84,7 @@ const mapSelectionMode = (mode: string): SelectionMode => {
     }
 };
 
-export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEntry => {
+export const mapConfiguratorToSystem = (configurator: IConfigurator): IFeatureModelRecord => {
     return {
         uid: configurator.uid,
         createdAt: configurator.date,
@@ -94,7 +104,7 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): ISystemEnt
     };
 };
 
-export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): ISystemEntry => {
+export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): IFeatureModelRecord => {
     return {
         uid: configurator.uid,
         source: configurator.source,
@@ -172,8 +182,8 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
         ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
             systemConfig: { id: workflow.systemConfigurationInput.sysConfigId, },
         } : null),
-        ...(workflow.testConfigId ? {
-            testConfig: { id: workflow.testConfigId, },
+        ...(workflow.vulnerabilityConfigurationInput && workflow.vulnerabilityConfigurationInput.vulnConfigId ? {
+            testConfig: { id: workflow.vulnerabilityConfigurationInput.vulnConfigId, },
         } : null),
         ...(workflow.reportId ? {
             report: { id: workflow.reportId, },

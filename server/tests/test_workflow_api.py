@@ -1,30 +1,14 @@
-import unittest
+from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
 import json
 from datetime import datetime
-import logging
 
-from app import create_app
 from app.models import (
     db,
     Workflow,
 )
 
 
-class TestWorkflowApi(unittest.TestCase):
-
-    def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        self.app.logger.setLevel(logging.CRITICAL)
-        db.create_all()
-        self.client = self.app.test_client()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-        self.app.logger.setLevel(logging.NOTSET)
+class TestWorkflowApi(BesspinTestApiBaseClass):
 
     def test_create(self):
         r = Workflow().query.all()
@@ -33,7 +17,7 @@ class TestWorkflowApi(unittest.TestCase):
         label = f'created workflow {datetime.utcnow()}'
         response = self.client.post(
             '/api/workflow',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
             )))
@@ -48,7 +32,7 @@ class TestWorkflowApi(unittest.TestCase):
 
         response = self.client.post(
             '/api/workflow',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict()))
 
         self.assertEqual(response.status_code, 400)
@@ -68,7 +52,7 @@ class TestWorkflowApi(unittest.TestCase):
         label = f'{w.label}-{datetime.now()}'
         response = self.client.put(
             f'/api/workflow/{w.workflowId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
             )))
@@ -88,7 +72,7 @@ class TestWorkflowApi(unittest.TestCase):
 
         response = self.client.put(
             f'/api/workflow/{w.workflowId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict()))
 
         self.assertEqual(response.status_code, 400)
@@ -107,7 +91,7 @@ class TestWorkflowApi(unittest.TestCase):
 
         response = self.client.put(
             f'/api/workflow/{w.workflowId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=w.label + '-NEW',
             )))

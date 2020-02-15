@@ -9,9 +9,9 @@ import createSagaMiddleware from 'redux-saga';
 import {
     reducerSystem as system,
     reducerSystemConfigInput as systemConfigInput,
-    ISystemConfigState,
+    IFeatureModelConfigState,
     ISystemConfigInputState,
-} from './system';
+} from './feature-model';
 import {
     reducer as workflow,
     IWorkflowState,
@@ -27,7 +27,7 @@ import {
 import { rootSaga } from './sagas';
 
 export interface IState {
-    system: ISystemConfigState,
+    system: IFeatureModelConfigState,
     systemConfigInput: ISystemConfigInputState,
     testResults: ITestResultsState,
     ui: IUiState,

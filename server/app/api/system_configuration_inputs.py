@@ -48,10 +48,10 @@ existing_sysconfig_input = api.inherit(
             description='SystemConfigurationInputs identifier'),
         'createdAt': fields.String(
             required=False,
-            description='Date workflow was initiallly created'),
+            description='Date system-configuration-input was initiallly created'),
         'updatedAt': fields.String(
             required=False,
-            description='Date workflow was last updated'),
+            description='Date system-configuration-input was last updated'),
     }
 )
 

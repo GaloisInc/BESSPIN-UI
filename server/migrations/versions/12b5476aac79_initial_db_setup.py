@@ -1,13 +1,13 @@
-"""initial db setup
+""" initial db setup
 
 Revision ID: 12b5476aac79
-Revises: 
+Revises:
 Create Date: 2019-12-20 14:29:39.176940
 
 """
+
 from alembic import op
 import sqlalchemy as sa
-from datetime import datetime
 
 from app.models import JobStatus, VersionedResourceType
 
@@ -35,18 +35,16 @@ def upgrade():
     op.create_index(op.f('ix_versionedResourceTypes_label'), 'versionedResourceTypes', ['label'], unique=True)
     op.create_table(
         'vulnerabilityConfigurationInputs',
+        sa.Column('vulnConfigId', sa.Integer(), nullable=False),
         sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
         sa.Column('createdAt', sa.DateTime(), nullable=False),
         sa.Column('updatedAt', sa.DateTime(), nullable=True),
-        sa.Column('vulnConfigId', sa.Integer(), nullable=False),
-        sa.Column(
-            'configuration',
-            sa.TEXT(),
-            nullable=True,
-            comment='text to contain actual configuration (NOTE: this may change to point to a file upload path if the text is too large)'
-        ),
+        sa.Column('workflowId', sa.Integer(), nullable=False),
+        sa.Column('vulnClass', sa.String(32), nullable=False),
+        sa.Column('featureModelUid', sa.String(64), nullable=False),
         sa.PrimaryKeyConstraint('vulnConfigId'),
-        sa.UniqueConstraint('configuration')
+        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='SET NULL'),
+        sa.ForeignKeyConstraint(['featureModelUid'], ['feature_models.uid']),
     )
     op.create_table(
         'jobs',
@@ -162,20 +160,21 @@ def upgrade():
     op.create_table(
         'feature_models',
         sa.Column('uid', sa.Text(), unique=True),
-        sa.Column('filename', sa.Text()),
-        sa.Column('source', sa.Text()),
-        sa.Column('conftree', sa.Text()),
-        sa.Column('date', sa.DateTime(), nullable=False, default=datetime.utcnow),
-        sa.Column('hash', sa.Text()),
-        sa.Column('configs', sa.Text()),
-        sa.Column('last_update', sa.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow),
+        sa.Column('filename', sa.Text(), nullable=True),
+        sa.Column('source', sa.Text(), nullable=True),
+        sa.Column('conftree', sa.Text(), nullable=True),
+        sa.Column('hash', sa.Text(), nullable=True),
+        sa.Column('configs', sa.Text(), nullable=True),
+        sa.Column('createdAt', sa.DateTime(), nullable=False),
+        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+        sa.Column('updatedAt', sa.DateTime(), nullable=True)
     )
     # ### end Alembic commands ###
 
     # add our initial resource types and job statuses
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
-    
+
     VersionedResourceType.load_allowed_types(session)
     JobStatus.load_allowed_statuses(session)
 

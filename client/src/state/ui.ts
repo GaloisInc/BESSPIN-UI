@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 
-import { ISystemAction, SystemActionTypes } from './system';
+import { ISystemAction, SystemActionTypes } from './feature-model';
 import {
     WorkflowActionTypes,
     IWorkflowAction,

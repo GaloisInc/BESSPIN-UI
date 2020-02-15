@@ -12,9 +12,9 @@ import {
     selection_change_validated,
     selection_mem,
     selection_is_empty,
-} from '../state/selection';
+} from './selection';
 
-export interface ISystemEntry {
+export interface IFeatureModelRecord {
     configsPP?: string;
     configs: ISelectionType[];
     conftree: IFeatureModel;
@@ -53,12 +53,12 @@ export interface ISelectionMap {
 
 export type ISelection = ISelectionType[]
 
-export interface ISystemConfigState {
-    system: ISystemEntry,
+export interface IFeatureModelConfigState {
+    featureModelRecord: IFeatureModelRecord,
 }
 
-export const DEFAULT_CONFIG_SYSTEM_STATE: ISystemConfigState = {
-    system: {
+export const DEFAULT_CONFIG_SYSTEM_STATE: IFeatureModelConfigState = {
+    featureModelRecord: {
         configs: [],
         conftree: DEFAULT_FEATURE_MODEL,
         createdAt: '',
@@ -73,10 +73,10 @@ export const DEFAULT_CONFIG_SYSTEM_STATE: ISystemConfigState = {
 
 /**
  * NOTE: We have two related, but different models going on here
- * 
+ *
  *  - System: this is the original proof-of-concept feature-model system
  *  - SystemConfigInput: The inputs necessasry to build a system in ToolSuite
- * 
+ *
  * This could be a source of confusion and should be cleaned up.
  * One possibility is to remove "systems" as that does not appear to be used.
  * "system" could be renamed to "architecture" or "systemFeatureModel" to disambiguate...
@@ -120,6 +120,9 @@ export enum SystemActionTypes {
     SUBMIT_SYSTEM = 'system/submit',
     SUBMIT_SYSTEM_FAILURE = 'system/submit/failure',
     SUBMIT_SYSTEM_SUCCESS = 'system/submit/success',
+    SUBMIT_VULNERABILITY_CLASS = 'vulnerability/submit',
+    SUBMIT_VULNERABILITY_CLASS_FAILURE = 'vulnerability/submit/failure',
+    SUBMIT_VULNERABILITY_CLASS_SUCCESS = 'vulnerability/submit/success',
     SUBMIT_VALIDATE_CONFIGURATION= 'system/submit/validate',
     SUBMIT_VALIDATE_CONFIGURATION_FAILURE = 'system/submit/validate/failure',
     SUBMIT_VALIDATE_CONFIGURATION_SUCCESS = 'system/submit/validate/success',
@@ -147,7 +150,7 @@ export const fetchSystemFailure = (error: string) => {
     } as const;
 };
 
-export const fetchSystemSuccess = (system: ISystemEntry) => {
+export const fetchSystemSuccess = (system: IFeatureModelRecord) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS,
         data: {
@@ -175,9 +178,38 @@ export const submitSystemFailure = (error: string) => {
     } as const;
 };
 
-export const submitSystemSuccess = (system: ISystemEntry) => {
+export const submitSystemSuccess = (system: IFeatureModelRecord) => {
     return {
         type: SystemActionTypes.SUBMIT_SYSTEM_SUCCESS,
+        data: {
+            system,
+        }
+    } as const;
+};
+
+
+export const submitVulnerabilityClass = (workflowId: string, vulnerabilityClassName: string) => {
+    return {
+        type: SystemActionTypes.SUBMIT_VULNERABILITY_CLASS,
+        data: {
+            workflowId,
+            vulnerabilityClassName,
+        },
+    } as const;
+}
+
+export const submitVulnerabilityClassFailure = (error: string) => {
+    return {
+        type: SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_FAILURE,
+        data: {
+            error,
+        },
+    } as const;
+};
+
+export const submitVulnerabilityClassSuccess = (system: IFeatureModelRecord) => {
+    return {
+        type: SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_SUCCESS,
         data: {
             system,
         }
@@ -295,6 +327,9 @@ export type ISystemAction = ReturnType<
     typeof submitSystem |
     typeof submitSystemSuccess |
     typeof submitSystemFailure |
+    typeof submitVulnerabilityClass |
+    typeof submitVulnerabilityClassSuccess |
+    typeof submitVulnerabilityClassFailure |
     typeof selectFeature |
     typeof selectFeatureUndo |
     typeof selectFeatureRedo |
@@ -339,68 +374,73 @@ function circle_selection(conftree: IFeatureModel, selected_nodes: ISelection, u
     };
 };
 
-export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISystemAction): ISystemConfigState => {
+export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISystemAction): IFeatureModelConfigState => {
     switch (action.type) {
         case SystemActionTypes.SUBMIT_SYSTEM_SUCCESS:
             return {
                 ...state,
-                system: action.data.system,
+                featureModelRecord: action.data.system,
+            };
+        case SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_SUCCESS:
+            return {
+                ...state,
+                featureModelRecord: action.data.system,
             };
         case SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS:
             return {
                 ...state,
-                system: action.data.system,
+                featureModelRecord: action.data.system,
             };
         case SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_SUCCESS:
             return {
                 ...state,
-                system: {
-                    ...state.system,
+                featureModelRecord: {
+                    ...state.featureModelRecord,
                     configs: action.data.validateResult.validatedFeatures,
                     configsPP: action.data.validateResult.serverConstraints,
                 }
             };
         case SystemActionTypes.SELECT_FEATURE: {
             const newconfigs = circle_selection(
-                state.system.conftree,
-                state.system.configs,
+                state.featureModelRecord.conftree,
+                state.featureModelRecord.configs,
                 action.data.uid
             );
             return {
                 ...state,
-                system: {
-                    ...state.system,
+                featureModelRecord: {
+                    ...state.featureModelRecord,
                     configs: newconfigs,
                 }
             };
         }
         case SystemActionTypes.UNDO_SELECT_FEATURE: {
-            const configs = state.system.configs;
-            const undos = state.system.selectionUndos;
+            const configs = state.featureModelRecord.configs;
+            const undos = state.featureModelRecord.selectionUndos;
             if (selection_is_empty(configs)) {
                 return { ...state }
             }
             const elm = selection_top(configs);
             return {
                 ...state,
-                system: {
-                    ...state.system,
+                featureModelRecord: {
+                    ...state.featureModelRecord,
                     configs: selection_pop(configs),
                     selectionUndos: selection_push_elm(undos, elm),
                 }
             };
         }
         case SystemActionTypes.REDO_SELECT_FEATURE:
-            const configs = state.system.configs;
-            const undos = state.system.selectionUndos;
+            const configs = state.featureModelRecord.configs;
+            const undos = state.featureModelRecord.selectionUndos;
             if (selection_is_empty(undos)) {
                 return { ...state }
             }
             const elm = selection_top(undos);
             return {
                 ...state,
-                system: {
-                    ...state.system,
+                featureModelRecord: {
+                    ...state.featureModelRecord,
                     configs: selection_push_elm(configs, elm),
                     selectionUndos: selection_pop(undos),
                 }
@@ -414,7 +454,7 @@ export const reducerSystemConfigInput = (state = DEFAULT_SYSTEM_CONFIG_INPUT_STA
     switch (action.type) {
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_FAILURE:
-            return {};  
+            return {};
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_SUCCESS:
         case SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS:
             return {
@@ -429,10 +469,10 @@ export const reducerSystemConfigInput = (state = DEFAULT_SYSTEM_CONFIG_INPUT_STA
 // Selectors
 
 interface IState {
-    system: ISystemConfigState;
+    system: IFeatureModelConfigState;
     systemConfigInput: ISystemConfigInputState;
 }
 
-export const getSystem = (state: IState) => state.system.system;
+export const getSystem = (state: IState) => state.system.featureModelRecord;
 
 export const getSystemConfigInput = (state: IState) => state.systemConfigInput.systemConfigInput;

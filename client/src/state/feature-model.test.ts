@@ -1,6 +1,7 @@
 import {
     SystemActionTypes,
-    ISystemEntry,
+    IFeatureModelConfigState,
+    IFeatureModelRecord,
     selectFeature,
     SelectionMode,
     reducerSystem,
@@ -11,7 +12,7 @@ import {
     fetchSystemConfigInputFailure,
     fetchSystemConfigInputSuccess,
     INewSystemConfigInput,
-} from './system';
+} from './feature-model';
 
 import { DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
@@ -20,7 +21,7 @@ const genDate = (): string => {
     return new Date(Date.now()).toISOString();
 };
 
-const DEFAULT_SYSTEM: ISystemEntry = {
+const DEFAULT_SYSTEM: IFeatureModelRecord = {
     configs: [],
     conftree: DEFAULT_FEATURE_MODEL,
     uid: 'TEST-HASH',
@@ -45,7 +46,7 @@ const DEFAULT_SYSTEM_CONFIG_INPUT: ISystemConfigInput = {
 };
 
 const DEFAULT_SYSTEM_STATE = {
-    system: DEFAULT_SYSTEM,
+    featureModelRecord: DEFAULT_SYSTEM,
 };
 
 const generateTestSystemConfigInputState = (overrides: Partial<ISystemConfigInput> = {}): ISystemConfigInputState => {
@@ -57,7 +58,7 @@ const generateTestSystemConfigInputState = (overrides: Partial<ISystemConfigInpu
     };
 };
 
-const generateTestState = (overrides = {}) => {
+const generateTestState = (overrides = {}): IFeatureModelConfigState => {
     return {
         ...DEFAULT_SYSTEM_STATE,
         ...overrides,
@@ -92,7 +93,7 @@ describe('systems', () => {
 
                 it('should add the selection', () => {
                     const testState = generateTestState({
-                        system: {
+                        featureModelRecord: {
                             ...DEFAULT_SYSTEM,
                             configs: [],
                             conftree: {
@@ -101,7 +102,7 @@ describe('systems', () => {
                             }
                         },
                     });
-                    expect(reducerSystem(testState, selectFeature(TEST_UID)).system.configs).toEqual(
+                    expect(reducerSystem(testState, selectFeature(TEST_UID)).featureModelRecord.configs).toEqual(
                         [ { uid: TEST_UID, mode: TEST_MODE, other: TEST_UID, isValid: false } ],
                     );
                 });
@@ -111,7 +112,7 @@ describe('systems', () => {
 
                 it('should add the selection', () => {
                     const testState = generateTestState({
-                        system: {
+                        featureModelRecord: {
                             ...DEFAULT_SYSTEM,
                             configs: [
                                 { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
@@ -123,7 +124,7 @@ describe('systems', () => {
 
                     const reducedState = reducerSystem(testState, selectFeature(TEST_UID));
                     expect(reducedState).toEqual({
-                        system: {
+                        featureModelRecord: {
                             ...DEFAULT_SYSTEM,
                             configs: [
                                 { uid: 'TEST-UID-1', mode: SelectionMode.rejected, offer: 'TEST-UID-1', isValid: false },
