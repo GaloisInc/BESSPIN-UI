@@ -24,13 +24,13 @@ import { getDataRequested } from '../state/ui';
 import {
     fetchSystem,
     getSystem,
-    ISystemEntry,
+    IFeatureModelRecord,
     submitSystem,
     submitValidateConfiguration,
     selectFeature,
     selectFeatureUndo,
     selectFeatureRedo,
-} from '../state/system';
+} from '../state/feature-model';
 
 
 import { Header } from '../components/Header';
@@ -47,7 +47,7 @@ export interface IConfigureCpuProps {
     selectFeatureUndo: typeof selectFeatureUndo,
     selectFeatureRedo: typeof selectFeatureRedo,
     submitValidateConfiguration: typeof submitValidateConfiguration;
-    system: ISystemEntry;
+    system: IFeatureModelRecord;
     systemUid: string;
 }
 

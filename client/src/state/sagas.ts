@@ -13,6 +13,7 @@ import {
     submitSystemConfigurationInput as submitSystemConfigurationInputApi,
     submitValidateConfiguration as submitValidateConfigurationApi,
     updateSystemConfigurationInput as updateSystemConfigurationInputApi,
+    submitVulnerabilityClass as submitVulnerabilityClassApi,
 } from '../api/api';
 
 import {
@@ -39,11 +40,14 @@ import {
     submitSystem as submitSystemAction,
     submitSystemConfigInput as submitSystemConfigurationInputAction,
     submitSystemConfigInputFailure,
+    submitVulnerabilityClass as submitVulnerabilityClassAction,
+    submitVulnerabilityClassFailure,
+    submitVulnerabilityClassSuccess,
     submitValidateConfiguration as submitValidateConfigurationAction,
     submitValidateConfigurationSuccess,
     submitValidateConfigurationFailure,
     updateSystemConfigInput as updateSystemConfigInputAction,
-} from './system';
+} from './feature-model';
 
 import {
     fetchWorkflowsError,
@@ -103,6 +107,17 @@ function* submitSystem(action: ReturnType<typeof submitSystemAction>) {
     } catch (e) {
         console.error(e);
         yield put(submitSystemFailure(e.message));
+    }
+}
+
+function* submitVulnerabilityClass(action: ReturnType<typeof submitVulnerabilityClassAction>) {
+    try {
+        const configurator = yield call(submitVulnerabilityClassApi, action.data.workflowId, action.data.vulnerabilityClassName);
+        const mappedConfigurator = mapUploadConfiguratorToSystem(configurator);
+        yield put(submitVulnerabilityClassSuccess(mappedConfigurator));
+    } catch (e) {
+        console.error(e);
+        yield put(submitVulnerabilityClassFailure(e.message));
     }
 }
 
@@ -170,6 +185,7 @@ function* updateSystemConfigInput(action: ReturnType<typeof updateSystemConfigIn
 // Register all the actions that should trigger our sagas
 export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
+    yield takeLatest(SystemActionTypes.SUBMIT_VULNERABILITY_CLASS, submitVulnerabilityClass);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOWS, fetchWorkflows);

@@ -1,9 +1,7 @@
-import unittest
+from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
 import json
 from datetime import datetime
-import logging
 
-from app import create_app
 from app.models import (
     db,
     VersionedResourceType,
@@ -11,22 +9,11 @@ from app.models import (
 )
 
 
-class TestVersionedResourcesApi(unittest.TestCase):
+class TestVersionedResourcesApi(BesspinTestApiBaseClass):
 
     def setUp(self):
-        self.app = create_app('test')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        self.app.logger.setLevel(logging.CRITICAL)
-        db.create_all()
+        super(TestVersionedResourcesApi, self).setUp()
         VersionedResourceType.load_allowed_types()
-        self.client = self.app.test_client()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-        self.app.logger.setLevel(logging.NOTSET)
 
     def test_create(self):
         r = VersionedResource().query.all()
@@ -36,7 +23,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
         label = f'created resource {datetime.utcnow()}'
         response = self.client.post(
             '/api/versioned-resource',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
                 url='https://github.com/test/repo.git',
@@ -55,7 +42,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
         label = f'created resource {datetime.utcnow()}'
         response = self.client.post(
             '/api/versioned-resource',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
                 url='https://github.com/test/repo.git',
@@ -80,7 +67,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
             f'/api/versioned-resource/{r.resourceId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
                 url=r.url,
@@ -104,7 +91,7 @@ class TestVersionedResourcesApi(unittest.TestCase):
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
             f'/api/versioned-resource/{r.resourceId}',
-            headers={'Content-type': 'application/json'},
+            headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
                 url=r.url,

@@ -36,7 +36,7 @@ import {
     INewSystemConfigInput,
     ISystemConfigInput,
     updateSystemConfigInput,
-} from '../state/system';
+} from '../state/feature-model';
 
 import { IState } from '../state';
 

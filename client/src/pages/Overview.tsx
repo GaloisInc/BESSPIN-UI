@@ -221,7 +221,7 @@ export const Overview: React.FC<IOverviewProps> = ({
               <td>
                 <ButtonGroup>
                   <SystemConfigButton workflowId={w.id} config={w.systemConfig} />
-                  <TestConfigButton workflowId={w.id} config={w.testConfig} disabled={!w.systemConfig} />
+                  <TestConfigButton workflowId={w.id} config={w.testConfig} />
                 </ButtonGroup>
               </td>
               <td><ReportButton disabled={reportShouldBeDisabled(w)} workflowId={w.id} config={w.report} /></td>

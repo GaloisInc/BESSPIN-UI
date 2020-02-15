@@ -27,17 +27,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://0.0.0.0:3784/configurator/upload/piccolo.fm.json/foo",
-					"protocol": "http",
+					"raw": "{{apiHost}}/api/feature-model/upload/piccolo.fm.json/foo",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{apiHost}}"
 					],
-					"port": "3784",
 					"path": [
-						"configurator",
+						"api",
+						"feature-model",
 						"upload",
 						"piccolo.fm.json",
 						"foo"
@@ -47,24 +43,29 @@
 			"response": []
 		},
 		{
-			"name": "Get all feature configurations",
+			"name": "Get all feature models",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "http://0.0.0.0:3784/configurator/list_db_models/",
-					"protocol": "http",
+					"raw": "{{apiHost}}/api/feature-model",
 					"host": [
-						"0",
-						"0",
-						"0",
-						"0"
+						"{{apiHost}}"
 					],
-					"port": "3784",
 					"path": [
-						"configurator",
-						"list_db_models",
-						""
+						"api",
+						"feature-model"
 					]
 				}
 			},
@@ -197,26 +198,6 @@
 			"response": []
 		},
 		{
-			"name": "GET configurator db models",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{apiHost}}/api/configurator/list_db_models/",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"configurator",
-						"list_db_models",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get all versioned resources",
 			"request": {
 				"method": "GET",
@@ -306,7 +287,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"label\": \"my newer first workflow\"\n}",
+					"raw": "{\n\t\"label\": \"test workflow\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -356,6 +337,150 @@
 						"api",
 						"workflow",
 						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a system configuration input",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"test sysconfig input\",\n\t\"nixConfigFilename\": \"foo.nix\",\n\t\"nixConfig\": \"{ nix: config }\",\n\t\"workflowId\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/system-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"system-config-input"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all system configuration inputs",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{apiHost}}/api/system-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"system-config-input"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create minimal Vulnerability Config Input",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\"\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "app",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Load Feature Models",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"model_uid\":\"f670c746-0fc8-4fe1-a71e-78c21cfbbf5d\"}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/configurator/load_from_db/",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"configurator",
+						"load_from_db",
+						""
 					]
 				}
 			},
