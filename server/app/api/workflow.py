@@ -6,6 +6,7 @@ from . import api
 from app.models import db, Workflow
 from app.api.system_configuration_inputs import existing_sysconfig_input
 from app.api.vulnerability_configuration_inputs import existing_vulnconfig_input
+from app.api.report_job import existing_report_job
 
 """
     Since all the routes here are for managing our Workflow
@@ -46,12 +47,20 @@ existing_workflow = api.inherit(
             description='Date workflow was last updated'),
         'systemConfigurationInput': fields.Nested(
             existing_sysconfig_input,
+            allow_null=True,
             required=False,
             description='SystemConfigurationInput associated with this workflow'),
         'vulnerabilityConfigurationInput': fields.Nested(
             existing_vulnconfig_input,
+            allow_null=True,
             required=False,
             description='VulnerabilityConfigurationInput associated with this workflow'
+        ),
+        'reportJob': fields.Nested(
+            existing_report_job,
+            allow_null=True,
+            required=False,
+            description='ReportJob associated with this workflow'
         )
     }
 )

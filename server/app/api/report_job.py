@@ -36,6 +36,9 @@ new_report_job = api.model('NewReportJob', {
     'sysConfigId': fields.Integer(
         required=True,
         description='Id of system-configuration-inputs record'),
+    'workflowId': fields.Integer(
+        required=True,
+        description='Id of workflow record'),
     'jobStatus': fields.Nested(
         report_job_status,
         required=True,
@@ -83,7 +86,8 @@ class ReportJobListApi(Resource):
         new_report_job = ReportJob(
             label=report_job_input['label'],
             statusId=report_job_status.statusId,
-            sysConfigId=report_job_input['sysConfigId']
+            sysConfigId=report_job_input['sysConfigId'],
+            workflowId=report_job_input['workflowId']
         )
         db.session.add(new_report_job)
         db.session.commit()
