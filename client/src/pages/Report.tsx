@@ -26,7 +26,7 @@ export interface IReport {
 interface IStateFromProps {
     errors: string[];
     isLoading: boolean;
-    report?: IReport;
+    report: IReport;
     workflowId?: number;
 }
 
@@ -1324,18 +1324,21 @@ const sampleReport: IReport = {
 
 const scrollToLine = (ace: AceEditor, line: number): void => {
     if (ace.editor) {
+        // https://stackoverflow.com/questions/23748743/ace-editor-go-to-line
+        // not sure exactly _why_ this is required, but the SO link above was
+        // the solution I found...
         ace.editor.resize(true);
         ace.editor.scrollToLine(line, true, true, () => {});
     }
 };
 
-export const Report: React.FC<IReportProps> = () => {
+export const Report: React.FC<IReportProps> = ({ report }) => {
     const aceRef = useRef<AceEditor>(null);
 
     useEffect(() => {
         const editor  = aceRef?.current;
         if (editor) {
-            const logLineCount = sampleReport.log.split(/\n/).length;
+            const logLineCount = report.log.split(/\n/).length;
             scrollToLine(editor, logLineCount);
         }
     });
@@ -1354,7 +1357,7 @@ export const Report: React.FC<IReportProps> = () => {
                     readOnly={ true }
                     setOptions={{ useWorker: false }}
                     theme='monokai'
-                    value={ sampleReport.log }
+                    value={ report.log }
                     width='100%'
                     height='85vh' />
             </Container>
@@ -1387,6 +1390,7 @@ const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps =>
     return {
         errors,
         isLoading,
+        report: sampleReport,
         ...( workflowId ? { workflowId } : null ),
     };
 };
