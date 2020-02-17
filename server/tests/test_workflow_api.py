@@ -1,4 +1,8 @@
-from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
+from helpers import (
+    BesspinTestApiBaseClass,
+    create_workflow,
+    DEFAULT_HEADERS
+)
 import json
 from datetime import datetime
 
@@ -116,3 +120,12 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(len(json_response), 2)
+
+    def test_null_subobjects(self):
+        wf = create_workflow(label='test workflow')
+        response = self.client.get(f'/api/workflow/{wf.workflowId}')
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.get_data(as_text=True))
+        self.assertIsNone(json_response['systemConfigurationInput'])
+        self.assertIsNone(json_response['vulnerabilityConfigurationInput'])
+        self.assertIsNone(json_response['reportJob'])
