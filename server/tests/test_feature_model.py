@@ -7,6 +7,7 @@ from app.models import (
     FeatureModel,
 )
 from helpers import (
+    create_featureModel,
     load_test_fmjson,
 )
 
@@ -25,10 +26,11 @@ class FeatureModelTestCase(BesspinTestBaseClass):
         uid = str(uuid4())
         source = load_test_fmjson()
 
-        feature_model = FeatureModel(uid=uid, conftree=json.loads(source), filename='test.fm.json')
-
-        db.session.add(feature_model)
-        db.session.commit()
+        create_featureModel(
+            uid=uid,
+            conftree=json.loads(source),
+            filename='test.fm.json'
+        )
 
         fm = FeatureModel.query.get(uid)
 

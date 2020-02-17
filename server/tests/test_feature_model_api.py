@@ -1,9 +1,18 @@
-from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS, load_test_fmjson
+from helpers import (
+    BesspinTestApiBaseClass,
+    create_featureModel,
+    create_workflow,
+    create_vulnerabilityConfig,
+    DEFAULT_HEADERS,
+    load_test_fmjson,
+)
+
 import json
 
 from app.models import (
-    db,
     FeatureModel,
+    VulnerabilityConfigurationInput,
+    Workflow,
 )
 
 
@@ -38,15 +47,28 @@ class TestFeatureModelApi(BesspinTestApiBaseClass):
         test_filename = 'test.fm.json'
         test_conftree = load_test_fmjson()
 
-        fm = FeatureModel(
+        fm = create_featureModel(
             uid=test_uid,
             filename=test_filename,
             source=test_conftree,
             conftree=json.loads(test_conftree)
         )
+        create_workflow(label='test workflow')
 
-        db.session.add(fm)
-        db.session.commit()
+        wf = Workflow.query.filter_by(label='test workflow').first()
+        self.assertIsNotNone(wf)
+        fm = FeatureModel.query.filter_by(uid=test_uid).first()
+        self.assertIsNotNone(fm)
+
+        vc = create_vulnerabilityConfig(
+            label='test vuln config',
+            featureModelUid=test_uid,
+            workflowId=wf.workflowId,
+            vulnClass='BOF'
+        )
+
+        vc = VulnerabilityConfigurationInput.query.filter_by(featureModelUid=test_uid).first()
+        self.assertIsNotNone(vc)
 
         response = self.client.post(
             '/api/feature-model/fetch-by-uid',
@@ -67,22 +89,18 @@ class TestFeatureModelApi(BesspinTestApiBaseClass):
         test_uid_1 = 'TEST-UID-1'
         test_uid_2 = 'TEST-UID-2'
 
-        fm1 = FeatureModel(
+        create_featureModel(
             uid=test_uid_1,
             filename='test1.fm.json',
             source=test_fmjson,
             conftree=json.loads(test_fmjson)
         )
-        fm2 = FeatureModel(
+        create_featureModel(
             uid=test_uid_2,
             filename='test2.fm.json',
             source=test_fmjson,
             conftree=json.loads(test_fmjson)
         )
-
-        db.session.add(fm1)
-        db.session.add(fm2)
-        db.session.commit()
 
         response = self.client.get(
             '/api/feature-model',

@@ -1,4 +1,7 @@
-from helpers import BesspinTestBaseClass
+from helpers import (
+    BesspinTestBaseClass,
+    create_versionedResource
+)
 from sqlalchemy.exc import IntegrityError
 
 from app.models import (
@@ -47,24 +50,18 @@ class VersionedResourceModelTestCase(BesspinTestBaseClass):
         hdl_type_id = VersionedResourceType().query.filter_by(label='hdl').first().resourceTypeId
         test_url = 'https://github.com/fancy-pants/master.git'
 
-        db.session.add(
-            VersionedResource(
-                label='test resource 1',
-                url=test_url,
-                version='1',
-                resourceTypeId=hdl_type_id
-            )
+        create_versionedResource(
+            label='test resource 1',
+            url=test_url,
+            version='1',
+            resourceTypeId=hdl_type_id
         )
-        db.session.add(
-            VersionedResource(
-                label='test resource 2',
-                url=test_url,
-                version='2',
-                resourceTypeId=hdl_type_id
-            )
+        create_versionedResource(
+            label='test resource 2',
+            url=test_url,
+            version='2',
+            resourceTypeId=hdl_type_id
         )
-
-        db.session.commit()
 
         self.assertEqual(len(VersionedResource.query.all()), 2)
 
@@ -72,16 +69,12 @@ class VersionedResourceModelTestCase(BesspinTestBaseClass):
         hdl_type_id = VersionedResourceType().query.filter_by(label='hdl').first().resourceTypeId
         test_url = 'https://github.com/fancy-pants/master.git'
 
-        db.session.add(
-            VersionedResource(
-                label='test resource 1',
-                url=test_url,
-                version='1',
-                resourceTypeId=hdl_type_id
-            )
+        create_versionedResource(
+            label='test resource 1',
+            url=test_url,
+            version='1',
+            resourceTypeId=hdl_type_id
         )
-
-        db.session.commit()
 
         versionedResource = VersionedResource.query.filter_by(url=test_url).first()
 

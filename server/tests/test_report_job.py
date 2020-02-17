@@ -1,10 +1,13 @@
-from helpers import BesspinTestBaseClass
+from helpers import (
+    BesspinTestBaseClass,
+    create_reportJob,
+    create_sysConfig,
+    create_workflow,
+)
 
 from app.models import (
-    db,
     JobStatus,
     ReportJob,
-    SystemConfigurationInput,
 )
 
 
@@ -16,36 +19,26 @@ class ReportJobsModelTestCase(BesspinTestBaseClass):
 
     def test_basic_functionality(self):
 
-        db.session.add(
-            SystemConfigurationInput(
-                label='test sys-config 1',
-                nixConfigFilename='foo.nix',
-                nixConfig='{ test: { nix-config } }',
-                workflowId=1
-            )
+        wf = create_workflow(label='test workflow')
+        sc = create_sysConfig(
+            label='test sysconfig',
+            workflowId=wf.workflowId,
+            nixConfigFilename='test.nix',
+            nixConfig='{nix: config}'
         )
-
-        db.session.commit()
-
-        testSysConfigId = SystemConfigurationInput.query.first().sysConfigId
-
-        self.assertIsNotNone(testSysConfigId)
 
         jobStatusId = JobStatus.query.filter_by(label='running').first().statusId
 
         self.assertIsNotNone(jobStatusId)
 
-        db.session.add(
-            ReportJob(
-                label='test report 1',
-                sysConfigId=testSysConfigId,
-                statusId=jobStatusId
-            )
+        create_reportJob(
+            label='test report 1',
+            sysConfigId=sc.sysConfigId,
+            workflowId=wf.workflowId,
+            statusId=jobStatusId
         )
 
-        db.session.commit()
-
-        testReportJob = ReportJob.query.filter_by(sysConfigId=testSysConfigId).first()
+        testReportJob = ReportJob.query.filter_by(sysConfigId=sc.sysConfigId).first()
 
         self.assertIsNotNone(testReportJob)
         self.assertEqual(testReportJob.status.label, 'running')

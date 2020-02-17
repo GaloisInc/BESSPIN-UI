@@ -1,4 +1,9 @@
-from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
+from helpers import (
+    BesspinTestApiBaseClass,
+    DEFAULT_HEADERS,
+    create_reportJob,
+    create_sysConfig
+)
 import json
 from datetime import datetime
 
@@ -7,6 +12,7 @@ from app.models import (
     JobStatus,
     ReportJob,
     SystemConfigurationInput,
+    Workflow
 )
 
 
@@ -17,18 +23,24 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         JobStatus.load_allowed_statuses()
 
-        s = SystemConfigurationInput(
+        s = create_sysConfig(
             label='test sysconfig',
             nixConfigFilename='foo.nix',
             nixConfig='{ my: nix: config }',
-            workflowId=1)
-
-        db.session.add(s)
-        db.session.commit()
+            workflowId=1
+        )
 
         s = SystemConfigurationInput().query.filter_by(label='test sysconfig').first()
 
+        w = Workflow(label='test workflow')
+
+        db.session.add(w)
+        db.session.commit()
+
+        w = Workflow().query.filter_by(label='test workflow').first()
+
         self.sysConfigId = s.sysConfigId
+        self.workflowId = w.workflowId
 
     def test_create(self):
         r = ReportJob().query.all()
@@ -43,7 +55,8 @@ class TestReportJobApi(BesspinTestApiBaseClass):
             data=json.dumps(dict(
                 label=label,
                 jobStatus=dict(statusId=t.statusId, label=t.label),
-                sysConfigId=self.sysConfigId
+                sysConfigId=self.sysConfigId,
+                workflowId=1
             )))
 
         self.assertEqual(response.status_code, 200)
@@ -65,16 +78,19 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
-            'errors': {'jobStatus': "'jobStatus' is a required property"},
+            'errors': {'jobStatus': "'jobStatus' is a required property", 'workflowId': "'workflowId' is a required property"},
             'message': 'Input payload validation failed'})
 
     def test_update(self):
         r = ReportJob().query.all()
         t = JobStatus().query.filter_by(label='running').first()
         self.assertListEqual(r, [])
-        r = ReportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId)
-        db.session.add(r)
-        db.session.commit()
+        r = create_reportJob(
+            label='r1',
+            statusId=1,
+            sysConfigId=self.sysConfigId,
+            workflowId=self.workflowId
+        )
 
         self.assertEqual(len(ReportJob().query.all()), 1)
 
@@ -86,7 +102,8 @@ class TestReportJobApi(BesspinTestApiBaseClass):
                 jobId=r.jobId,
                 label=label,
                 jobStatus=dict(statusId=t.statusId, label=t.label),
-                sysConfigId=self.sysConfigId
+                sysConfigId=self.sysConfigId,
+                workflowId=self.workflowId
             )))
 
         self.assertEqual(response.status_code, 200)
@@ -96,9 +113,12 @@ class TestReportJobApi(BesspinTestApiBaseClass):
     def test_update_with_missing_data(self):
         r = ReportJob().query.all()
         self.assertListEqual(r, [])
-        r = ReportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId)
-        db.session.add(r)
-        db.session.commit()
+        r = create_reportJob(
+            label='r1',
+            statusId=1,
+            sysConfigId=self.sysConfigId,
+            workflowId=self.workflowId
+        )
 
         self.assertEqual(len(ReportJob().query.all()), 1)
 
@@ -114,17 +134,16 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
-            'errors': {'jobStatus': "'jobStatus' is a required property"},
+            'errors': {'jobStatus': "'jobStatus' is a required property", 'workflowId': "'workflowId' is a required property"},
             'message': 'Input payload validation failed'})
 
     def test_get(self):
         # add two report jobs
         r = ReportJob().query.all()
         self.assertListEqual(r, [])
-        r1 = ReportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId)
-        r2 = ReportJob(label='r2', statusId=1, sysConfigId=self.sysConfigId)
-        db.session.add_all([r1, r2])
-        db.session.commit()
+        r1 = create_reportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId, workflowId=self.workflowId)
+        r2 = create_reportJob(label='r2', statusId=1, sysConfigId=self.sysConfigId, workflowId=self.workflowId)
+
         r = ReportJob().query.all()
         self.assertEqual(len(r), 2)
 

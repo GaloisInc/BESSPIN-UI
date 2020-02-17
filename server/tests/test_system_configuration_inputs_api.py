@@ -1,4 +1,9 @@
-from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
+from helpers import (
+    BesspinTestApiBaseClass,
+    create_sysConfig,
+    create_workflow,
+    DEFAULT_HEADERS,
+)
 import json
 from datetime import datetime
 
@@ -13,10 +18,7 @@ class TestSystemConfigurationInputApi(BesspinTestApiBaseClass):
 
     def test_create(self):
         test_workflow_label = 'TEST WORKFLOW'
-        wf = Workflow(label=test_workflow_label)
-
-        db.session.add(wf)
-        db.session.commit()
+        wf = create_workflow(label=test_workflow_label)
 
         self.assertIsNotNone(wf.workflowId)
         self.assertIsNone(wf.updatedAt)
@@ -63,19 +65,14 @@ class TestSystemConfigurationInputApi(BesspinTestApiBaseClass):
 
     def test_update(self):
         test_workflow_label = 'TEST WORKFLOW'
-        wf = Workflow(label=test_workflow_label)
-
-        db.session.add(wf)
-        db.session.commit()
+        wf = create_workflow(label=test_workflow_label)
 
         self.assertIsNotNone(wf.workflowId)
         self.assertIsNone(wf.updatedAt)
 
         sc = SystemConfigurationInput().query.all()
         self.assertListEqual(sc, [])
-        sc = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=wf.workflowId)
-        db.session.add(sc)
-        db.session.commit()
+        sc = create_sysConfig(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=wf.workflowId)
 
         self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
 
@@ -107,9 +104,7 @@ class TestSystemConfigurationInputApi(BesspinTestApiBaseClass):
     def test_update_with_missing_data(self):
         sc = SystemConfigurationInput().query.all()
         self.assertListEqual(sc, [])
-        sc = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=1)
-        db.session.add(sc)
-        db.session.commit()
+        sc = create_sysConfig(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=1)
 
         self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
 
@@ -129,16 +124,11 @@ class TestSystemConfigurationInputApi(BesspinTestApiBaseClass):
             'message': 'Input payload validation failed'})
 
     def test_update_label(self):
-        wf = Workflow(label='test-wf')
-
-        db.session.add(wf)
-        db.session.commit()
+        wf = create_workflow(label='test-wf')
 
         sc = SystemConfigurationInput().query.all()
         self.assertListEqual(sc, [])
-        sc = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=wf.workflowId)
-        db.session.add(sc)
-        db.session.commit()
+        sc = create_sysConfig(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=wf.workflowId)
 
         self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
 
@@ -161,10 +151,9 @@ class TestSystemConfigurationInputApi(BesspinTestApiBaseClass):
         # add system-config-inputs
         sc = SystemConfigurationInput().query.all()
         self.assertListEqual(sc, [])
-        sc1 = SystemConfigurationInput(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=1)
-        sc2 = SystemConfigurationInput(label='sc2', nixConfigFilename='bar.nix', nixConfig='{ nix: config }', workflowId=2)
-        db.session.add_all([sc1, sc2])
-        db.session.commit()
+        sc1 = create_sysConfig(label='sc1', nixConfigFilename='foo.nix', nixConfig='{ config: nix }', workflowId=1)
+        sc2 = create_sysConfig(label='sc2', nixConfigFilename='bar.nix', nixConfig='{ nix: config }', workflowId=2)
+
         r = SystemConfigurationInput().query.all()
         self.assertEqual(len(r), 2)
 
