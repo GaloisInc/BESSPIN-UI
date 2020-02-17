@@ -209,8 +209,9 @@ class ConfiguratorUpload(Resource):
             current_app.logger.error(err)
             return abort(500, str(err))
 
+
 @ns.route('/create-test/<path:subpath>')
-class ConfiguratorUpload(Resource):
+class TestConfiguratorUpload(Resource):
     # NOTE: we cannot use "expect" here because we are using file-upload
     @ns.marshal_with(uploadResponse)
     def post(self, subpath):
@@ -355,7 +356,7 @@ class ConfiguratorModel(Resource):
 
         current_app.logger.debug(f'going to fetch feature_model({uid})')
 
-        vuln_conf_input = VulnerabilityConfigurationInput.query.get(uid)
+        vuln_conf_input = VulnerabilityConfigurationInput.query.get(featureModelUid=uid).first()
         model = FeatureModel.query.get(vuln_conf_input.featureModelUid)
 
         if model is None:
