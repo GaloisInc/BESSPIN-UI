@@ -79,7 +79,14 @@ class ReportJobListApi(Resource):
     def post(self):
         report_job_input = json.loads(request.data)
         current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
-        report_job_status = JobStatus.query.get(report_job_input['jobStatus']['statusId'])
+        report_job_status = JobStatus.query.get(report_job_input['jobStatus']['statusId']) \
+            or JobStatus.query.filter_by(label=JobStatus.ALLOWED_STATUSES[0]).first()
+
+        current_app.logger.debug(f'setting new report job status to: {report_job_status.label}')
+
+        """
+            INSERT NIX CALLS HERE...
+        """
         new_report_job = ReportJob(
             label=report_job_input['label'],
             statusId=report_job_status.statusId,

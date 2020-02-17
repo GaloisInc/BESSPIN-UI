@@ -12,7 +12,7 @@ class JobStatus(db.Model):
     )
 
     def __repr__(self):
-        return '<JobStatus "{}" {}>'.format(self.statusId, self.label)
+        return '<JobStatus id="{}" label="{}">'.format(self.statusId, self.label)
 
     ALLOWED_STATUSES = ['running', 'failed', 'succeeded']
 
