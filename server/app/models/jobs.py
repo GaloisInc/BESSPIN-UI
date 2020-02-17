@@ -88,6 +88,11 @@ class ReportJob(Job):
         db.ForeignKey('systemConfigurationInputs.sysConfigId', ondelete='CASCADE'),  # noqa E501
         nullable=False
     )
+    workflowId = db.Column(
+        db.Integer,
+        db.ForeignKey('workflows.workflowId', ondelete='CASCADE'),
+        nullable=False
+    )
 
     __mapper_args__ = {
         'polymorphic_identity': 'report',
