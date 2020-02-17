@@ -2,7 +2,6 @@ from helpers import (
     BesspinTestApiBaseClass,
     DEFAULT_HEADERS,
     create_reportJob,
-    create_sysConfig
 )
 import json
 from datetime import datetime
@@ -11,7 +10,6 @@ from app.models import (
     db,
     JobStatus,
     ReportJob,
-    SystemConfigurationInput,
     Workflow
 )
 
@@ -23,15 +21,6 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         JobStatus.load_allowed_statuses()
 
-        s = create_sysConfig(
-            label='test sysconfig',
-            nixConfigFilename='foo.nix',
-            nixConfig='{ my: nix: config }',
-            workflowId=1
-        )
-
-        s = SystemConfigurationInput().query.filter_by(label='test sysconfig').first()
-
         w = Workflow(label='test workflow')
 
         db.session.add(w)
@@ -39,7 +28,6 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         w = Workflow().query.filter_by(label='test workflow').first()
 
-        self.sysConfigId = s.sysConfigId
         self.workflowId = w.workflowId
 
     def test_create(self):
@@ -55,7 +43,6 @@ class TestReportJobApi(BesspinTestApiBaseClass):
             data=json.dumps(dict(
                 label=label,
                 jobStatus=dict(statusId=t.statusId, label=t.label),
-                sysConfigId=self.sysConfigId,
                 workflowId=1
             )))
 
@@ -73,7 +60,6 @@ class TestReportJobApi(BesspinTestApiBaseClass):
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
-                sysConfigId=self.sysConfigId
             )))
 
         self.assertEqual(response.status_code, 400)
@@ -88,7 +74,6 @@ class TestReportJobApi(BesspinTestApiBaseClass):
         r = create_reportJob(
             label='r1',
             statusId=1,
-            sysConfigId=self.sysConfigId,
             workflowId=self.workflowId
         )
 
@@ -102,7 +87,6 @@ class TestReportJobApi(BesspinTestApiBaseClass):
                 jobId=r.jobId,
                 label=label,
                 jobStatus=dict(statusId=t.statusId, label=t.label),
-                sysConfigId=self.sysConfigId,
                 workflowId=self.workflowId
             )))
 
@@ -116,7 +100,6 @@ class TestReportJobApi(BesspinTestApiBaseClass):
         r = create_reportJob(
             label='r1',
             statusId=1,
-            sysConfigId=self.sysConfigId,
             workflowId=self.workflowId
         )
 
@@ -128,8 +111,7 @@ class TestReportJobApi(BesspinTestApiBaseClass):
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 jobId=r.jobId,
-                label=label,
-                sysConfigId=self.sysConfigId
+                label=label
             )))
 
         self.assertEqual(response.status_code, 400)
@@ -141,8 +123,8 @@ class TestReportJobApi(BesspinTestApiBaseClass):
         # add two report jobs
         r = ReportJob().query.all()
         self.assertListEqual(r, [])
-        r1 = create_reportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId, workflowId=self.workflowId)
-        r2 = create_reportJob(label='r2', statusId=1, sysConfigId=self.sysConfigId, workflowId=self.workflowId)
+        r1 = create_reportJob(label='r1', statusId=1, workflowId=self.workflowId)
+        r2 = create_reportJob(label='r2', statusId=1, workflowId=self.workflowId)
 
         r = ReportJob().query.all()
         self.assertEqual(len(r), 2)

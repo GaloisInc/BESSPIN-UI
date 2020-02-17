@@ -38,7 +38,6 @@ def create_featureModel(**kwargs) -> FeatureModel:
 def create_reportJob(**kwargs) -> ReportJob:
     rj = ReportJob(
         label=kwargs['label'],
-        sysConfigId=kwargs['sysConfigId'],
         workflowId=kwargs['workflowId'],
         statusId=kwargs['statusId']
     )

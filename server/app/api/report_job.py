@@ -33,9 +33,6 @@ new_report_job = api.model('NewReportJob', {
     'label': fields.String(
         required=True,
         description='Human-readable report-job label'),
-    'sysConfigId': fields.Integer(
-        required=True,
-        description='Id of system-configuration-inputs record'),
     'workflowId': fields.Integer(
         required=True,
         description='Id of workflow record'),
@@ -81,12 +78,11 @@ class ReportJobListApi(Resource):
     @ns.expect(new_report_job, validate=True)
     def post(self):
         report_job_input = json.loads(request.data)
-        current_app.logger.debug(f'creating report job for sysConfig: {report_job_input["sysConfigId"]}')
+        current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
         report_job_status = JobStatus.query.get(report_job_input['jobStatus']['statusId'])
         new_report_job = ReportJob(
             label=report_job_input['label'],
             statusId=report_job_status.statusId,
-            sysConfigId=report_job_input['sysConfigId'],
             workflowId=report_job_input['workflowId']
         )
         db.session.add(new_report_job)

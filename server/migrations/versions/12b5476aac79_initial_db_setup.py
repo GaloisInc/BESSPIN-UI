@@ -109,10 +109,8 @@ def upgrade():
     op.create_table(
         'reportJobs',
         sa.Column('jobId', sa.Integer(), nullable=False),
-        sa.Column('sysConfigId', sa.Integer(), nullable=False),
         sa.Column('workflowId', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(['jobId'], ['jobs.jobId'], ),
-        sa.ForeignKeyConstraint(['sysConfigId'], ['systemConfigurationInputs.sysConfigId'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('jobId')
     )
