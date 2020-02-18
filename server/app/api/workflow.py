@@ -134,7 +134,7 @@ class WorkflowApi(Resource):
                   in reality, we will need to grab the logfile using
                   workflow.reportJob.logFilePath...
         """
-        if workflow.reportJob.status.label == 'succeeded':
+        if workflow.reportJob is not None and workflow.reportJob.status.label == 'succeeded':
             workflow.reportJob.log = 'test log output'
 
         return workflow
