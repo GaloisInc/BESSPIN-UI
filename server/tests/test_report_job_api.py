@@ -43,7 +43,7 @@ class TestReportJobApi(BesspinTestApiBaseClass):
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
-                jobStatus=dict(statusId=t.statusId, label=t.label),
+                status=dict(statusId=t.statusId, label=t.label),
                 workflowId=1
             )))
 
@@ -65,7 +65,7 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
-            'errors': {'jobStatus': "'jobStatus' is a required property", 'workflowId': "'workflowId' is a required property"},
+            'errors': {'status': "'status' is a required property", 'workflowId': "'workflowId' is a required property"},
             'message': 'Input payload validation failed'})
 
     def test_create_with_invalid_job_status_id(self):
@@ -78,7 +78,7 @@ class TestReportJobApi(BesspinTestApiBaseClass):
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=rj_test_label,
-                jobStatus=dict(statusId=1000, label='BAD STATUS'),
+                status=dict(statusId=1000, label='BAD STATUS'),
                 workflowId=wf.workflowId
             ))
         )
@@ -106,7 +106,7 @@ class TestReportJobApi(BesspinTestApiBaseClass):
             data=json.dumps(dict(
                 jobId=r.jobId,
                 label=label,
-                jobStatus=dict(statusId=t.statusId, label=t.label),
+                status=dict(statusId=t.statusId, label=t.label),
                 workflowId=self.workflowId
             )))
 
@@ -136,7 +136,7 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
-            'errors': {'jobStatus': "'jobStatus' is a required property", 'workflowId': "'workflowId' is a required property"},
+            'errors': {'status': "'status' is a required property", 'workflowId': "'workflowId' is a required property"},
             'message': 'Input payload validation failed'})
 
     def test_get(self):
