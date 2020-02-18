@@ -162,14 +162,6 @@ const mapJobStatusLabel = (label: string): JobStatus => {
     }
 };
 
-const mapJobStatus = (s: IServersideJobStatus): IJobStatus => {
-    return {
-        id: s.statusId,
-        label: mapJobStatusLabel(s.label),
-    };
-};
-
-
 export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystemConfigInput => {
     return {
         id: config.sysConfigId,
