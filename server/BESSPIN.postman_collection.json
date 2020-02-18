@@ -452,7 +452,7 @@
 			"response": []
 		},
 		{
-			"name": "Load Feature Models",
+			"name": "Load Feature Model by UID",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -469,18 +469,188 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\"model_uid\":\"f670c746-0fc8-4fe1-a71e-78c21cfbbf5d\"}"
+					"raw": "{\"model_uid\":\"7056a7e2-0531-4ebb-8877-a291b49cc6e0\"}"
 				},
 				"url": {
-					"raw": "{{apiHost}}/api/configurator/load_from_db/",
+					"raw": "{{apiHost}}/api/feature-model/fetch-by-uid",
 					"host": [
 						"{{apiHost}}"
 					],
 					"path": [
 						"api",
-						"configurator",
-						"load_from_db",
-						""
+						"feature-model",
+						"fetch-by-uid"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Feature Model to  Vulnerability Config Input",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModelUid\": \"7efe8010-3966-4211-8138-91aec88fd3ae\"\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input",
+						"1"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "app",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET a specific Vulnerability Configuration Input Record",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Vulnerability Config",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": 2,\n\t\"label\": \"test vuln config one\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModel\": {\n\t\t\"uid\": \"1abc3948\",\n\t\t\"source\": \"\",\n\t\t\"filename\": \"foo.fm.json\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a report job",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test report\",\n\t\"jobStatus\": {\n\t\t\"statusId\": 1,\n\t\t\"label\": \"running\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/report-job",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"report-job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a report job",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"jobId\": 2,\n\t\"workflowId\": 2,\n\t\"label\": \"test report two\",\n\t\"status\": {\n\t\t\"statusId\": 3,\n\t\t\"label\": \"succeeded\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/report-job/2",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"report-job",
+						"2"
 					]
 				}
 			},
