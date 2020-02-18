@@ -6,17 +6,31 @@ export interface IWorkflowError {
 }
 
 export enum JobStatus {
-    Running = 'Running',
-    Complete = 'Complete',
+    Running = 'running',
+    Succeeded = 'succeeded',
+    Failed = 'failed',
 };
 
 export interface IConfig {
   id: number;
+  createdAt: string;
+  updatedAt?: string;
+  label?: string;
   error?: IWorkflowError;
+}
+
+export interface ISystemConfig extends IConfig {
+    nixFilename: string;
+    nixConfig: string;
+}
+
+export interface IVulnerabilityConfig extends IConfig {
+    featureModel: string;
 }
 
 export interface IReportConfig extends IConfig {
   status: JobStatus;
+  log?: string;
 }
 
 export interface IWorkflow {
@@ -25,8 +39,8 @@ export interface IWorkflow {
     createdAt: string;
     hasError?: boolean;
     updatedAt?: string;
-    systemConfig?: IConfig;
-    testConfig?: IConfig;
+    systemConfig?: ISystemConfig;
+    testConfig?: IVulnerabilityConfig;
     report?: IReportConfig;
 }
 
@@ -47,6 +61,9 @@ export const DEFAULT_STATE: IWorkflowState = {
 // Actions
 
 export enum WorkflowActionTypes {
+    FETCH_WORKFLOW = 'workflow/fetch',
+    FETCH_WORKFLOW_FAILURE = 'workflow/fetch/error',
+    FETCH_WORKFLOW_SUCCESS = 'workflow/fetch/success',
     FETCH_WORKFLOWS = 'workflows/fetch',
     FETCH_WORKFLOWS_FAILURE = 'workflows/fetch/error',
     FETCH_WORKFLOWS_SUCCESS = 'workflows/fetch/success',
@@ -54,6 +71,27 @@ export enum WorkflowActionTypes {
     SUBMIT_WORKFLOW_FAILURE = 'workflow/submit/error',
     SUBMIT_WORKFLOW_SUCCESS = 'workflow/submit/success',
 }
+
+export const fetchWorkflow = (id: number) => {
+    return {
+        type: WorkflowActionTypes.FETCH_WORKFLOW,
+        payload: id,
+    } as const;
+};
+
+export const fetchWorkflowError = (error: string) => {
+    return {
+        type: WorkflowActionTypes.FETCH_WORKFLOW_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const fetchWorkflowSuccess = (workflow: IWorkflow) => {
+    return {
+        type: WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS,
+        payload: workflow,
+    } as const;
+};
 
 export const fetchWorkflows = () => {
     return {
@@ -97,6 +135,9 @@ export const submitWorkflowSuccess = (workflow: IWorkflow) => {
 };
 
 export type IWorkflowAction = ReturnType<
+    typeof fetchWorkflow |
+    typeof fetchWorkflowError |
+    typeof fetchWorkflowSuccess |
     typeof fetchWorkflows |
     typeof fetchWorkflowsError |
     typeof fetchWorkflowsSuccess |
@@ -106,6 +147,12 @@ export type IWorkflowAction = ReturnType<
 >;
 
 // Reducers
+
+const uniquifyIds = (ids: number[]): number[] => {
+    return ids.sort().reduce((acc: number[], id: number) => {
+        return acc.includes(id) ? acc : acc.concat(id);
+    }, []);
+};
 
 export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
     switch (action.type) {
@@ -120,10 +167,17 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
             return {
                 ...state,
                 byId,
-                ids: state.ids.concat(newIds).sort().reduce((acc: number[], id: number) => {
-                    return acc.includes(id) ? acc : acc.concat(id);
-                }, []),
+                ids: uniquifyIds(state.ids.concat(newIds)),
             };
+        case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
+            return {
+                ...state,
+                byId: {
+                    ...state.byId,
+                    [action.payload.id]: action.payload,
+                },
+                ids: uniquifyIds(state.ids.concat([action.payload.id])),
+            }
         case WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS:
             return {
                 ...state,
@@ -155,3 +209,8 @@ export const getWorkflowIds = createSelector(
     [getWorkflowState],
     (workflowState: IWorkflowState) => workflowState.ids,
 );
+
+export const getWorkflowById = (state: IState, id: number): IWorkflow | null => {
+    const workflowsById = getWorkflowsMap(state);
+    return workflowsById[id] || null;
+};

@@ -36,7 +36,7 @@ new_report_job = api.model('NewReportJob', {
     'workflowId': fields.Integer(
         required=True,
         description='Id of workflow record'),
-    'jobStatus': fields.Nested(
+    'status': fields.Nested(
         report_job_status,
         required=True,
         description='status of the job',  # noqa E501
@@ -57,6 +57,16 @@ existing_report_job = api.inherit(
             required=True,
             description='Repport Job identifier'
         ),
+        'createdAt': fields.String(
+            required=False,
+            description='Date report-job was initiallly created'),
+        'updatedAt': fields.String(
+            required=False,
+            description='Date report-job was last updated'),
+        'log': fields.String(
+            required=False,
+            description='contents of logging for given report'
+        )
     }
 )
 
@@ -79,7 +89,8 @@ class ReportJobListApi(Resource):
     def post(self):
         report_job_input = json.loads(request.data)
         current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
-        report_job_status = JobStatus.query.get(report_job_input['jobStatus']['statusId']) \
+        # TODO: should we even allow for a client to set the status?
+        report_job_status = JobStatus.query.get(report_job_input['status']['statusId']) \
             or JobStatus.query.filter_by(label=JobStatus.ALLOWED_STATUSES[0]).first()
 
         current_app.logger.debug(f'setting new report job status to: {report_job_status.label}')
@@ -106,7 +117,7 @@ class ReportJobpi(Resource):
     def put(self, jobId):
         current_app.logger.debug(f'updating report jobId: {jobId}')
         report_job_input = json.loads(request.data)
-        job_status = JobStatus.query.get(report_job_input['jobStatus']['statusId'])
+        job_status = JobStatus.query.get(report_job_input['status']['statusId'])
         existing_report_job = ReportJob.query.get_or_404(jobId)
         existing_report_job.label = report_job_input['label']
         existing_report_job.statusId = job_status.statusId

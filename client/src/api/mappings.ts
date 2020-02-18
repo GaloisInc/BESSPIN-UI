@@ -1,4 +1,10 @@
-import { ISelectionType, ValidateResult, IFeatureModelRecord, SelectionMode, ISystemConfigInput } from '../state/feature-model';
+import {
+    IFeatureModelRecord,
+    ISelectionType,
+    ISystemConfigInput,
+    SelectionMode,
+    ValidateResult,
+} from '../state/feature-model';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { IWorkflow, JobStatus } from '../state/workflow';
 
@@ -38,6 +44,21 @@ export interface IValidateResponse {
     configured_feature_model: IFeatureModel,
 }
 
+interface IServersideJobStatus {
+    statusId: number;
+    label: string;
+}
+
+export interface IServersideReport {
+    jobId: number;
+    createdAt: string;
+    updatedAt?: string;
+    label: string;
+    workflowId: number;
+    status: IServersideJobStatus;
+    log?: string;
+}
+
 export interface IServersideSysConfigInput {
     sysConfigId: number;
     workflowId: number;
@@ -65,11 +86,7 @@ export interface IServersideWorkflow {
     systemConfigurationInput?: IServersideSysConfigInput;
     vulnerabilityConfigurationInput?: IServersideVulnConfigInput;
     testConfigId?: number;
-    reportId?: number;
-    report?: {
-        id: number;
-        status: JobStatus;
-    }
+    reportJob?: IServersideReport;
 }
 
 /* eslint-enable camelcase */
@@ -122,15 +139,36 @@ export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): IF
     };
 };
 
-const mapIConfigToISelectionType = (c: IConfig): ISelectionType => {
+export const mapIConfigToISelectionType = (c: IConfig): ISelectionType => {
     return {
         uid: c.uid,
         mode: mapSelectionMode(c.mode),
         other: c.other,
         isValid: c.validated,
-    }
+    };
+};
 
-}
+const mapJobStatusLabel = (label: string): JobStatus => {
+    switch (label) {
+        case 'running':
+            return JobStatus.Running;
+        case 'succeeded':
+            return JobStatus.Succeeded;
+        case 'error':
+            return JobStatus.Failed;
+        default:
+            console.error(`Unknown jobStatus "${label}"`);
+            return JobStatus.Running; // TODO: is this really how we want to handle this?
+    }
+};
+
+const mapJobStatus = (s: IServersideJobStatus): IJobStatus => {
+    return {
+        id: s.statusId,
+        label: mapJobStatusLabel(s.label),
+    };
+};
+
 
 export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystemConfigInput => {
     return {
@@ -184,13 +222,33 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
         updatedAt: workflow.updatedAt,
         label: workflow.label,
         ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
-            systemConfig: { id: workflow.systemConfigurationInput.sysConfigId, },
+            systemConfig: {
+                id: workflow.systemConfigurationInput.sysConfigId,
+                label: workflow.systemConfigurationInput.label,
+                createdAt: workflow.systemConfigurationInput.createdAt,
+                nixFilename: workflow.systemConfigurationInput.nixConfigFilename,
+                nixConfig: workflow.systemConfigurationInput.nixConfig,
+                updatedAt: workflow.systemConfigurationInput.updatedAt,
+            },
         } : null),
         ...(workflow.vulnerabilityConfigurationInput && workflow.vulnerabilityConfigurationInput.vulnConfigId ? {
-            testConfig: { id: workflow.vulnerabilityConfigurationInput.vulnConfigId, },
+            testConfig: {
+                id: workflow.vulnerabilityConfigurationInput.vulnConfigId,
+                createdAt: workflow.vulnerabilityConfigurationInput.createdAt,
+                updatedAt: workflow.vulnerabilityConfigurationInput.updatedAt,
+                label: workflow.vulnerabilityConfigurationInput.label,
+                featureModel: workflow.vulnerabilityConfigurationInput.featureModel,
+            },
         } : null),
-        ...(workflow.reportId && workflow.report?.status ? {
-            report: { id: workflow.reportId, status: workflow.report.status },
+        ...(workflow.reportJob ? {
+            report: {
+                id: workflow.reportJob.jobId,
+                createdAt: workflow.reportJob.createdAt,
+                updatedAt: workflow.reportJob.updatedAt,
+                label: workflow.reportJob.label,
+                status: mapJobStatusLabel(workflow.reportJob.status.label),
+                ...(workflow.reportJob.log ? { log: workflow.reportJob.log } : null),
+            },
         } : null),
     };
 };

@@ -127,4 +127,14 @@ class WorkflowApi(Resource):
             fetch a workflow for the given workflowId
         """
         current_app.logger.debug(f'fetching workflowId: {workflowId}')
-        return Workflow.query.get_or_404(workflowId)
+        workflow = Workflow.query.get_or_404(workflowId)
+
+        """
+            NOTE: this is a hack to get things working
+                  in reality, we will need to grab the logfile using
+                  workflow.reportJob.logFilePath...
+        """
+        if workflow.reportJob.status.label == 'succeeded':
+            workflow.reportJob.log = 'test log output'
+
+        return workflow

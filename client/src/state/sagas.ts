@@ -6,6 +6,7 @@ import {
 
 import {
     fetchConfigurator,
+    fetchWorkflow as fetchWorkflowApi,
     fetchWorkflows as fetchWorkflowsApi,
     fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
     submitConfigurator,
@@ -50,6 +51,9 @@ import {
 } from './feature-model';
 
 import {
+    fetchWorkflow as fetchWorkflowAction,
+    fetchWorkflowError,
+    fetchWorkflowSuccess,
     fetchWorkflowsError,
     fetchWorkflowsSuccess,
     submitWorkflow as submitWorkflowAction,
@@ -85,6 +89,17 @@ function* fetchSystemConfigInput(action: ReturnType<typeof fetchSystemConfigurat
     } catch (e) {
         console.error(e);
         yield put(fetchSystemConfigInputFailure(e.message));
+    }
+}
+
+function* fetchWorkflow(action: ReturnType<typeof fetchWorkflowAction>) {
+    try {
+        const workflow = yield call(fetchWorkflowApi, action.payload);
+        const mappedWorkflow = mapWorkflow(workflow);
+        yield put(fetchWorkflowSuccess(mappedWorkflow));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchWorkflowError(e.message));
     }
 }
 
@@ -189,6 +204,7 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOWS, fetchWorkflows);
+    yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOW, fetchWorkflow);
     yield takeLatest(WorkflowActionTypes.SUBMIT_WORKFLOW, submitWorkflow);
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT, submitSystemConfigInput);
     yield takeLatest(SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT, fetchSystemConfigInput);

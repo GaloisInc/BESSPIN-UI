@@ -57,6 +57,18 @@ export const fetchConfigurators = async () => {
     .then(extractData);
 };
 
+export const fetchWorkflow = async (id: number) => {
+    return axios.request({
+        url: `/api/workflow/${id}`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+}
+
 export const fetchWorkflows = async () => {
     return axios.request({
         url: '/api/workflow',

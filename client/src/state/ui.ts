@@ -40,6 +40,7 @@ export type IUiAction =
 
 export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
     switch (action.type) {
+        case WorkflowActionTypes.FETCH_WORKFLOW:
         case WorkflowActionTypes.FETCH_WORKFLOWS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT:
             return {
@@ -52,6 +53,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
                 ...state,
                 isLoading: true,
             };
+        case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_SUCCESS:
         case SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS:
@@ -60,6 +62,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
                 error: '',
                 isLoading: false,
             };
+        case WorkflowActionTypes.FETCH_WORKFLOW_FAILURE:
         case WorkflowActionTypes.FETCH_WORKFLOWS_FAILURE:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_FAILURE:
         case SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE:
