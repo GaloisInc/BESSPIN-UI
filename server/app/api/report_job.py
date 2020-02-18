@@ -91,13 +91,14 @@ class ReportJobListApi(Resource):
         current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
         # TODO: should we even allow for a client to set the status?
         report_job_status = JobStatus.query.get(report_job_input['status']['statusId']) \
-            or JobStatus.query.filter_by(label=JobStatus.ALLOWED_STATUSES[0]).first()
+            or JobStatus.query.filter_by(label=JobStatus.INITIAL_STATUS).first()
 
         current_app.logger.debug(f'setting new report job status to: {report_job_status.label}')
 
         """
             INSERT NIX CALLS HERE...
         """
+
         new_report_job = ReportJob(
             label=report_job_input['label'],
             statusId=report_job_status.statusId,

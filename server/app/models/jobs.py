@@ -14,7 +14,8 @@ class JobStatus(db.Model):
     def __repr__(self):
         return '<JobStatus id="{}" label="{}">'.format(self.statusId, self.label)
 
-    ALLOWED_STATUSES = ['running', 'failed', 'succeeded']
+    INITIAL_STATUS = 'running'
+    ALLOWED_STATUSES = [INITIAL_STATUS, 'failed', 'succeeded']
 
     @staticmethod
     def load_allowed_statuses(db_conn=db.session):
