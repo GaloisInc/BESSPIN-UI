@@ -241,6 +241,11 @@ export const getWorkflowIds = createSelector(
     (workflowState: IWorkflowState) => workflowState.ids,
 );
 
+// NOTE: this is not a standard selector from the perspective of reselect
+//       since it takes an argument.
+//       Not sure if needed, but there is a recommended implementation
+//       that continues to leverage reselect's memoization:
+//       https://github.com/reduxjs/reselect/blob/master/README.md#q-how-do-i-create-a-selector-that-takes-an-argument
 export const getWorkflowById = (state: IState, id: number): IWorkflow | null => {
     const workflowsById = getWorkflowsMap(state);
     return workflowsById[id] || null;
