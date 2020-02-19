@@ -180,3 +180,19 @@ export const submitValidateConfiguration = async (uid: string, selectedNodes: IC
     .then(trapHTMLError)
     .then(extractData);
 };
+
+export const triggerReport = async (workflowId: number, workflowLabel: string) => {
+    return axios.request({
+        url: `/api/report-job`,
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: JSON.stringify({
+            workflowId,
+            label: `report job for ${workflowLabel}`,
+        }),
+    })
+    .then(trapHTMLError)
+    .then(extractData);  
+}
