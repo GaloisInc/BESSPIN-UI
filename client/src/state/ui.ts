@@ -49,6 +49,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
                 dataRequested: true,
             };
         case SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT:
+        case WorkflowActionTypes.TRIGGER_REPORT:
             return {
                 ...state,
                 isLoading: true,
@@ -57,6 +58,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
         case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_SUCCESS:
         case SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS:
+        case WorkflowActionTypes.TRIGGER_REPORT_SUCCESS:
             return {
                 ...state,
                 error: '',
@@ -66,6 +68,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction) => {
         case WorkflowActionTypes.FETCH_WORKFLOWS_FAILURE:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_FAILURE:
         case SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE:
+        case WorkflowActionTypes.TRIGGER_REPORT_FAILURE:
             return {
                 ...state,
                 error: action.data,

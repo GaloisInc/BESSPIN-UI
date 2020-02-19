@@ -15,6 +15,7 @@ import {
     submitValidateConfiguration as submitValidateConfigurationApi,
     updateSystemConfigurationInput as updateSystemConfigurationInputApi,
     submitVulnerabilityClass as submitVulnerabilityClassApi,
+    triggerReport as triggerReportApi,
 } from '../api/api';
 
 import {
@@ -59,6 +60,9 @@ import {
     submitWorkflow as submitWorkflowAction,
     submitWorkflowError,
     submitWorkflowSuccess,
+    triggerReport as triggerReportAction,
+    triggerReportError,
+    triggerReportSuccess,
     WorkflowActionTypes,
 } from './workflow';
 
@@ -180,6 +184,22 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
     }
 }
 
+function* triggerReport(action: ReturnType<typeof triggerReportAction>) {
+    try {
+        // NOTE: the api call to trigger a report does return a report-job payload
+        //       but since we are currently running this from the overview page
+        //       where we are working with workflows, we ignore that and just re-fetch
+        //       the relevant workflow
+        yield call(triggerReportApi, action.data.workflowId, action.data.workflowLabel);
+        const workflow = yield call(fetchWorkflowApi, action.data.workflowId);
+        const mappedWorkflow = mapWorkflow(workflow);
+        yield put(triggerReportSuccess(mappedWorkflow));
+    } catch (e) {
+        console.error(e);
+        put(triggerReportError(e.message));
+    }
+}
+
 function* updateSystemConfigInput(action: ReturnType<typeof updateSystemConfigInputAction>) {
     try {
         const serversideConfig = mapSystemConfigInputToServerside(action.data);
@@ -209,4 +229,5 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT, submitSystemConfigInput);
     yield takeLatest(SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT, fetchSystemConfigInput);
     yield takeLatest(SystemActionTypes.UPDATE_SYSTEM_CONFIG_INPUT, updateSystemConfigInput);
+    yield takeLatest(WorkflowActionTypes.TRIGGER_REPORT, triggerReport);
 };

@@ -70,6 +70,9 @@ export enum WorkflowActionTypes {
     SUBMIT_WORKFLOW = 'workflow/submit',
     SUBMIT_WORKFLOW_FAILURE = 'workflow/submit/error',
     SUBMIT_WORKFLOW_SUCCESS = 'workflow/submit/success',
+    TRIGGER_REPORT = 'workflow/trigger-report',
+    TRIGGER_REPORT_FAILURE = 'workflow/trigger-report/error',
+    TRIGGER_REPORT_SUCCESS = 'workflow/trigger-report/success',
 }
 
 export const fetchWorkflow = (id: number) => {
@@ -134,6 +137,30 @@ export const submitWorkflowSuccess = (workflow: IWorkflow) => {
     } as const;
 };
 
+export const triggerReport = (workflowId: number, workflowLabel: string) => {
+    return {
+        type: WorkflowActionTypes.TRIGGER_REPORT,
+        data: {
+            workflowId,
+            workflowLabel,
+        },
+    } as const;
+};
+
+export const triggerReportError = (error: string) => {
+    return {
+        type: WorkflowActionTypes.TRIGGER_REPORT_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const triggerReportSuccess = (workflow: IWorkflow) => {
+    return {
+        type: WorkflowActionTypes.TRIGGER_REPORT_SUCCESS,
+        data: workflow,
+    } as const;
+};
+
 export type IWorkflowAction = ReturnType<
     typeof fetchWorkflow |
     typeof fetchWorkflowError |
@@ -143,7 +170,10 @@ export type IWorkflowAction = ReturnType<
     typeof fetchWorkflowsSuccess |
     typeof submitWorkflow |
     typeof submitWorkflowError |
-    typeof submitWorkflowSuccess
+    typeof submitWorkflowSuccess |
+    typeof triggerReport |
+    typeof triggerReportError |
+    typeof triggerReportSuccess
 >;
 
 // Reducers
@@ -170,6 +200,7 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
                 ids: uniquifyIds(state.ids.concat(newIds)),
             };
         case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
+        case WorkflowActionTypes.TRIGGER_REPORT_SUCCESS:
             return {
                 ...state,
                 byId: {
