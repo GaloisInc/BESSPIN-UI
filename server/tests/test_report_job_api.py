@@ -65,27 +65,8 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
-            'errors': {'status': "'status' is a required property", 'workflowId': "'workflowId' is a required property"},
+            'errors': {'workflowId': "'workflowId' is a required property"},
             'message': 'Input payload validation failed'})
-
-    def test_create_with_invalid_job_status_id(self):
-        rj_test_label = f'test report job {datetime.now()}'
-        wf_test_label = f'test workflow {datetime.now()}'
-        wf = create_workflow(label=wf_test_label)
-
-        response = self.client.post(
-            '/api/report-job',
-            headers=DEFAULT_HEADERS,
-            data=json.dumps(dict(
-                label=rj_test_label,
-                status=dict(statusId=1000, label='BAD STATUS'),
-                workflowId=wf.workflowId
-            ))
-        )
-        self.assertEqual(response.status_code, 200)
-        created_report_job = ReportJob.query.filter_by(label=rj_test_label).first()
-        self.assertIsNotNone(created_report_job)
-        self.assertEqual(created_report_job.status.label, JobStatus.ALLOWED_STATUSES[0])
 
     def test_update(self):
         r = ReportJob().query.all()

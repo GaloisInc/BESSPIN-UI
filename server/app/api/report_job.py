@@ -36,12 +36,6 @@ new_report_job = api.model('NewReportJob', {
     'workflowId': fields.Integer(
         required=True,
         description='Id of workflow record'),
-    'status': fields.Nested(
-        report_job_status,
-        required=True,
-        description='status of the job',  # noqa E501
-        skip_none=True
-    )
 })
 
 """
@@ -63,6 +57,12 @@ existing_report_job = api.inherit(
         'updatedAt': fields.String(
             required=False,
             description='Date report-job was last updated'),
+        'status': fields.Nested(
+            report_job_status,
+            required=True,
+            description='status of the job',  # noqa E501
+            skip_none=True
+        ),
         'log': fields.String(
             required=False,
             description='contents of logging for given report'
@@ -89,9 +89,7 @@ class ReportJobListApi(Resource):
     def post(self):
         report_job_input = json.loads(request.data)
         current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
-        # TODO: should we even allow for a client to set the status?
-        report_job_status = JobStatus.query.get(report_job_input['status']['statusId']) \
-            or JobStatus.query.filter_by(label=JobStatus.INITIAL_STATUS).first()
+        report_job_status = JobStatus.query.filter_by(label=JobStatus.INITIAL_STATUS).first()
 
         current_app.logger.debug(f'setting new report job status to: {report_job_status.label}')
 
