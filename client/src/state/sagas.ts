@@ -94,7 +94,7 @@ function* fetchSystemConfigInput(action: ReturnType<typeof fetchSystemConfigurat
 
 function* fetchWorkflow(action: ReturnType<typeof fetchWorkflowAction>) {
     try {
-        const workflow = yield call(fetchWorkflowApi, action.payload);
+        const workflow = yield call(fetchWorkflowApi, action.data);
         const mappedWorkflow = mapWorkflow(workflow);
         yield put(fetchWorkflowSuccess(mappedWorkflow));
     } catch (e) {

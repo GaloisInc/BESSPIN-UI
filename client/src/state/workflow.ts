@@ -75,7 +75,7 @@ export enum WorkflowActionTypes {
 export const fetchWorkflow = (id: number) => {
     return {
         type: WorkflowActionTypes.FETCH_WORKFLOW,
-        payload: id,
+        data: id,
     } as const;
 };
 
@@ -89,7 +89,7 @@ export const fetchWorkflowError = (error: string) => {
 export const fetchWorkflowSuccess = (workflow: IWorkflow) => {
     return {
         type: WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS,
-        payload: workflow,
+        data: workflow,
     } as const;
 };
 
@@ -109,7 +109,7 @@ export const fetchWorkflowsError = (error: string) => {
 export const fetchWorkflowsSuccess = (workflows: IWorkflow[]) => {
     return {
         type: WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS,
-        payload: workflows,
+        data: workflows,
     } as const;
 };
 
@@ -130,7 +130,7 @@ export const submitWorkflowError = (error: string) => {
 export const submitWorkflowSuccess = (workflow: IWorkflow) => {
     return {
         type: WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS,
-        payload: workflow,
+        data: workflow,
     } as const;
 };
 
@@ -157,7 +157,7 @@ const uniquifyIds = (ids: number[]): number[] => {
 export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
     switch (action.type) {
         case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
-            const byId: IWorkflowMap = action.payload.reduce((acc, workflow) => {
+            const byId: IWorkflowMap = action.data.reduce((acc, workflow) => {
                 return {
                     ...acc,
                     [workflow.id]: workflow,
@@ -174,18 +174,18 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
                 ...state,
                 byId: {
                     ...state.byId,
-                    [action.payload.id]: action.payload,
+                    [action.data.id]: action.data,
                 },
-                ids: uniquifyIds(state.ids.concat([action.payload.id])),
+                ids: uniquifyIds(state.ids.concat([action.data.id])),
             }
         case WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS:
             return {
                 ...state,
                 byId: {
                     ...state.byId,
-                    [action.payload.id]: action.payload,
+                    [action.data.id]: action.data,
                 },
-                ids: state.ids.concat(action.payload.id),
+                ids: state.ids.concat(action.data.id),
             };
         default:
             return state;
