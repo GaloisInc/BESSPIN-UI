@@ -66,7 +66,7 @@ export const Report: React.FC<IReportProps> = ({ dataRequested, fetchWorkflow, r
     return (
         <Container className='Report'>
             <Header />
-            <h1>Report</h1>
+            <h1>Report: {report ? report.label : '...'}</h1>
             <Container>
                 <AceEditor
                     ref={aceRef}
