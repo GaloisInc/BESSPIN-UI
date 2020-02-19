@@ -45,6 +45,18 @@ export const fetchConfigurator = async (systemUid: string) => {
     .then(extractData);
 };
 
+export const fetchConfiguratorByVulnConfig = async (vulnConfigId: number) => {
+    return axios.request({
+        url: `/api/vulnerability-config-input/${vulnConfigId}/feature-model`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
 export const fetchConfigurators = async () => {
     return axios.request({
         url: '/api/feature-model',

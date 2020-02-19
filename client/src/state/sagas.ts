@@ -9,6 +9,7 @@ import {
     fetchWorkflow as fetchWorkflowApi,
     fetchWorkflows as fetchWorkflowsApi,
     fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
+    fetchConfiguratorByVulnConfig as fetchConfiguratatorByVulnConfigApi,
     submitConfigurator,
     submitWorkflow as submitWorkflowApi,
     submitSystemConfigurationInput as submitSystemConfigurationInputApi,
@@ -33,6 +34,9 @@ import {
     fetchSystem as fetchSystemAction,
     fetchSystemFailure,
     fetchSystemSuccess,
+    fetchSystemByVulnConfig as fetchSystemByVulnConfigAction,
+    fetchSystemByVulnConfigFailure,
+    fetchSystemByVulnConfigSuccess,
     fetchSystemConfigInput as fetchSystemConfigurationInputAction,
     fetchSystemConfigInputFailure,
     fetchSystemConfigInputSuccess,
@@ -93,6 +97,17 @@ function* fetchSystemConfigInput(action: ReturnType<typeof fetchSystemConfigurat
     } catch (e) {
         console.error(e);
         yield put(fetchSystemConfigInputFailure(e.message));
+    }
+}
+
+function* fetchSystemByVulnConfig(action: ReturnType<typeof fetchSystemByVulnConfigAction>) {
+    try {
+        const configurator = yield call(fetchConfiguratatorByVulnConfigApi, action.data.vulnConfigId);
+        const mappedConfigurator = mapConfiguratorToSystem(configurator);
+        yield put(fetchSystemByVulnConfigSuccess(mappedConfigurator));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchSystemByVulnConfigFailure(e.message));
     }
 }
 
@@ -222,6 +237,7 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VULNERABILITY_CLASS, submitVulnerabilityClass);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
+    yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN, fetchSystemByVulnConfig);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOWS, fetchWorkflows);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOW, fetchWorkflow);
