@@ -356,8 +356,7 @@ class ConfiguratorModel(Resource):
 
         current_app.logger.debug(f'going to fetch feature_model({uid})')
 
-        vuln_conf_input = VulnerabilityConfigurationInput.query.filter_by(featureModelUid=uid).first()
-        model = FeatureModel.query.get(vuln_conf_input.featureModelUid)
+        model = FeatureModel.query.get(uid)
 
         if model is None:
             current_app.logger.debug(f'Unable to find feature-model({uid})')
