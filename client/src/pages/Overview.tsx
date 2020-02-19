@@ -28,6 +28,7 @@ import {
   IConfig,
   IReportConfig,
   JobStatus,
+  triggerReport,
 } from '../state/workflow';
 
 import {
@@ -53,7 +54,8 @@ interface IWorkflowProps {
   disabled?: boolean;
 }
 interface IReportProps {
-  workflowId?: number;
+  workflowId: number;
+  onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   config?: IReportConfig;
   disabled?: boolean;
 }
@@ -73,13 +75,14 @@ interface IWorkflowButton {
   noNextStep?: boolean;
   tooltipError?: string;
   inProgress?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
 interface IErrorTooltipProps extends PopoverProps {
   label: string;
 }
 
-const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabled, noNextStep, tooltipError, inProgress }) => {
+const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabled, noNextStep, tooltipError, inProgress, onClick }) => {
   const renderTooltip: React.FC<IErrorTooltipProps> = (props) => (<Popover {...props} content={true}>{props.label}</Popover>);
   const variantType = inProgress ? 'warning' :
                         disabled ? 'secondary' :
@@ -90,7 +93,7 @@ const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabl
       <Button disabled={disabled} variant='danger' href={url}>{label}</Button>
     </OverlayTrigger>
     : (
-      <Button disabled={disabled} variant={variantType} href={url}>
+      <Button disabled={disabled} variant={variantType} href={url} {...(onClick ? { onClick } : null)}>
         { inProgress && <Spinner as='span' animation='grow' size='sm' role='status' aria-hidden='true' /> }
         {label}
         {!(disabled || noNextStep ) && variantType !== 'primary' && <FontAwesomeIcon icon={faChevronRight} />
@@ -122,11 +125,18 @@ const TestConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabl
   return <CreateEditButton label='Test' path='/test-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
 };
 
-const ReportButton: React.FC<IReportProps> = ({ workflowId, config, disabled }) => {
+const ReportButton: React.FC<IReportProps> = ({ workflowId, onClick, config, disabled }) => {
   const inProgress = config && config.status === JobStatus.Running;
   const label = !config ? 'Build/Run' :
                 inProgress ? 'Running' : 'View';
-  return <WorkflowButton label={label} url={`/report/${workflowId}`} tooltipError={config && config.error && config.error.message} disabled={disabled} noNextStep={true} inProgress={inProgress} />;
+  return <WorkflowButton
+          label={label}
+          url={`/report/${workflowId}`}
+          tooltipError={config && config.error && config.error.message}
+          disabled={disabled}
+          noNextStep={true}
+          inProgress={inProgress}
+          onClick={onClick} />;
 };
 
 const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
@@ -147,6 +157,7 @@ interface IStateFromProps {
 interface IDispatchFromProps {
   dispatch: Dispatch;
   createWorkflow: (_: string) => void;
+  triggerReport: typeof triggerReport;
 }
 
 export type IOverviewProps  = IStateFromProps & IDispatchFromProps;
@@ -157,9 +168,9 @@ export const Overview: React.FC<IOverviewProps> = ({
   isLoading,
   workflows,
   createWorkflow,
+  triggerReport,
 }) => {
 
-  // useEffect is a way for us to trigger side-effects to load systems
   useEffect(() => {
     dataRequested || (dispatch && dispatch(fetchWorkflows()));
   });
@@ -224,7 +235,18 @@ export const Overview: React.FC<IOverviewProps> = ({
                   <TestConfigButton workflowId={w.id} config={w.testConfig} />
                 </ButtonGroup>
               </td>
-              <td><ReportButton disabled={reportShouldBeDisabled(w)} workflowId={w.id} config={w.report} /></td>
+              <td>
+                <ReportButton
+                  disabled={reportShouldBeDisabled(w)}
+                  workflowId={w.id}
+                  onClick={ (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                    if (!w.report) {
+                      e.preventDefault();
+                      triggerReport(w.id, w.label);
+                    }
+                  }}
+                  config={w.report} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -248,6 +270,7 @@ const mapStateToProps = (state: IState): IStateFromProps => {
 const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
   dispatch,
   createWorkflow: (label: string) => dispatch(submitWorkflow(label)),
+  triggerReport: (workflowId: number, workflowLabel: string) => dispatch(triggerReport(workflowId, workflowLabel)),
 });
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
