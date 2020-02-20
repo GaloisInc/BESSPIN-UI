@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Dispatch } from 'redux';
 import { connect } from 'react-redux'
 
 import {
@@ -55,24 +54,24 @@ interface IStateFromProps {
 }
 
 interface IDispatchFromProps {
-  dispatch: Dispatch;
-  createWorkflow: (_: string) => void;
+  createWorkflow: typeof submitWorkflow;
   triggerReport: typeof triggerReport;
+  fetchWorkflows: typeof fetchWorkflows;
 }
 
 export type IOverviewProps  = IStateFromProps & IDispatchFromProps;
 
 export const Overview: React.FC<IOverviewProps> = ({
   dataRequested,
-  dispatch,
   isLoading,
   workflows,
+  fetchWorkflows,
   createWorkflow,
   triggerReport,
 }) => {
 
   useEffect(() => {
-    dataRequested || (dispatch && dispatch(fetchWorkflows()));
+    dataRequested || fetchWorkflows();
   });
 
   const [newWorkflow, setNewWorkflow] = useState('');
@@ -167,11 +166,11 @@ const mapStateToProps = (state: IState): IStateFromProps => {
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
-  dispatch,
-  createWorkflow: (label: string) => dispatch(submitWorkflow(label)),
-  triggerReport: (workflowId: number, workflowLabel: string) => dispatch(triggerReport(workflowId, workflowLabel)),
-});
+const mapDispatchToProps = {
+  createWorkflow: submitWorkflow,
+  fetchWorkflows,
+  triggerReport,
+};
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
 
