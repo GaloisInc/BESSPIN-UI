@@ -26,13 +26,14 @@ def upgrade():
         sa.Column('label', sa.String(length=64), nullable=False),
         sa.PrimaryKeyConstraint('statusId')
     )
-    op.create_table(
-        'versionedResourceTypes',
-        sa.Column('resourceTypeId', sa.Integer(), nullable=False),
-        sa.Column('label', sa.String(length=64), nullable=False),
-        sa.PrimaryKeyConstraint('resourceTypeId')
-    )
-    op.create_index(op.f('ix_versionedResourceTypes_label'), 'versionedResourceTypes', ['label'], unique=True)
+    # Not needed yet...
+    # op.create_table(
+    #     'versionedResourceTypes',
+    #     sa.Column('resourceTypeId', sa.Integer(), nullable=False),
+    #     sa.Column('label', sa.String(length=64), nullable=False),
+    #     sa.PrimaryKeyConstraint('resourceTypeId')
+    # )
+    # op.create_index(op.f('ix_versionedResourceTypes_label'), 'versionedResourceTypes', ['label'], unique=True)
     op.create_table(
         'vulnerabilityConfigurationInputs',
         sa.Column('vulnConfigId', sa.Integer(), nullable=False),
@@ -43,7 +44,7 @@ def upgrade():
         sa.Column('vulnClass', sa.String(32), nullable=False),
         sa.Column('featureModelUid', sa.String(64), nullable=False),
         sa.PrimaryKeyConstraint('vulnConfigId'),
-        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='SET NULL'),
+        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['featureModelUid'], ['feature_models.uid']),
     )
     op.create_table(
@@ -61,51 +62,55 @@ def upgrade():
         sa.PrimaryKeyConstraint('jobId'),
         sa.UniqueConstraint('logFilePath')
     )
-    op.create_table(
-        'versionedResources',
-        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
-        sa.Column('createdAt', sa.DateTime(), nullable=False),
-        sa.Column('updatedAt', sa.DateTime(), nullable=True),
-        sa.Column('resourceId', sa.Integer(), nullable=False),
-        sa.Column('resourceTypeId', sa.Integer(), nullable=False),
-        sa.Column('url', sa.String(length=256), nullable=False),
-        sa.Column('version', sa.String(length=256), nullable=False),
-        sa.ForeignKeyConstraint(['resourceTypeId'], ['versionedResourceTypes.resourceTypeId'], ),
-        sa.PrimaryKeyConstraint('resourceId'),
-        sa.UniqueConstraint('url', 'version', name='versioned_resources_uc')
-    )
-    op.create_index(op.f('ix_versionedResources_url'), 'versionedResources', ['url'], unique=False)
-    op.create_index(op.f('ix_versionedResources_version'), 'versionedResources', ['version'], unique=False)
-    op.create_table(
-        'featureModelInputs',
-        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
-        sa.Column('createdAt', sa.DateTime(), nullable=False),
-        sa.Column('updatedAt', sa.DateTime(), nullable=True),
-        sa.Column('featModelId', sa.Integer(), nullable=False),
-        sa.Column('hdlId', sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(['hdlId'], ['versionedResources.resourceId'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('featModelId')
-    )
-    op.create_table(
-        'featureConfigurationInputs',
-        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
-        sa.Column('createdAt', sa.DateTime(), nullable=False),
-        sa.Column('updatedAt', sa.DateTime(), nullable=True),
-        sa.Column('featConfigId', sa.Integer(), nullable=False),
-        sa.Column('configurationJson', sa.Text(), nullable=True, comment='JSON generated during feature configuration'),
-        sa.Column('featModelId', sa.Integer(), nullable=False, comment='can have many configurations for a model'),
-        sa.ForeignKeyConstraint(['featModelId'], ['featureModelInputs.featModelId'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('featConfigId'),
-        sa.UniqueConstraint('featModelId', 'configurationJson', name='feat_config_inputs_uc')
-    )
-    op.create_table(
-        'featureExtractionJobs',
-        sa.Column('jobId', sa.Integer(), nullable=False),
-        sa.Column('featModelId', sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(['featModelId'], ['featureModelInputs.featModelId'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['jobId'], ['jobs.jobId'], ),
-        sa.PrimaryKeyConstraint('jobId')
-    )
+    # Not needed yet...
+    # op.create_table(
+    #     'versionedResources',
+    #     sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+    #     sa.Column('createdAt', sa.DateTime(), nullable=False),
+    #     sa.Column('updatedAt', sa.DateTime(), nullable=True),
+    #     sa.Column('resourceId', sa.Integer(), nullable=False),
+    #     sa.Column('resourceTypeId', sa.Integer(), nullable=False),
+    #     sa.Column('url', sa.String(length=256), nullable=False),
+    #     sa.Column('version', sa.String(length=256), nullable=False),
+    #     sa.ForeignKeyConstraint(['resourceTypeId'], ['versionedResourceTypes.resourceTypeId'], ),
+    #     sa.PrimaryKeyConstraint('resourceId'),
+    #     sa.UniqueConstraint('url', 'version', name='versioned_resources_uc')
+    # )
+    # op.create_index(op.f('ix_versionedResources_url'), 'versionedResources', ['url'], unique=False)
+    # op.create_index(op.f('ix_versionedResources_version'), 'versionedResources', ['version'], unique=False)
+    # Not needed yet...
+    # op.create_table(
+    #     'featureModelInputs',
+    #     sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+    #     sa.Column('createdAt', sa.DateTime(), nullable=False),
+    #     sa.Column('updatedAt', sa.DateTime(), nullable=True),
+    #     sa.Column('featModelId', sa.Integer(), nullable=False),
+    #     sa.Column('hdlId', sa.Integer(), nullable=False),
+    #     sa.ForeignKeyConstraint(['hdlId'], ['versionedResources.resourceId'], ondelete='CASCADE'),
+    #     sa.PrimaryKeyConstraint('featModelId')
+    # )
+    # Not needed yet...
+    # op.create_table(
+    #     'featureConfigurationInputs',
+    #     sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+    #     sa.Column('createdAt', sa.DateTime(), nullable=False),
+    #     sa.Column('updatedAt', sa.DateTime(), nullable=True),
+    #     sa.Column('featConfigId', sa.Integer(), nullable=False),
+    #     sa.Column('configurationJson', sa.Text(), nullable=True, comment='JSON generated during feature configuration'),
+    #     sa.Column('featModelId', sa.Integer(), nullable=False, comment='can have many configurations for a model'),
+    #     sa.ForeignKeyConstraint(['featModelId'], ['featureModelInputs.featModelId'], ondelete='CASCADE'),
+    #     sa.PrimaryKeyConstraint('featConfigId'),
+    #     sa.UniqueConstraint('featModelId', 'configurationJson', name='feat_config_inputs_uc')
+    # )
+    # Not needed yet...
+    # op.create_table(
+    #     'featureExtractionJobs',
+    #     sa.Column('jobId', sa.Integer(), nullable=False),
+    #     sa.Column('featModelId', sa.Integer(), nullable=False),
+    #     sa.ForeignKeyConstraint(['featModelId'], ['featureModelInputs.featModelId'], ondelete='CASCADE'),
+    #     sa.ForeignKeyConstraint(['jobId'], ['jobs.jobId'], ),
+    #     sa.PrimaryKeyConstraint('jobId')
+    # )
     op.create_table(
         'reportJobs',
         sa.Column('jobId', sa.Integer(), nullable=False),
@@ -141,22 +146,23 @@ def upgrade():
         ),
         sa.Column('sysConfigId', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('sysConfigId'),
-        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='SET NULL'),
+        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='CASCADE'),
         sa.UniqueConstraint('nixConfig', 'workflowId', name='sys_config_workflow_uc')
     )
-    op.create_table(
-        'testRunInputs',
-        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
-        sa.Column('createdAt', sa.DateTime(), nullable=False),
-        sa.Column('updatedAt', sa.DateTime(), nullable=True),
-        sa.Column('testRunId', sa.Integer(), nullable=False),
-        sa.Column('sysConfigId', sa.Integer(), nullable=True),
-        sa.Column('vulnConfigId', sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(['sysConfigId'], ['systemConfigurationInputs.sysConfigId'], ondelete='SET NULL'),
-        sa.ForeignKeyConstraint(['vulnConfigId'], ['vulnerabilityConfigurationInputs.vulnConfigId'], ondelete='SET NULL'),
-        sa.PrimaryKeyConstraint('testRunId'),
-        sa.UniqueConstraint('sysConfigId', 'vulnConfigId', name='test_runs_uc')
-    )
+    # Not needed yet...
+    # op.create_table(
+    #     'testRunInputs',
+    #     sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+    #     sa.Column('createdAt', sa.DateTime(), nullable=False),
+    #     sa.Column('updatedAt', sa.DateTime(), nullable=True),
+    #     sa.Column('testRunId', sa.Integer(), nullable=False),
+    #     sa.Column('sysConfigId', sa.Integer(), nullable=True),
+    #     sa.Column('vulnConfigId', sa.Integer(), nullable=True),
+    #     sa.ForeignKeyConstraint(['sysConfigId'], ['systemConfigurationInputs.sysConfigId'], ondelete='SET NULL'),
+    #     sa.ForeignKeyConstraint(['vulnConfigId'], ['vulnerabilityConfigurationInputs.vulnConfigId'], ondelete='SET NULL'),
+    #     sa.PrimaryKeyConstraint('testRunId'),
+    #     sa.UniqueConstraint('sysConfigId', 'vulnConfigId', name='test_runs_uc')
+    # )
     op.create_table(
         'feature_models',
         sa.Column('uid', sa.Text(), unique=True),
@@ -175,7 +181,8 @@ def upgrade():
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
 
-    VersionedResourceType.load_allowed_types(session)
+    # Not needed yet...
+    # VersionedResourceType.load_allowed_types(session)
     JobStatus.load_allowed_statuses(session)
 
     session.commit()
