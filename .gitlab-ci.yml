@@ -11,7 +11,7 @@ build_image:
   tags:
     - "besspin-ui-tag"
 
-test:
+test_server:
   script:
     - docker run besspin-ui:latest sh -c 'cd server && flask test unit'
   tags:
