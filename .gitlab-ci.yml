@@ -25,6 +25,6 @@ build_ui_image:
 
 test_ui:
   script:
-    - docker run besspin-ui-client:latest npm test
+    - docker run --env CI=true besspin-ui-client:latest npm test
   tags:
     - "besspin-ui-tag"
