@@ -21,6 +21,7 @@ const genDate = (): string => {
 
 const genOverviewWrapper = (propsOverrides: Partial<IOverviewProps> = {}): ReturnType<typeof mount> => {
     const props: IOverviewProps = {
+        triggerReport: jest.fn(),
         workflows: [],
         createWorkflow: jest.fn(),
         dispatch: jest.fn(),
