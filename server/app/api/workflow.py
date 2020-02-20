@@ -111,11 +111,6 @@ class WorkflowApi(Resource):
         existing_workflow = Workflow.query.get_or_404(workflowId)
         existing_workflow.label = workflow_input['label']
 
-        if 'testConfigInd' in workflow_input:
-            existing_workflow.testRunId = workflow_input['testRunId']
-        if 'reportJobId' in workflow_input:
-            existing_workflow.reportJobId = workflow_input['reportJobId']
-
         db.session.add(existing_workflow)
         db.session.commit()
 
