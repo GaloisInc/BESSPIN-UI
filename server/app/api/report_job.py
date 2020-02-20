@@ -1,9 +1,14 @@
 from flask import current_app, request
 import json
-from flask_restplus import Resource, fields
+from flask_restplus import abort, Resource, fields
 
 from . import api
-from app.models import db, ReportJob, JobStatus
+from app.models import (
+    db,
+    JobStatus,
+    ReportJob,
+    Workflow,
+)
 
 """
     Since all the routes here are for managing our ReportJob
@@ -33,15 +38,9 @@ new_report_job = api.model('NewReportJob', {
     'label': fields.String(
         required=True,
         description='Human-readable report-job label'),
-    'sysConfigId': fields.Integer(
+    'workflowId': fields.Integer(
         required=True,
-        description='Id of system-configuration-inputs record'),
-    'jobStatus': fields.Nested(
-        report_job_status,
-        required=True,
-        description='status of the job',  # noqa E501
-        skip_none=True
-    )
+        description='Id of workflow record'),
 })
 
 """
@@ -57,6 +56,22 @@ existing_report_job = api.inherit(
             required=True,
             description='Repport Job identifier'
         ),
+        'createdAt': fields.String(
+            required=False,
+            description='Date report-job was initiallly created'),
+        'updatedAt': fields.String(
+            required=False,
+            description='Date report-job was last updated'),
+        'status': fields.Nested(
+            report_job_status,
+            required=True,
+            description='status of the job',  # noqa E501
+            skip_none=True
+        ),
+        'log': fields.String(
+            required=False,
+            description='contents of logging for given report'
+        )
     }
 )
 
@@ -78,13 +93,26 @@ class ReportJobListApi(Resource):
     @ns.expect(new_report_job, validate=True)
     def post(self):
         report_job_input = json.loads(request.data)
-        current_app.logger.debug(f'creating report job for sysConfig: {report_job_input["sysConfigId"]}')
-        report_job_status = JobStatus.query.get(report_job_input['jobStatus']['statusId'])
+
+        if Workflow.query.get(report_job_input['workflowId']) is None:
+            return abort(400, 'Unable to find given workflow', workflowId=report_job_input['workflowId'])
+
+        current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
+
+        report_job_status = JobStatus.query.filter_by(label=JobStatus.INITIAL_STATUS).first()
+
+        current_app.logger.debug(f'setting new report job status to: {report_job_status.label}')
+
+        """
+            INSERT NIX CALLS HERE...
+        """
+
         new_report_job = ReportJob(
             label=report_job_input['label'],
             statusId=report_job_status.statusId,
-            sysConfigId=report_job_input['sysConfigId']
+            workflowId=report_job_input['workflowId']
         )
+
         db.session.add(new_report_job)
         db.session.commit()
 
@@ -98,11 +126,25 @@ class ReportJobpi(Resource):
     @ns.expect(existing_report_job, validate=True)
     def put(self, jobId):
         current_app.logger.debug(f'updating report jobId: {jobId}')
-        report_job_input = json.loads(request.data)
-        job_status = JobStatus.query.get(report_job_input['jobStatus']['statusId'])
+
         existing_report_job = ReportJob.query.get_or_404(jobId)
+
+        report_job_input = json.loads(request.data)
+
+        job_status = JobStatus.query.get(report_job_input['status']['statusId'])
+
+        if job_status is None:
+            return abort(400, 'Unable to find specified job status', status=report_job_input['status'])
+
+        if report_job_input['workflowId'] != existing_report_job.workflowId:
+            current_app.logger.error(
+                f'attempt to change workflow for report job ({jobId}) from ({existing_report_job.workflowId}) to ({report_job_input["workflowId"]})'  # noqa E501
+            )
+            return abort(400, 'Cannot change workflow association')
+
         existing_report_job.label = report_job_input['label']
         existing_report_job.statusId = job_status.statusId
+
         db.session.add(existing_report_job)
         db.session.commit()
 
@@ -112,4 +154,4 @@ class ReportJobpi(Resource):
     @ns.marshal_with(existing_report_job)
     def get(self, jobId):
         current_app.logger.debug(f'fetching report jobId: {jobId}')
-        return ReportJob.query.get(jobId)
+        return ReportJob.query.get_or_404(jobId)

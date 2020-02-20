@@ -6,14 +6,17 @@ import {
 
 import {
     fetchConfigurator,
+    fetchWorkflow as fetchWorkflowApi,
     fetchWorkflows as fetchWorkflowsApi,
     fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
+    fetchConfiguratorByVulnConfig as fetchConfiguratatorByVulnConfigApi,
     submitConfigurator,
     submitWorkflow as submitWorkflowApi,
     submitSystemConfigurationInput as submitSystemConfigurationInputApi,
     submitValidateConfiguration as submitValidateConfigurationApi,
     updateSystemConfigurationInput as updateSystemConfigurationInputApi,
     submitVulnerabilityClass as submitVulnerabilityClassApi,
+    triggerReport as triggerReportApi,
 } from '../api/api';
 
 import {
@@ -31,6 +34,9 @@ import {
     fetchSystem as fetchSystemAction,
     fetchSystemFailure,
     fetchSystemSuccess,
+    fetchSystemByVulnConfig as fetchSystemByVulnConfigAction,
+    fetchSystemByVulnConfigFailure,
+    fetchSystemByVulnConfigSuccess,
     fetchSystemConfigInput as fetchSystemConfigurationInputAction,
     fetchSystemConfigInputFailure,
     fetchSystemConfigInputSuccess,
@@ -50,11 +56,17 @@ import {
 } from './feature-model';
 
 import {
+    fetchWorkflow as fetchWorkflowAction,
+    fetchWorkflowError,
+    fetchWorkflowSuccess,
     fetchWorkflowsError,
     fetchWorkflowsSuccess,
     submitWorkflow as submitWorkflowAction,
     submitWorkflowError,
     submitWorkflowSuccess,
+    triggerReport as triggerReportAction,
+    triggerReportError,
+    triggerReportSuccess,
     WorkflowActionTypes,
 } from './workflow';
 
@@ -85,6 +97,28 @@ function* fetchSystemConfigInput(action: ReturnType<typeof fetchSystemConfigurat
     } catch (e) {
         console.error(e);
         yield put(fetchSystemConfigInputFailure(e.message));
+    }
+}
+
+function* fetchSystemByVulnConfig(action: ReturnType<typeof fetchSystemByVulnConfigAction>) {
+    try {
+        const configurator = yield call(fetchConfiguratatorByVulnConfigApi, action.data.vulnConfigId);
+        const mappedConfigurator = mapConfiguratorToSystem(configurator);
+        yield put(fetchSystemByVulnConfigSuccess(mappedConfigurator));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchSystemByVulnConfigFailure(e.message));
+    }
+}
+
+function* fetchWorkflow(action: ReturnType<typeof fetchWorkflowAction>) {
+    try {
+        const workflow = yield call(fetchWorkflowApi, action.data);
+        const mappedWorkflow = mapWorkflow(workflow);
+        yield put(fetchWorkflowSuccess(mappedWorkflow));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchWorkflowError(e.message));
     }
 }
 
@@ -165,6 +199,22 @@ function* submitValidateConfiguration(action: ReturnType<typeof submitValidateCo
     }
 }
 
+function* triggerReport(action: ReturnType<typeof triggerReportAction>) {
+    try {
+        // NOTE: the api call to trigger a report does return a report-job payload
+        //       but since we are currently running this from the overview page
+        //       where we are working with workflows, we ignore that and just re-fetch
+        //       the relevant workflow
+        yield call(triggerReportApi, action.data.workflowId, action.data.workflowLabel);
+        const workflow = yield call(fetchWorkflowApi, action.data.workflowId);
+        const mappedWorkflow = mapWorkflow(workflow);
+        yield put(triggerReportSuccess(mappedWorkflow));
+    } catch (e) {
+        console.error(e);
+        put(triggerReportError(e.message));
+    }
+}
+
 function* updateSystemConfigInput(action: ReturnType<typeof updateSystemConfigInputAction>) {
     try {
         const serversideConfig = mapSystemConfigInputToServerside(action.data);
@@ -187,10 +237,13 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VULNERABILITY_CLASS, submitVulnerabilityClass);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
+    yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN, fetchSystemByVulnConfig);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOWS, fetchWorkflows);
+    yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOW, fetchWorkflow);
     yield takeLatest(WorkflowActionTypes.SUBMIT_WORKFLOW, submitWorkflow);
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM_CONFIG_INPUT, submitSystemConfigInput);
     yield takeLatest(SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT, fetchSystemConfigInput);
     yield takeLatest(SystemActionTypes.UPDATE_SYSTEM_CONFIG_INPUT, updateSystemConfigInput);
+    yield takeLatest(WorkflowActionTypes.TRIGGER_REPORT, triggerReport);
 };

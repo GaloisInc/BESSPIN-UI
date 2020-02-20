@@ -1,9 +1,12 @@
-from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
+from helpers import (
+    BesspinTestApiBaseClass,
+    create_versionedResource,
+    DEFAULT_HEADERS
+)
 import json
 from datetime import datetime
 
 from app.models import (
-    db,
     VersionedResourceType,
     VersionedResource,
 )
@@ -58,9 +61,7 @@ class TestVersionedResourcesApi(BesspinTestApiBaseClass):
         r = VersionedResource().query.all()
         t = VersionedResourceType().query.filter_by(label='hdl').first()
         self.assertListEqual(r, [])
-        r = VersionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
-        db.session.add(r)
-        db.session.commit()
+        r = create_versionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
 
         self.assertEqual(len(VersionedResource().query.all()), 1)
 
@@ -82,9 +83,7 @@ class TestVersionedResourcesApi(BesspinTestApiBaseClass):
     def test_update_with_missing_data(self):
         r = VersionedResource().query.all()
         self.assertListEqual(r, [])
-        r = VersionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
-        db.session.add(r)
-        db.session.commit()
+        r = create_versionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
 
         self.assertEqual(len(VersionedResource().query.all()), 1)
 
@@ -107,10 +106,9 @@ class TestVersionedResourcesApi(BesspinTestApiBaseClass):
         # add two resources
         r = VersionedResource().query.all()
         self.assertListEqual(r, [])
-        r1 = VersionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
-        r2 = VersionedResource(label='r2', url='https://test.url.two', version='1', resourceTypeId=1)
-        db.session.add_all([r1, r2])
-        db.session.commit()
+        r1 = create_versionedResource(label='r1', url='https://test.url.one', version='1', resourceTypeId=1)
+        r2 = create_versionedResource(label='r2', url='https://test.url.two', version='1', resourceTypeId=1)
+
         r = VersionedResource().query.all()
         self.assertEqual(len(r), 2)
 

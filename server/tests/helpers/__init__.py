@@ -3,7 +3,15 @@ import unittest
 import logging
 
 from app import create_app
-from app.models import db
+from app.models import (
+    db,
+    FeatureModel,
+    ReportJob,
+    SystemConfigurationInput,
+    VersionedResource,
+    VulnerabilityConfigurationInput,
+    Workflow,
+)
 
 DEFAULT_HEADERS = {'Content-type': 'application/json'}
 FM_JSON_TEST_FILEPATH = os.path.join(os.path.dirname(__file__), '../../app/ui/examples/flute.fm.json')
@@ -14,6 +22,66 @@ def load_test_fmjson() -> str:
     with open(FM_JSON_TEST_FILEPATH, 'r') as myfile:
         data = ''.join(myfile.readlines())
     return data
+
+
+def add_to_db(*objs):
+    [db.session.add(o) for o in objs]
+    db.session.commit()
+
+
+def create_featureModel(**kwargs) -> FeatureModel:
+    fm = FeatureModel(**kwargs)
+    add_to_db(fm)
+    return fm
+
+
+def create_reportJob(**kwargs) -> ReportJob:
+    rj = ReportJob(
+        label=kwargs['label'],
+        workflowId=kwargs['workflowId'],
+        statusId=kwargs['statusId']
+    )
+    add_to_db(rj)
+    return rj
+
+
+def create_sysConfig(**kwargs) -> SystemConfigurationInput:
+    sc = SystemConfigurationInput(
+        label=kwargs['label'],
+        nixConfigFilename=kwargs['nixConfigFilename'],
+        nixConfig=kwargs['nixConfig'],
+        workflowId=kwargs['workflowId']
+    )
+    add_to_db(sc)
+    return sc
+
+
+def create_versionedResource(**kwargs) -> VersionedResource:
+    vr = VersionedResource(
+        label=kwargs['label'],
+        url=kwargs['url'],
+        version=kwargs['version'],
+        resourceTypeId=kwargs['resourceTypeId']
+    )
+    add_to_db(vr)
+    return vr
+
+
+def create_workflow(**kwargs) -> Workflow:
+    wf = Workflow(label=kwargs['label'])
+    add_to_db(wf)
+    return wf
+
+
+def create_vulnerabilityConfig(**kwargs) -> VulnerabilityConfigurationInput:
+    vc = VulnerabilityConfigurationInput(
+        label=kwargs['label'],
+        featureModelUid=kwargs['featureModelUid'],
+        workflowId=kwargs['workflowId'],
+        vulnClass=kwargs['vulnClass']
+    )
+    add_to_db(vc)
+    return vc
 
 
 class BesspinTestBaseClass(unittest.TestCase):

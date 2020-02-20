@@ -1,19 +1,20 @@
-from helpers import BesspinTestBaseClass
+from helpers import (
+    BesspinTestBaseClass,
+    create_sysConfig,
+    create_workflow,
+)
 from sqlalchemy.exc import IntegrityError
 
 from app.models import (
     db,
     SystemConfigurationInput,
-    Workflow,
 )
 
 
 class SystemConfigurationInputModelTestCase(BesspinTestBaseClass):
 
     def test_unique_constraint(self):
-        wf = Workflow(label='wf')
-        db.session.add(wf)
-        db.session.commit()
+        wf = create_workflow(label='wf')
 
         db.session.add(
             SystemConfigurationInput(
@@ -36,21 +37,15 @@ class SystemConfigurationInputModelTestCase(BesspinTestBaseClass):
             db.session.commit()
 
     def test_workflow_relationship(self):
-        wf = Workflow(label='wf')
-        db.session.add(wf)
-        db.session.commit()
+        wf = create_workflow(label='wf')
 
         test_label = 'test sysconfig'
-        db.session.add(
-            SystemConfigurationInput(
-                label=test_label,
-                nixConfigFilename='foo.nix',
-                nixConfig='{ some: config }',
-                workflowId=wf.workflowId
-            )
+        create_sysConfig(
+            label=test_label,
+            nixConfigFilename='foo.nix',
+            nixConfig='{ some: config }',
+            workflowId=wf.workflowId
         )
-
-        db.session.commit()
 
         sc = SystemConfigurationInput.query.filter_by(label=test_label).first()
 

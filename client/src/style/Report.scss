@@ -1,0 +1,10 @@
+@import '../../node_modules/bootstrap/scss/functions';
+@import '../../node_modules/bootstrap/scss/variables';
+
+.Report {
+    .report-header {
+        background-color: white;
+        border-bottom: 1px solid $gray-400;
+        padding: 1em;
+    }
+}

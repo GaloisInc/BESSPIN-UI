@@ -1,23 +1,280 @@
 import {
     mapWorkflow,
     mapWorkflows,
+    IServersideReport,
+    IServersideSysConfigInput,
     IServersideWorkflow,
+    IServersideVulnConfigInput,
 } from './mappings';
 import {
-    IWorkflow,
+    IWorkflow, JobStatus,
 } from '../state/workflow';
-
-import { DEFAULT_FEATURE_MODEL } from '../components/graph-helper';
 
 describe('mappings', () => {
 
     describe('mapWorkflow', () => {
+        const TEST_LABEL = 'test label';
+        const TEST_CREATED_AT = '1234-56-78 00:00:00';
+        
+        describe('when contains minimal properties', () => {
+            let testWorkflow: IServersideWorkflow;
 
-        it.todo('should map minimal serverside workflow into client one');
-        it.todo('should map workflow that also has updatedAt information');
-        it.todo('should map workflow that also system configuration information');
-        it.todo('should map workflow that also test configuration information');
-        it.todo('should map workflow that also report information');
+            beforeEach(() => {
+                testWorkflow = {
+                    workflowId: 1,
+                    createdAt: TEST_CREATED_AT,
+                    label: TEST_LABEL,
+                };
+            });
+
+            it('should map into valid clientside workflow', () => {
+                expect(mapWorkflow(testWorkflow)).toEqual({
+                    id: 1,
+                    label: TEST_LABEL,
+                    createdAt: TEST_CREATED_AT,
+                });
+            });
+
+            describe('and when it has updated datetime', () => {
+                const TEST_UPDATED_AT = '8765-43-21 00:00:00';
+
+                beforeEach(() => {
+                    testWorkflow = {
+                        workflowId: 1,
+                        createdAt: TEST_CREATED_AT,
+                        updatedAt: TEST_UPDATED_AT,
+                        label: TEST_LABEL,
+                    };
+                });
+
+                it('should map into valid clientside workflow with an updated timestamp', () => {
+                    expect(mapWorkflow(testWorkflow)).toEqual({
+                        id: 1,
+                        label: TEST_LABEL,
+                        createdAt: TEST_CREATED_AT,
+                        updatedAt: TEST_UPDATED_AT,
+                    } as IWorkflow);
+                });
+
+                describe('and it also has a system configuration', () => {
+                    const TEST_SYSCONFIG_LABEL = 'TEST SYSCONFIG';
+                    const TEST_NIX_FILENAME = 'TEST.nix';
+                    const TEST_NIX_CONFIG = '{ nix: "config" }';
+                    const TEST_SYSCONFIG: IServersideSysConfigInput = {
+                        sysConfigId: 2,
+                        label: TEST_SYSCONFIG_LABEL,
+                        createdAt: TEST_CREATED_AT,
+                        workflowId: 1,
+                        nixConfigFilename: TEST_NIX_FILENAME,
+                        nixConfig: TEST_NIX_CONFIG,
+                    };
+
+                    beforeEach(() => {
+                        testWorkflow = {
+                            workflowId: 1,
+                            createdAt: TEST_CREATED_AT,
+                            updatedAt: TEST_UPDATED_AT,
+                            label: TEST_LABEL,
+                            systemConfigurationInput: {
+                                ...TEST_SYSCONFIG,
+                            },
+                        };
+                    });
+
+                    it('should map into valid clientside workflow with a system config', () => {
+                        expect(mapWorkflow(testWorkflow)).toEqual({
+                            id: 1,
+                            label: TEST_LABEL,
+                            createdAt: TEST_CREATED_AT,
+                            updatedAt: TEST_UPDATED_AT,
+                            systemConfig: {
+                                id: TEST_SYSCONFIG.sysConfigId,
+                                label: TEST_SYSCONFIG_LABEL,
+                                createdAt: TEST_CREATED_AT,
+                                nixFilename: TEST_NIX_FILENAME,
+                                nixConfig: TEST_NIX_CONFIG,
+                            },
+                        } as IWorkflow);
+                    });
+
+                    describe('and it also has a vulnerability configuration', () => {
+                        const TEST_VULN_CONFIG_LABEL = 'TEST VULN CONFIG';
+                        const TEST_FEAT_MODEL = '{ feature: "model" }';
+                        const TEST_VULN_CONFIG: IServersideVulnConfigInput = {
+                            workflowId: 1,
+                            vulnConfigId: 3,
+                            createdAt: TEST_CREATED_AT,
+                            updatedAt: TEST_UPDATED_AT,
+                            label: TEST_VULN_CONFIG_LABEL,
+                            featureModel: TEST_FEAT_MODEL,
+                        };
+
+                        beforeEach(() => {
+                            testWorkflow = {
+                                workflowId: 1,
+                                createdAt: TEST_CREATED_AT,
+                                updatedAt: TEST_UPDATED_AT,
+                                label: TEST_LABEL,
+                                systemConfigurationInput: {
+                                    ...TEST_SYSCONFIG,
+                                },
+                                vulnerabilityConfigurationInput: {
+                                    ...TEST_VULN_CONFIG,
+                                },
+                            };
+                        });
+
+                        it('should map into valid clientside vulnerability config', () => {
+                            expect(mapWorkflow(testWorkflow)).toEqual({
+                                id: 1,
+                                label: TEST_LABEL,
+                                createdAt: TEST_CREATED_AT,
+                                updatedAt: TEST_UPDATED_AT,
+                                systemConfig: {
+                                    id: TEST_SYSCONFIG.sysConfigId,
+                                    label: TEST_SYSCONFIG_LABEL,
+                                    createdAt: TEST_SYSCONFIG.createdAt,
+                                    updatedAt: TEST_SYSCONFIG.updatedAt,
+                                    nixFilename: TEST_SYSCONFIG.nixConfigFilename,
+                                    nixConfig: TEST_SYSCONFIG.nixConfig,
+                                },
+                                testConfig: {
+                                    id: TEST_VULN_CONFIG.vulnConfigId,
+                                    createdAt: TEST_VULN_CONFIG.createdAt,
+                                    updatedAt: TEST_VULN_CONFIG.updatedAt,
+                                    label: TEST_VULN_CONFIG.label,
+                                    featureModel: TEST_VULN_CONFIG.featureModel,
+                                },
+                            } as IWorkflow);
+                        });
+
+                        describe('and it also has a report job that is running', () => {
+                            const TEST_REPORT_LABEL = 'TEST REPORT LABEL';
+                            const TEST_REPORT: IServersideReport = {
+                                jobId: 1,
+                                createdAt: TEST_CREATED_AT,
+                                updatedAt: TEST_UPDATED_AT,
+                                label: TEST_REPORT_LABEL,
+                                workflowId: 1,
+                                status: {
+                                    statusId: 1,
+                                    label: 'running',
+                                },
+                            };
+
+                            beforeEach(() => {
+                                testWorkflow = {
+                                    workflowId: 1,
+                                    createdAt: TEST_CREATED_AT,
+                                    updatedAt: TEST_UPDATED_AT,
+                                    label: TEST_LABEL,
+                                    systemConfigurationInput: {
+                                        ...TEST_SYSCONFIG,
+                                    },
+                                    vulnerabilityConfigurationInput: {
+                                        ...TEST_VULN_CONFIG,
+                                    },
+                                    reportJob: {
+                                        ...TEST_REPORT,
+                                    },
+                                };
+                            });
+
+                            it('should map into a valid clientside report', () => {
+                                expect(mapWorkflow(testWorkflow)).toEqual({
+                                    id: 1,
+                                    createdAt: TEST_CREATED_AT,
+                                    updatedAt: TEST_UPDATED_AT,
+                                    label: TEST_LABEL,
+                                    systemConfig: {
+                                        id: TEST_SYSCONFIG.sysConfigId,
+                                        label: TEST_SYSCONFIG_LABEL,
+                                        createdAt: TEST_SYSCONFIG.createdAt,
+                                        updatedAt: TEST_SYSCONFIG.updatedAt,
+                                        nixFilename: TEST_SYSCONFIG.nixConfigFilename,
+                                        nixConfig: TEST_SYSCONFIG.nixConfig,
+                                    },
+                                    testConfig: {
+                                        id: TEST_VULN_CONFIG.vulnConfigId,
+                                        createdAt: TEST_VULN_CONFIG.createdAt,
+                                        updatedAt: TEST_VULN_CONFIG.updatedAt,
+                                        label: TEST_VULN_CONFIG.label,
+                                        featureModel: TEST_VULN_CONFIG.featureModel,
+                                    },
+                                    report: {
+                                        id: TEST_REPORT.jobId,
+                                        createdAt: TEST_REPORT.createdAt,
+                                        updatedAt: TEST_REPORT.updatedAt,
+                                        label: TEST_REPORT.label,
+                                        status: JobStatus.Running,
+                                    },
+                                } as IWorkflow);
+                            });
+
+                            describe('and the report job succeeded', () => {
+                                const TEST_REPORT_LOG = 'test log output';
+
+                                beforeEach(() => {
+                                    testWorkflow = {
+                                        workflowId: 1,
+                                        createdAt: TEST_CREATED_AT,
+                                        updatedAt: TEST_UPDATED_AT,
+                                        label: TEST_LABEL,
+                                        systemConfigurationInput: {
+                                            ...TEST_SYSCONFIG,
+                                        },
+                                        vulnerabilityConfigurationInput: {
+                                            ...TEST_VULN_CONFIG,
+                                        },
+                                        reportJob: {
+                                            ...TEST_REPORT,
+                                            status: {
+                                                statusId: 2,
+                                                label: JobStatus.Succeeded,
+                                            },
+                                            log: TEST_REPORT_LOG,
+                                        },
+                                    };
+                                });
+
+                                it('should map to a client-side record with the appropriate status and log output', () => {
+                                    expect(mapWorkflow(testWorkflow)).toEqual({
+                                        id: 1,
+                                        createdAt: TEST_CREATED_AT,
+                                        updatedAt: TEST_UPDATED_AT,
+                                        label: TEST_LABEL,
+                                        systemConfig: {
+                                            id: TEST_SYSCONFIG.sysConfigId,
+                                            label: TEST_SYSCONFIG_LABEL,
+                                            createdAt: TEST_SYSCONFIG.createdAt,
+                                            updatedAt: TEST_SYSCONFIG.updatedAt,
+                                            nixFilename: TEST_SYSCONFIG.nixConfigFilename,
+                                            nixConfig: TEST_SYSCONFIG.nixConfig,
+                                        },
+                                        testConfig: {
+                                            id: TEST_VULN_CONFIG.vulnConfigId,
+                                            createdAt: TEST_VULN_CONFIG.createdAt,
+                                            updatedAt: TEST_VULN_CONFIG.updatedAt,
+                                            label: TEST_VULN_CONFIG.label,
+                                            featureModel: TEST_VULN_CONFIG.featureModel,
+                                        },
+                                        report: {
+                                            id: TEST_REPORT.jobId,
+                                            createdAt: TEST_REPORT.createdAt,
+                                            updatedAt: TEST_REPORT.updatedAt,
+                                            label: TEST_REPORT.label,
+                                            status: JobStatus.Succeeded,
+                                            log: TEST_REPORT_LOG,
+                                        },
+                                    } as IWorkflow);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
         // TODO: are the error messages coming from the API?
     });
 

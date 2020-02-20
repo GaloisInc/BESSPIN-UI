@@ -1,6 +1,6 @@
 from flask import current_app, request
 import json
-from flask_restplus import Resource, fields
+from flask_restplus import abort, Resource, fields
 from datetime import datetime
 
 from . import api
@@ -73,7 +73,11 @@ class SystemConfigurationInputListApi(Resource):
     @ns.expect(new_sysconfig_input, validate=True)
     def post(self):
         sysconfig_input = json.loads(request.data)
-        workflow = Workflow.query.get_or_404(sysconfig_input['workflowId'])
+        workflow = Workflow.query.get(sysconfig_input['workflowId'])
+
+        if workflow is None:
+            return abort(400, 'Unable to find given workflow', workflowId=sysconfig_input['workflowId'])
+
         new_sysconfig_input = SystemConfigurationInput(
             label=sysconfig_input['label'],
             nixConfigFilename=sysconfig_input['nixConfigFilename'],
@@ -97,6 +101,13 @@ class SystemConfigurationInputApi(Resource):
         current_app.logger.debug(f'updating sysConfigInputId: {sysConfigInputId}')
         sysconfig_input = json.loads(request.data)
         existing_sysconfig_input = SystemConfigurationInput.query.get_or_404(sysConfigInputId)
+
+        if sysconfig_input['workflowId'] != existing_sysconfig_input.workflowId:
+            current_app.logger.error(
+                f'attempt to change workflow for sysconfig ({sysConfigInputId}) from ({existing_sysconfig_input.workflowId}) to ({sysconfig_input["workflowId"]})'  # noqa E501
+            )
+            return abort(400, 'Cannot change workflow association')
+
         existing_sysconfig_input.label = sysconfig_input['label']
         existing_sysconfig_input.nixConfig = sysconfig_input['nixConfig']
         existing_sysconfig_input.nixConfigFilename = sysconfig_input['nixConfigFilename']

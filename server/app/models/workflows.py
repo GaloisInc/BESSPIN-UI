@@ -9,6 +9,7 @@ class Workflow(db.Model, MetaDataColumnsMixin):
 
     systemConfigurationInput = db.relationship('SystemConfigurationInput', uselist=False, backref='workflow')
     vulnerabilityConfigurationInput = db.relationship('VulnerabilityConfigurationInput', uselist=False, backref='workflow')
+    reportJob = db.relationship('ReportJob', uselist=False, backref='workflow')
 
     def __repr__(self):
         return f'<Workflow id="{self.workflowId}" label="{self.label}" updated="{self.updatedAt}">'  # noqa E501

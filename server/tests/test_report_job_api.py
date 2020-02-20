@@ -1,54 +1,66 @@
-from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
+from helpers import (
+    BesspinTestApiBaseClass,
+    DEFAULT_HEADERS,
+    create_reportJob,
+    create_workflow
+)
 import json
 from datetime import datetime
 
 from app.models import (
-    db,
     JobStatus,
     ReportJob,
-    SystemConfigurationInput,
+    Workflow
 )
 
 
 class TestReportJobApi(BesspinTestApiBaseClass):
+    BASE_ENDPOINT = '/api/report-job'
 
     def setUp(self):
         super(TestReportJobApi, self).setUp()
 
         JobStatus.load_allowed_statuses()
 
-        s = SystemConfigurationInput(
-            label='test sysconfig',
-            nixConfigFilename='foo.nix',
-            nixConfig='{ my: nix: config }',
-            workflowId=1)
+        w = create_workflow(label='test workflow')
 
-        db.session.add(s)
-        db.session.commit()
-
-        s = SystemConfigurationInput().query.filter_by(label='test sysconfig').first()
-
-        self.sysConfigId = s.sysConfigId
+        self.workflowId = w.workflowId
+        self.status = JobStatus().query.filter_by(label='running').first()
 
     def test_create(self):
         r = ReportJob().query.all()
-        t = JobStatus().query.filter_by(label='running').first()
         self.assertListEqual(r, [])
-        self.assertIsNotNone(t)
 
         label = f'created report job {datetime.utcnow()}'
         response = self.client.post(
-            '/api/report-job',
+            self.BASE_ENDPOINT,
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
-                jobStatus=dict(statusId=t.statusId, label=t.label),
-                sysConfigId=self.sysConfigId
+                status=dict(statusId=self.status.statusId, label=self.status.label),
+                workflowId=1
             )))
 
         self.assertEqual(response.status_code, 200)
         created_report_job = ReportJob.query.filter_by(label=label).first()
         self.assertIsNotNone(created_report_job)
+
+    def test_create_with_nonexistent_workflow(self):
+        nonexistent_workflow_id = 2
+        self.assertIsNone(Workflow.query.get(nonexistent_workflow_id))
+        response = self.client.post(
+            self.BASE_ENDPOINT,
+            headers=DEFAULT_HEADERS,
+            data=json.dumps(dict(
+                workflowId=nonexistent_workflow_id,
+                label='REPORT JOB w/ NONEXISTENT WORKFLOW'
+            ))
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json(), {
+            'message': 'Unable to find given workflow',
+            'workflowId': nonexistent_workflow_id,
+        })
 
     def test_create_with_missing_data(self):
         r = ReportJob().query.all()
@@ -56,37 +68,37 @@ class TestReportJobApi(BesspinTestApiBaseClass):
 
         label = f'created report job {datetime.utcnow()}'
         response = self.client.post(
-            '/api/report-job',
+            self.BASE_ENDPOINT,
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
-                sysConfigId=self.sysConfigId
             )))
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
-            'errors': {'jobStatus': "'jobStatus' is a required property"},
+            'errors': {'workflowId': "'workflowId' is a required property"},
             'message': 'Input payload validation failed'})
 
     def test_update(self):
         r = ReportJob().query.all()
-        t = JobStatus().query.filter_by(label='running').first()
         self.assertListEqual(r, [])
-        r = ReportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId)
-        db.session.add(r)
-        db.session.commit()
+        r = create_reportJob(
+            label='r1',
+            statusId=self.status.statusId,
+            workflowId=self.workflowId
+        )
 
         self.assertEqual(len(ReportJob().query.all()), 1)
 
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
-            f'/api/report-job/{r.jobId}',
+            f'{self.BASE_ENDPOINT}/{r.jobId}',
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 jobId=r.jobId,
                 label=label,
-                jobStatus=dict(statusId=t.statusId, label=t.label),
-                sysConfigId=self.sysConfigId
+                status=dict(statusId=self.status.statusId, label=self.status.label),
+                workflowId=self.workflowId
             )))
 
         self.assertEqual(response.status_code, 200)
@@ -96,50 +108,106 @@ class TestReportJobApi(BesspinTestApiBaseClass):
     def test_update_with_missing_data(self):
         r = ReportJob().query.all()
         self.assertListEqual(r, [])
-        r = ReportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId)
-        db.session.add(r)
-        db.session.commit()
+        r = create_reportJob(
+            label='r1',
+            statusId=1,
+            workflowId=self.workflowId
+        )
 
         self.assertEqual(len(ReportJob().query.all()), 1)
 
         label = f'{r.label}-{datetime.now()}'
         response = self.client.put(
-            f'/api/report-job/{r.jobId}',
+            f'{self.BASE_ENDPOINT}/{r.jobId}',
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 jobId=r.jobId,
-                label=label,
-                sysConfigId=self.sysConfigId
+                label=label
             )))
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {
-            'errors': {'jobStatus': "'jobStatus' is a required property"},
+            'errors': {'status': "'status' is a required property", 'workflowId': "'workflowId' is a required property"},
             'message': 'Input payload validation failed'})
+
+    def test_update_with_invalid_status(self):
+        nonexistent_status_id = 10
+        self.assertIsNone(JobStatus.query.get(nonexistent_status_id))
+        rj = create_reportJob(
+            workflowId=self.workflowId,
+            label='REPORT w/ NONEXISTENT STATUS',
+            statusId=self.status.statusId,
+        )
+        self.assertIsNotNone(rj)
+        response = self.client.put(
+            f'{self.BASE_ENDPOINT}/{rj.jobId}',
+            headers=DEFAULT_HEADERS,
+            data=json.dumps(dict(
+                workflowId=rj.workflowId,
+                jobId=rj.jobId,
+                label=rj.label,
+                status=dict(statusId=nonexistent_status_id, label='NONEXISTENT STATUS')
+            ))
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json(), {
+            'message': 'Unable to find specified job status',
+            'status': {
+                'statusId': nonexistent_status_id,
+                'label': 'NONEXISTENT STATUS'
+            }
+        })
+
+    def test_attempt_to_change_workflow(self):
+        rj = create_reportJob(
+            workflowId=self.workflowId,
+            label='TEST REPORT',
+            statusId=self.status.statusId,
+        )
+        self.assertIsNotNone(rj)
+
+        response = self.client.put(
+            f'{self.BASE_ENDPOINT}/{rj.jobId}',
+            headers=DEFAULT_HEADERS,
+            data=json.dumps(dict(
+                workflowId=rj.workflowId + 1,
+                jobId=rj.jobId,
+                label=rj.label,
+                status=dict(statusId=rj.status.statusId, label=rj.status.label)
+            ))
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json(), {
+            'message': 'Cannot change workflow association',
+        })
 
     def test_get(self):
         # add two report jobs
         r = ReportJob().query.all()
         self.assertListEqual(r, [])
-        r1 = ReportJob(label='r1', statusId=1, sysConfigId=self.sysConfigId)
-        r2 = ReportJob(label='r2', statusId=1, sysConfigId=self.sysConfigId)
-        db.session.add_all([r1, r2])
-        db.session.commit()
+        r1 = create_reportJob(label='r1', statusId=1, workflowId=self.workflowId)
+        r2 = create_reportJob(label='r2', statusId=1, workflowId=self.workflowId)
+
         r = ReportJob().query.all()
         self.assertEqual(len(r), 2)
 
         # get them individually
-        response = self.client.get(f'/api/report-job/{r1.jobId}')
+        response = self.client.get(f'{self.BASE_ENDPOINT}/{r1.jobId}')
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(json_response['label'], 'r1')
-        response = self.client.get(f'/api/report-job/{r2.jobId}')
+        response = self.client.get(f'{self.BASE_ENDPOINT}/{r2.jobId}')
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(json_response['label'], 'r2')
 
         # get them all
-        response = self.client.get('/api/report-job')
+        response = self.client.get(self.BASE_ENDPOINT)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(len(json_response), 2)
+
+    def get_nonexistent_report(self):
+        self.assertIsNone(ReportJob.query.get(1))
+        response = self.get(f'{self.BASE_ENDPOINT}/1')
+        self.assertEqual(response.status_code, 404)

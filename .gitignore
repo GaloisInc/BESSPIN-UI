@@ -1,5 +1,6 @@
 .vscode
 .DS_Store
+.swp
 __pycache__
 node_modules
 **/*.configured

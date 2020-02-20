@@ -45,6 +45,18 @@ export const fetchConfigurator = async (systemUid: string) => {
     .then(extractData);
 };
 
+export const fetchConfiguratorByVulnConfig = async (vulnConfigId: number) => {
+    return axios.request({
+        url: `/api/vulnerability-config-input/${vulnConfigId}/feature-model`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+};
+
 export const fetchConfigurators = async () => {
     return axios.request({
         url: '/api/feature-model',
@@ -56,6 +68,18 @@ export const fetchConfigurators = async () => {
     .then(trapHTMLError)
     .then(extractData);
 };
+
+export const fetchWorkflow = async (id: number) => {
+    return axios.request({
+        url: `/api/workflow/${id}`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    })
+    .then(trapHTMLError)
+    .then(extractData);
+}
 
 export const fetchWorkflows = async () => {
     return axios.request({
@@ -168,3 +192,19 @@ export const submitValidateConfiguration = async (uid: string, selectedNodes: IC
     .then(trapHTMLError)
     .then(extractData);
 };
+
+export const triggerReport = async (workflowId: number, workflowLabel: string) => {
+    return axios.request({
+        url: `/api/report-job`,
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: JSON.stringify({
+            workflowId,
+            label: `report job for ${workflowLabel}`,
+        }),
+    })
+    .then(trapHTMLError)
+    .then(extractData);  
+}

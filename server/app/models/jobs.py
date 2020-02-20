@@ -12,9 +12,10 @@ class JobStatus(db.Model):
     )
 
     def __repr__(self):
-        return '<JobStatus "{}" {}>'.format(self.statusId, self.label)
+        return '<JobStatus id="{}" label="{}">'.format(self.statusId, self.label)
 
-    ALLOWED_STATUSES = ['running', 'failed', 'succeeded']
+    INITIAL_STATUS = 'running'
+    ALLOWED_STATUSES = [INITIAL_STATUS, 'failed', 'succeeded']
 
     @staticmethod
     def load_allowed_statuses(db_conn=db.session):
@@ -83,9 +84,9 @@ class ReportJob(Job):
     __tablename__ = 'reportJobs'
 
     jobId = db.Column(db.Integer, db.ForeignKey('jobs.jobId'), primary_key=True)  # noqa E501
-    sysConfigId = db.Column(
+    workflowId = db.Column(
         db.Integer,
-        db.ForeignKey('systemConfigurationInputs.sysConfigId', ondelete='CASCADE'),  # noqa E501
+        db.ForeignKey('workflows.workflowId', ondelete='CASCADE'),
         nullable=False
     )
 

@@ -13,7 +13,7 @@
             text-align: inherit;
         }
         .btn {
-            min-width: 100px;
+            min-width: 125px;
 
             @at-root td {
                 text-align: center;
@@ -21,6 +21,10 @@
 
             .fa-chevron-right {
                 margin-left: 10px;
+            }
+
+            .spinner-grow {
+                margin-right: 10px;
             }
         }
     }

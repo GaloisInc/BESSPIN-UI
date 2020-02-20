@@ -182,7 +182,8 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                 setOptions={{ useWorker: false }}
                 theme='monokai'
                 value={ nixConfig }
-                width='100%' />
+                width='100%'
+                height='65vh' />
         </Container>
     );
 };

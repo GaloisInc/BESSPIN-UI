@@ -1,11 +1,12 @@
-from helpers import BesspinTestApiBaseClass, DEFAULT_HEADERS
+from helpers import (
+    BesspinTestApiBaseClass,
+    create_workflow,
+    DEFAULT_HEADERS
+)
 import json
 from datetime import datetime
 
-from app.models import (
-    db,
-    Workflow,
-)
+from app.models import Workflow
 
 
 class TestWorkflowApi(BesspinTestApiBaseClass):
@@ -43,9 +44,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
     def test_update(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
-        w = Workflow(label='w1')
-        db.session.add(w)
-        db.session.commit()
+        w = create_workflow(label='w1')
 
         self.assertEqual(len(Workflow().query.all()), 1)
 
@@ -64,9 +63,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
     def test_update_with_missing_data(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
-        w = Workflow(label='w1')
-        db.session.add(w)
-        db.session.commit()
+        w = create_workflow(label='w1')
 
         self.assertEqual(len(Workflow().query.all()), 1)
 
@@ -83,9 +80,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
     def test_update_label(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
-        w = Workflow(label='w1')
-        db.session.add(w)
-        db.session.commit()
+        w = create_workflow(label='w1')
 
         self.assertEqual(len(Workflow().query.all()), 1)
 
@@ -100,14 +95,22 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         updated_workflow = Workflow.query.filter_by(label='w1-NEW').first()
         self.assertIsNotNone(updated_workflow)
 
+    def test_update_nonexistent_workflow(self):
+        self.assertIsNone(Workflow.query.get(1))
+        response = self.client.put(
+            '/api/workflow/1',
+            headers=DEFAULT_HEADERS,
+            data=json.dumps(dict(label='TEST WORKFLOW UPDATE')),
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_get(self):
         # add workflows
         w = Workflow().query.all()
         self.assertListEqual(w, [])
-        w1 = Workflow(label='w1')
-        w2 = Workflow(label='w2')
-        db.session.add_all([w1, w2])
-        db.session.commit()
+        w1 = create_workflow(label='w1')
+        w2 = create_workflow(label='w2')
+
         r = Workflow().query.all()
         self.assertEqual(len(r), 2)
 
@@ -126,3 +129,17 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(len(json_response), 2)
+
+    def test_null_subobjects(self):
+        wf = create_workflow(label='test workflow')
+        response = self.client.get(f'/api/workflow/{wf.workflowId}')
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.get_data(as_text=True))
+        self.assertIsNone(json_response['systemConfigurationInput'])
+        self.assertIsNone(json_response['vulnerabilityConfigurationInput'])
+        self.assertIsNone(json_response['reportJob'])
+
+    def test_get_nonexistent_workflow(self):
+        self.assertIsNone(Workflow.query.get(1))
+        response = self.client.get('/api/workflow/1')
+        self.assertEqual(response.status_code, 404)

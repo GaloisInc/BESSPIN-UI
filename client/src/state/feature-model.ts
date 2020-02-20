@@ -114,6 +114,8 @@ export enum SystemActionTypes {
     FETCH_TEST_SYSTEMS = 'system/fetch',
     FETCH_TEST_SYSTEMS_FAILURE = 'system/fetch/failure',
     FETCH_TEST_SYSTEMS_SUCCESS = 'system/fetch/success',
+    FETCH_TEST_SYSTEM_BY_VULN_FAILURE = 'system/fetch-by-vuln/error',
+    FETCH_TEST_SYSTEM_BY_VULN_SUCCESS = 'system/fetch-by-vuln/success',
     SELECT_FEATURE = 'system/select/feature',
     UNDO_SELECT_FEATURE = 'system/select/undo',
     REDO_SELECT_FEATURE = 'system/select/redo',
@@ -130,6 +132,7 @@ export enum SystemActionTypes {
     SUBMIT_SYSTEM_CONFIG_INPUT_FAILURE = 'system-config/submit/failure',
     SUBMIT_SYSTEM_CONFIG_INPUT_SUCCESS = 'system-config/submit/success',
     UPDATE_SYSTEM_CONFIG_INPUT = 'system-config/update',
+    FETCH_TEST_SYSTEM_BY_VULN = 'system/fetch-by-vuln',
 }
 
 export const fetchSystem = (systemUid: string) => {
@@ -153,6 +156,33 @@ export const fetchSystemFailure = (error: string) => {
 export const fetchSystemSuccess = (system: IFeatureModelRecord) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS,
+        data: {
+            system,
+        },
+    } as const;
+};
+
+export const fetchSystemByVulnConfig = (vulnConfigId: number) => {
+    return {
+        type: SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN,
+        data: {
+            vulnConfigId,
+        },
+    } as const;
+};
+
+export const fetchSystemByVulnConfigFailure = (error: string) => {
+    return {
+        type: SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_FAILURE,
+        data: {
+            error,
+        },
+    } as const;
+};
+
+export const fetchSystemByVulnConfigSuccess = (system: IFeatureModelRecord) => {
+    return {
+        type: SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_SUCCESS,
         data: {
             system,
         },
@@ -321,6 +351,9 @@ export type ISystemAction = ReturnType<
     typeof fetchSystem |
     typeof fetchSystemSuccess |
     typeof fetchSystemFailure |
+    typeof fetchSystemByVulnConfig |
+    typeof fetchSystemByVulnConfigFailure |
+    typeof fetchSystemByVulnConfigSuccess |
     typeof fetchSystemConfigInput |
     typeof fetchSystemConfigInputSuccess |
     typeof fetchSystemConfigInputFailure |
@@ -387,6 +420,7 @@ export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISyst
                 featureModelRecord: action.data.system,
             };
         case SystemActionTypes.FETCH_TEST_SYSTEM_SUCCESS:
+        case SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_SUCCESS:
             return {
                 ...state,
                 featureModelRecord: action.data.system,

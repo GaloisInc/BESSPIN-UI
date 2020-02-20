@@ -5,9 +5,32 @@ export interface IWorkflowError {
   message: string;
 }
 
+export enum JobStatus {
+    Running = 'running',
+    Succeeded = 'succeeded',
+    Failed = 'failed',
+};
+
 export interface IConfig {
   id: number;
+  createdAt: string;
+  updatedAt?: string;
+  label?: string;
   error?: IWorkflowError;
+}
+
+export interface ISystemConfig extends IConfig {
+    nixFilename: string;
+    nixConfig: string;
+}
+
+export interface IVulnerabilityConfig extends IConfig {
+    featureModel: string;
+}
+
+export interface IReportConfig extends IConfig {
+  status: JobStatus;
+  log?: string;
 }
 
 export interface IWorkflow {
@@ -16,9 +39,9 @@ export interface IWorkflow {
     createdAt: string;
     hasError?: boolean;
     updatedAt?: string;
-    systemConfig?: IConfig;
-    testConfig?: IConfig;
-    report?: IConfig;
+    systemConfig?: ISystemConfig;
+    testConfig?: IVulnerabilityConfig;
+    report?: IReportConfig;
 }
 
 export interface IWorkflowMap extends Object {
@@ -38,13 +61,40 @@ export const DEFAULT_STATE: IWorkflowState = {
 // Actions
 
 export enum WorkflowActionTypes {
+    FETCH_WORKFLOW = 'workflow/fetch',
+    FETCH_WORKFLOW_FAILURE = 'workflow/fetch/error',
+    FETCH_WORKFLOW_SUCCESS = 'workflow/fetch/success',
     FETCH_WORKFLOWS = 'workflows/fetch',
     FETCH_WORKFLOWS_FAILURE = 'workflows/fetch/error',
     FETCH_WORKFLOWS_SUCCESS = 'workflows/fetch/success',
     SUBMIT_WORKFLOW = 'workflow/submit',
     SUBMIT_WORKFLOW_FAILURE = 'workflow/submit/error',
     SUBMIT_WORKFLOW_SUCCESS = 'workflow/submit/success',
+    TRIGGER_REPORT = 'workflow/trigger-report',
+    TRIGGER_REPORT_FAILURE = 'workflow/trigger-report/error',
+    TRIGGER_REPORT_SUCCESS = 'workflow/trigger-report/success',
 }
+
+export const fetchWorkflow = (id: number) => {
+    return {
+        type: WorkflowActionTypes.FETCH_WORKFLOW,
+        data: id,
+    } as const;
+};
+
+export const fetchWorkflowError = (error: string) => {
+    return {
+        type: WorkflowActionTypes.FETCH_WORKFLOW_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const fetchWorkflowSuccess = (workflow: IWorkflow) => {
+    return {
+        type: WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS,
+        data: workflow,
+    } as const;
+};
 
 export const fetchWorkflows = () => {
     return {
@@ -62,7 +112,7 @@ export const fetchWorkflowsError = (error: string) => {
 export const fetchWorkflowsSuccess = (workflows: IWorkflow[]) => {
     return {
         type: WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS,
-        payload: workflows,
+        data: workflows,
     } as const;
 };
 
@@ -83,25 +133,61 @@ export const submitWorkflowError = (error: string) => {
 export const submitWorkflowSuccess = (workflow: IWorkflow) => {
     return {
         type: WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS,
-        payload: workflow,
+        data: workflow,
+    } as const;
+};
+
+export const triggerReport = (workflowId: number, workflowLabel: string) => {
+    return {
+        type: WorkflowActionTypes.TRIGGER_REPORT,
+        data: {
+            workflowId,
+            workflowLabel,
+        },
+    } as const;
+};
+
+export const triggerReportError = (error: string) => {
+    return {
+        type: WorkflowActionTypes.TRIGGER_REPORT_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const triggerReportSuccess = (workflow: IWorkflow) => {
+    return {
+        type: WorkflowActionTypes.TRIGGER_REPORT_SUCCESS,
+        data: workflow,
     } as const;
 };
 
 export type IWorkflowAction = ReturnType<
+    typeof fetchWorkflow |
+    typeof fetchWorkflowError |
+    typeof fetchWorkflowSuccess |
     typeof fetchWorkflows |
     typeof fetchWorkflowsError |
     typeof fetchWorkflowsSuccess |
     typeof submitWorkflow |
     typeof submitWorkflowError |
-    typeof submitWorkflowSuccess
+    typeof submitWorkflowSuccess |
+    typeof triggerReport |
+    typeof triggerReportError |
+    typeof triggerReportSuccess
 >;
 
 // Reducers
 
+const uniquifyIds = (ids: number[]): number[] => {
+    return ids.sort().reduce((acc: number[], id: number) => {
+        return acc.includes(id) ? acc : acc.concat(id);
+    }, []);
+};
+
 export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
     switch (action.type) {
         case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
-            const byId: IWorkflowMap = action.payload.reduce((acc, workflow) => {
+            const byId: IWorkflowMap = action.data.reduce((acc, workflow) => {
                 return {
                     ...acc,
                     [workflow.id]: workflow,
@@ -111,18 +197,26 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
             return {
                 ...state,
                 byId,
-                ids: state.ids.concat(newIds).sort().reduce((acc: number[], id: number) => {
-                    return acc.includes(id) ? acc : acc.concat(id);
-                }, []),
+                ids: uniquifyIds(state.ids.concat(newIds)),
             };
+        case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
+        case WorkflowActionTypes.TRIGGER_REPORT_SUCCESS:
+            return {
+                ...state,
+                byId: {
+                    ...state.byId,
+                    [action.data.id]: action.data,
+                },
+                ids: uniquifyIds(state.ids.concat([action.data.id])),
+            }
         case WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS:
             return {
                 ...state,
                 byId: {
                     ...state.byId,
-                    [action.payload.id]: action.payload,
+                    [action.data.id]: action.data,
                 },
-                ids: state.ids.concat(action.payload.id),
+                ids: state.ids.concat(action.data.id),
             };
         default:
             return state;
@@ -146,3 +240,13 @@ export const getWorkflowIds = createSelector(
     [getWorkflowState],
     (workflowState: IWorkflowState) => workflowState.ids,
 );
+
+// NOTE: this is not a standard selector from the perspective of reselect
+//       since it takes an argument.
+//       Not sure if needed, but there is a recommended implementation
+//       that continues to leverage reselect's memoization:
+//       https://github.com/reduxjs/reselect/blob/master/README.md#q-how-do-i-create-a-selector-that-takes-an-argument
+export const getWorkflowById = (state: IState, id: number): IWorkflow | null => {
+    const workflowsById = getWorkflowsMap(state);
+    return workflowsById[id] || null;
+};
