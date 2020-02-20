@@ -47,6 +47,10 @@ const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
   return false;
 };
 
+const formatDateTime = (dateTime: string): string => {
+  return (new Date(dateTime)).toUTCString();
+};
+
 interface IStateFromProps {
   workflows: IWorkflow[];
   isLoading: boolean;
@@ -124,17 +128,17 @@ export const Overview: React.FC<IOverviewProps> = ({
         <tbody>
           {workflows && workflows.map((w, i) => (
             <tr className='workflow-row' key={`workflow-${i}`}>
-              <td>{w.id}</td>
-              <td className='label'>{w.label}</td>
-              <td>{w.createdAt}</td>
-              <td>{w.updatedAt || ''}</td>
-              <td>
+              <td className='align-middle'>{w.id}</td>
+              <td className='label align-middle'>{w.label}</td>
+              <td className='align-middle'>{formatDateTime(w.createdAt)}</td>
+              <td className='align-middle'>{w.updatedAt ? formatDateTime(w.updatedAt) : ''}</td>
+              <td className='align-middle'>
                 <ButtonGroup>
                   <SystemConfigButton workflowId={w.id} config={w.systemConfig} />
                   <TestConfigButton workflowId={w.id} config={w.testConfig} />
                 </ButtonGroup>
               </td>
-              <td>
+              <td className='align-middle'>
                 <ReportButton
                   disabled={reportShouldBeDisabled(w)}
                   workflowId={w.id}
