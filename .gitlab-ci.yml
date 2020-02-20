@@ -17,8 +17,15 @@ test_server:
   tags:
     - "besspin-ui-tag"
 
+build_ui_image:
+  script:
+    - cd client
+    - docker build -f Dockerfile -t besspin-ui-client .
+  tags:
+    - "besspin-ui-tag"
+
 test_ui:
   script:
-    - sh -c 'cd client && npm test'
+    - docker run besspin-ui-client:latest sh -c 'cd client && npm test'
   tags:
     - "besspin-ui-tag"
