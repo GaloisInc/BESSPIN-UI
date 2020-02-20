@@ -5,7 +5,7 @@ variables:
 before_script:
   - docker info
 
-build_image:
+build_server_image:
   script:
     - docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
   tags:
