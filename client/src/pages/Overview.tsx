@@ -9,12 +9,8 @@ import {
   Container,
   Form,
   Modal,
-  OverlayTrigger,
   Row,
   Table,
-  Popover,
-  PopoverProps,
-  Spinner,
 } from 'react-bootstrap';
 
 import { IState } from '../state';
@@ -25,9 +21,6 @@ import {
   submitWorkflow,
   fetchWorkflows,
   IWorkflow,
-  IConfig,
-  IReportConfig,
-  JobStatus,
   triggerReport,
 } from '../state/workflow';
 
@@ -38,106 +31,13 @@ import {
 
 import { Header } from '../components/Header';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import {
+  ReportButton,
+  SystemConfigButton,
+  TestConfigButton,
+} from '../components/WorkflowButton';
 
 import '../style/Overview.scss';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
-
-// NOTE: Rendering buttons that represent a directed workflow involves
-//       a fair amount of logic to map the state of a given workflow.
-//       Right now we define all the types/components here, but we
-//       should consider pulling them out into their own "components"
-//       files once this UX is solidified
-interface IWorkflowProps {
-  workflowId?: number;
-  config?: IConfig;
-  disabled?: boolean;
-}
-interface IReportProps {
-  workflowId: number;
-  onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  config?: IReportConfig;
-  disabled?: boolean;
-}
-
-interface IViewCreateButtonProps extends IWorkflowProps {
-  label: string;
-  path: string;
-  noNextStep?: boolean;
-  inProgress?: boolean;
-}
-
-interface IWorkflowButton {
-  url: string;
-  label: string;
-  variant?: 'success' | 'warning' | 'danger';
-  disabled?: boolean;
-  noNextStep?: boolean;
-  tooltipError?: string;
-  inProgress?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}
-
-interface IErrorTooltipProps extends PopoverProps {
-  label: string;
-}
-
-const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabled, noNextStep, tooltipError, inProgress, onClick }) => {
-  const renderTooltip: React.FC<IErrorTooltipProps> = (props) => (<Popover {...props} content={true}>{props.label}</Popover>);
-  const variantType = inProgress ? 'warning' :
-                        disabled ? 'secondary' :
-                         variant ? variant : 'primary';
-
-  return tooltipError ?
-    <OverlayTrigger placement='bottom' overlay={(props: IErrorTooltipProps) => renderTooltip({ ...props, label: tooltipError })}>
-      <Button disabled={disabled} variant='danger' href={url}>{label}</Button>
-    </OverlayTrigger>
-    : (
-      <Button disabled={disabled} variant={variantType} href={url} {...(onClick ? { onClick } : null)}>
-        { inProgress && <Spinner as='span' animation='grow' size='sm' role='status' aria-hidden='true' /> }
-        {label}
-        {!(disabled || noNextStep ) && variantType !== 'primary' && <FontAwesomeIcon icon={faChevronRight} />
-        }</Button>
-    );
-};
-
-const CreateEditButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config, path, disabled, label, noNextStep, inProgress }) => {
-  if (config) {
-    return <WorkflowButton
-      disabled={disabled}
-      label={label}
-      noNextStep={noNextStep}
-      tooltipError={config.error && config.error.message}
-      url={`${path}/edit/${workflowId}/${config.id}`}
-      variant={ inProgress ? 'warning' : 'success' }
-      inProgress={inProgress}
-    />;
-  } else {
-    return <WorkflowButton label={label} url={`${path}/create/${workflowId}`} disabled={disabled} noNextStep={noNextStep} />;
-  }
-};
-
-const SystemConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  return <CreateEditButton label='System' path='/system-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
-};
-
-const TestConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  return <CreateEditButton label='Test' path='/test-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
-};
-
-const ReportButton: React.FC<IReportProps> = ({ workflowId, onClick, config, disabled }) => {
-  const inProgress = config && config.status === JobStatus.Running;
-  const label = !config ? 'Build/Run' :
-                inProgress ? 'Running' : 'View';
-  return <WorkflowButton
-          label={label}
-          url={`/report/${workflowId}`}
-          tooltipError={config && config.error && config.error.message}
-          disabled={disabled}
-          noNextStep={true}
-          inProgress={inProgress}
-          onClick={onClick} />;
-};
 
 const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
   if (!workflow.systemConfig) return true;
