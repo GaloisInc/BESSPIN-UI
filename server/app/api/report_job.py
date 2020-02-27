@@ -135,7 +135,8 @@ class ReportJobListApi(Resource):
         new_report_job = ReportJob(
             label=report_job_input['label'],
             statusId=report_job_status.statusId,
-            workflowId=report_job_input['workflowId']
+            workflowId=report_job_input['workflowId'],
+            log=str(cp.stdout.decode('utf8')),
         )
 
         db.session.add(new_report_job)

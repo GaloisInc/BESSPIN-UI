@@ -110,6 +110,7 @@ def upgrade():
         'reportJobs',
         sa.Column('jobId', sa.Integer(), nullable=False),
         sa.Column('workflowId', sa.Integer(), nullable=False),
+        sa.Column('log', sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(['jobId'], ['jobs.jobId'], ),
         sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('jobId')
