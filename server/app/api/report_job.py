@@ -1,7 +1,11 @@
+import subprocess
+from shlex import quote
+
 from flask import current_app, request
 import json
 from flask_restplus import abort, Resource, fields
 
+from config import config
 from . import api
 from app.models import (
     db,
@@ -9,6 +13,18 @@ from app.models import (
     ReportJob,
     Workflow,
 )
+
+def make_testgen_command(cmd):
+    """
+    :param cmd: string of the command to run
+
+    :return: list of parameters for subprocess to use
+    """
+    nix_cmd = "cd ~/testgen &&" + "nix-shell --run " + quote(cmd)
+    return [ "su", "-", "besspinuser", "-c",
+        nix_cmd
+    ]
+
 
 """
     Since all the routes here are for managing our ReportJob
@@ -106,6 +122,15 @@ class ReportJobListApi(Resource):
         """
             INSERT NIX CALLS HERE...
         """
+        cmd = make_testgen_command('./testgen.sh')
+
+        if config['default'].USE_TOOLSUITE:
+            cp = subprocess.run(
+                cmd,
+                capture_output=True
+            )
+            current_app.logger.debug('Clafer stdout: ' + str(cp.stdout.decode('utf8')))
+            current_app.logger.debug('Clafer stderr: ' + str(cp.stderr.decode('utf8')))
 
         new_report_job = ReportJob(
             label=report_job_input['label'],
