@@ -1,18 +1,26 @@
+import os
+import stat
+import pwd
 import subprocess
 from shlex import quote
+import tempfile
 
-from flask import current_app, request
 import json
+from flask import current_app, request
 from flask_restplus import abort, Resource, fields
 
 from config import config
-from . import api
 from app.models import (
     db,
     JobStatus,
     ReportJob,
     Workflow,
 )
+from app.lib.testgen_utils import (
+    get_config_ini_template,
+    set_variable,
+)
+from . import api
 
 def make_testgen_command(cmd):
     """
@@ -21,9 +29,7 @@ def make_testgen_command(cmd):
     :return: list of parameters for subprocess to use
     """
     nix_cmd = "cd ~/testgen &&" + "nix-shell --run " + quote(cmd)
-    return [ "su", "-", "besspinuser", "-c",
-        nix_cmd
-    ]
+    return ["su", "-", "besspinuser", "-c", nix_cmd]
 
 
 """
@@ -122,21 +128,70 @@ class ReportJobListApi(Resource):
         """
             INSERT NIX CALLS HERE...
         """
-        cmd = make_testgen_command('./testgen.sh')
 
         if config['default'].USE_TOOLSUITE:
+            if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
+                WORK_DIR_OBJ = tempfile.TemporaryDirectory()
+                WORK_DIR = WORK_DIR_OBJ.name
+            else:
+                WORK_DIR = tempfile.gettempdir()
+
+            current_app.logger.debug('WORK_DIR: ' + WORK_DIR)
+
+            constraints_path = os.path.join(WORK_DIR, 'constraints_generated.cfr')
+            current_app.logger.debug('Constraints PATH: '+ constraints_path)
+
+            testgen_config_path = os.path.join(WORK_DIR, 'config_generated.ini')
+            current_app.logger.debug('CONFIG PATH: '+ testgen_config_path)
+
+            testgen_config_text = get_config_ini_template()
+            current_app.logger.debug('TEMPLATE: ' + str(testgen_config_text))
+
+            testgen_config_text = set_variable(testgen_config_text, 'vulClasses', '[bufferErrors]')
+            testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
+            testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
+            testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
+            testgen_config_text = set_variable(testgen_config_text, 'nTests', '2')
+            current_app.logger.debug(testgen_config_text)
+
+            with open(testgen_config_path, 'w') as f:
+                f.write(testgen_config_text)
+
+            # NOTE: Have to change the permissions and owner from root to besspinuser
+            os.chmod(testgen_config_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            besspinuser_uid = pwd.getpwnam('besspinuser').pw_uid
+            besspinuser_gid = pwd.getpwnam('besspinuser').pw_gid
+            os.chown(testgen_config_path, besspinuser_uid, besspinuser_gid)
+
+            with open(constraints_path, 'w') as f:
+                f.write(
+                    "[ BufferErrors_Weakness.Location.Location_Stack => BufferErrors_Weakness.Access.Access_Read]\n" +
+                    "[ BufferErrors_Weakness.Location.Location_Heap => BufferErrors_Weakness.Access.Access_Write]\n" +
+                    "[ !PPAC_test ]\n" +
+                    "[ !InformationLeakage_Test ]\n" +
+                    "[ !ResourceManagement_Test ]\n"
+                    "[ !NumericErrors_Test ]\n"
+                )
+            # NOTE: Have to change the permissions and owner from root to besspinuser
+            os.chmod(constraints_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            os.chown(constraints_path, besspinuser_uid, besspinuser_gid)
+
+            cmd = make_testgen_command('./testgen.sh '+ testgen_config_path)
             cp = subprocess.run(
                 cmd,
                 capture_output=True
             )
             current_app.logger.debug('Clafer stdout: ' + str(cp.stdout.decode('utf8')))
             current_app.logger.debug('Clafer stderr: ' + str(cp.stderr.decode('utf8')))
+            log_output = str(cp.stdout.decode('utf8'))
+        else:
+            log_output = 'TOOLSUITE_NEEDED'
 
         new_report_job = ReportJob(
             label=report_job_input['label'],
             statusId=report_job_status.statusId,
             workflowId=report_job_input['workflowId'],
-            log=str(cp.stdout.decode('utf8')),
+            log=log_output,
         )
 
         db.session.add(new_report_job)
