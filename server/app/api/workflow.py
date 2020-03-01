@@ -140,14 +140,14 @@ class WorkflowApi(Resource):
         return workflow
 
 
-@ns.route('/duplicate/<int:workflowId>')
-class WorkflowDuplicationApi(Resource):
+@ns.route('/clone/<int:workflowId>')
+class WorkflowCloneApi(Resource):
     @ns.marshal_with(existing_workflow)
     def get(self, workflowId):
         """
-            duplicate a workflow based on the Id passed in
+            clone a workflow based on the Id passed in
         """
-        current_app.logger.debug(f'duplicating workflow({workflowId})')
+        current_app.logger.debug(f'cloning workflow({workflowId})')
         workflow = Workflow.query.get_or_404(workflowId)
 
         new_workflow = Workflow(label=f'COPY - {workflow.label}')

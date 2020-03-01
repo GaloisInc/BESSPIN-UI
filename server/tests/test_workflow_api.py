@@ -190,21 +190,21 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         response = self.client.get(f'{self.BASE_ENDPOINT}/1')
         self.assertEqual(response.status_code, 404)
 
-    def test_duplicate_just_workflow(self):
+    def test_clone_just_workflow(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
         w = create_workflow(label='w1')
 
         self.assertEqual(len(Workflow().query.all()), 1)
 
-        response = self.client.get(f'api/workflow/duplicate/{w.workflowId}')
+        response = self.client.get(f'api/workflow/clone/{w.workflowId}')
 
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         created_workflow = Workflow.query.get(json_response['workflowId'])
         self.assertIsNotNone(created_workflow)
 
-    def test_duplicate_workflow_with_only_sysconfig(self):
+    def test_clone_workflow_with_only_sysconfig(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
         w = create_workflow(label='w1')
@@ -217,7 +217,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertEqual(len(Workflow().query.all()), 1)
         self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
 
-        response = self.client.get(f'api/workflow/duplicate/{w.workflowId}')
+        response = self.client.get(f'api/workflow/clone/{w.workflowId}')
 
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
@@ -229,7 +229,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertIsNotNone(created_sysconfig)
         self.assertNotEqual(created_sysconfig.sysConfigId, sc.sysConfigId)
 
-    def test_duplicate_workflow_sysconfig_and_vulnconfig(self):
+    def test_clone_workflow_sysconfig_and_vulnconfig(self):
         w = Workflow().query.all()
         self.assertListEqual(w, [])
         w = create_workflow(label='w1')
@@ -249,7 +249,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
         self.assertEqual(len(VulnerabilityConfigurationInput().query.all()), 1)
 
-        response = self.client.get(f'api/workflow/duplicate/{w.workflowId}')
+        response = self.client.get(f'api/workflow/clone/{w.workflowId}')
 
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
