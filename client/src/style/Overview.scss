@@ -9,11 +9,13 @@
         padding: 1em;
     }
     .workflow-row {
+        font-size: .9em;
+
         .label {
             text-align: inherit;
         }
         .btn {
-            min-width: 125px;
+            min-width: 110px;
 
             @at-root td {
                 text-align: center;

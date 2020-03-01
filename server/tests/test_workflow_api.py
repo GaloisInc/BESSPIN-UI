@@ -1,5 +1,6 @@
 from helpers import (
     BesspinTestApiBaseClass,
+    create_reportJob,
     create_sysConfig,
     create_vulnerabilityConfig,
     create_workflow,
@@ -8,10 +9,21 @@ from helpers import (
 import json
 from datetime import datetime
 
-from app.models import SystemConfigurationInput, VulnerabilityConfigurationInput, Workflow
+from app.models import (
+    JobStatus,
+    SystemConfigurationInput,
+    VulnerabilityConfigurationInput,
+    Workflow
+)
 
 
 class TestWorkflowApi(BesspinTestApiBaseClass):
+    BASE_ENDPOINT = '/api/workflow'
+
+    def setUp(self):
+        super(TestWorkflowApi, self).setUp()
+
+        JobStatus.load_allowed_statuses()
 
     def test_create(self):
         r = Workflow().query.all()
@@ -19,7 +31,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
 
         label = f'created workflow {datetime.utcnow()}'
         response = self.client.post(
-            '/api/workflow',
+            self.BASE_ENDPOINT,
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
@@ -34,7 +46,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertListEqual(r, [])
 
         response = self.client.post(
-            '/api/workflow',
+            self.BASE_ENDPOINT,
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict()))
 
@@ -52,7 +64,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
 
         label = f'{w.label}-{datetime.now()}'
         response = self.client.put(
-            f'/api/workflow/{w.workflowId}',
+            f'{self.BASE_ENDPOINT}/{w.workflowId}',
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=label,
@@ -70,7 +82,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertEqual(len(Workflow().query.all()), 1)
 
         response = self.client.put(
-            f'/api/workflow/{w.workflowId}',
+            f'{self.BASE_ENDPOINT}/{w.workflowId}',
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict()))
 
@@ -87,7 +99,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertEqual(len(Workflow().query.all()), 1)
 
         response = self.client.put(
-            f'/api/workflow/{w.workflowId}',
+            f'{self.BASE_ENDPOINT}/{w.workflowId}',
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(
                 label=w.label + '-NEW',
@@ -100,7 +112,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
     def test_update_nonexistent_workflow(self):
         self.assertIsNone(Workflow.query.get(1))
         response = self.client.put(
-            '/api/workflow/1',
+            f'{self.BASE_ENDPOINT}/1',
             headers=DEFAULT_HEADERS,
             data=json.dumps(dict(label='TEST WORKFLOW UPDATE')),
         )
@@ -117,24 +129,56 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertEqual(len(r), 2)
 
         # get them individually
-        response = self.client.get(f'/api/workflow/{w1.workflowId}')
+        response = self.client.get(f'{self.BASE_ENDPOINT}/{w1.workflowId}')
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(json_response['label'], 'w1')
-        response = self.client.get(f'/api/workflow/{w2.workflowId}')
+        response = self.client.get(f'{self.BASE_ENDPOINT}/{w2.workflowId}')
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(json_response['label'], 'w2')
 
         # get them all
-        response = self.client.get('/api/workflow')
+        response = self.client.get(self.BASE_ENDPOINT)
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertEqual(len(json_response), 2)
 
+    def test_get_without_log_data(self):
+        wf = create_workflow(label='TEST WORKFLOW')
+        self.assertIsNotNone(wf)
+        succeeded_job_status = JobStatus.query.filter_by(label='running').first()
+        self.assertIsNotNone(succeeded_job_status)
+        rj = create_reportJob(
+            workflowId=wf.workflowId,
+            label='TEST REPORT JOB',
+            statusId=succeeded_job_status.statusId
+        )
+        self.assertIsNotNone(rj)
+
+        response = self.client.get(f'{self.BASE_ENDPOINT}/{rj.jobId}')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.get_json()['reportJob']['log'])
+
+    def test_get_with_log_data(self):
+        wf = create_workflow(label='TEST WORKFLOW')
+        self.assertIsNotNone(wf)
+        succeeded_job_status = JobStatus.query.filter_by(label='succeeded').first()
+        self.assertIsNotNone(succeeded_job_status)
+        rj = create_reportJob(
+            workflowId=wf.workflowId,
+            label='TEST REPORT JOB',
+            statusId=succeeded_job_status.statusId
+        )
+        self.assertIsNotNone(rj)
+
+        response = self.client.get(f'{self.BASE_ENDPOINT}/{rj.jobId}')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.get_json()['reportJob']['log'])
+
     def test_null_subobjects(self):
         wf = create_workflow(label='test workflow')
-        response = self.client.get(f'/api/workflow/{wf.workflowId}')
+        response = self.client.get(f'{self.BASE_ENDPOINT}/{wf.workflowId}')
         self.assertEqual(response.status_code, 200)
         json_response = json.loads(response.get_data(as_text=True))
         self.assertIsNone(json_response['systemConfigurationInput'])
@@ -143,7 +187,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
 
     def test_get_nonexistent_workflow(self):
         self.assertIsNone(Workflow.query.get(1))
-        response = self.client.get('/api/workflow/1')
+        response = self.client.get(f'{self.BASE_ENDPOINT}/1')
         self.assertEqual(response.status_code, 404)
 
     def test_duplicate_just_workflow(self):

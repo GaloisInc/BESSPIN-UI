@@ -6,6 +6,121 @@
 	},
 	"item": [
 		{
+			"name": "Create a workflow",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d61d342f-c92a-4eeb-8276-f2566868cc31",
+						"exec": [
+							"//console.log(pm.response.json())",
+							"pm.environment.set(\"workflowId\", pm.response.json().workflowId);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8c5dd535-52cc-4bfc-9f9a-a9660af7a349",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"test workflow {{$timestamp}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/workflow",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"workflow"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all workflows",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiHost}}/api/workflow",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"workflow"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a workflow",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"my first, renamed workflow\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/workflow/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"workflow",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Upload Feature Configuration",
 			"request": {
 				"method": "POST",
@@ -72,6 +187,387 @@
 			"response": []
 		},
 		{
+			"name": "Create a system configuration input",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3ace61f1-5fce-40d8-89b3-bfc17f5996b0",
+						"exec": [
+							"pm.environment.set(\"sysConfigId\", pm.response.json().sysConfigId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"test sysconfig {{$timestamp}}\",\n\t\"nixConfigFilename\": \"foo.nix\",\n\t\"nixConfig\": \"{ nix: config }\",\n\t\"workflowId\": {{workflowId}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/system-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"system-config-input"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all system configuration inputs",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{apiHost}}/api/system-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"system-config-input"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Vulnerability Config",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "889e647c-d8a7-4e1b-acd6-7c5a6d53b045",
+						"exec": [
+							"pm.environment.set(\"vulnConfigId\", pm.response.json().vulnConfigId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": {{workflowId}},\n\t\"label\": \"test vuln config {{$timestamp}}\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModel\": {\n\t\t\"uid\": \"1abc3948\",\n\t\t\"source\": \"\",\n\t\t\"filename\": \"foo.fm.json\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create minimal Vulnerability Config Input",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\"\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "app",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a specific Vulnerability Configuration Input Record",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Feature Model to  Vulnerability Config Input",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModelUid\": \"7efe8010-3966-4211-8138-91aec88fd3ae\"\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input",
+						"1"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "app",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch the feature model for a vuln config",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{apiHost}}/api/vulnerability-config-input/1/feature-model",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"vulnerability-config-input",
+						"1",
+						"feature-model"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a report job",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "774e7e54-55ba-49e5-aa23-1f505dd2f121",
+						"exec": [
+							"pm.environment.set(\"jobId\", pm.response.json().jobId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"workflowId\": {{workflowId}},\n\t\"label\": \"test report {{$timestamp}}\"\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/report-job",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"report-job"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a report job",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"jobId\": 2,\n\t\"workflowId\": 2,\n\t\"label\": \"test report two\",\n\t\"status\": {\n\t\t\"statusId\": 3,\n\t\t\"label\": \"succeeded\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/report-job/2",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"report-job",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Load Feature Model by UID",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"model_uid\":\"7056a7e2-0531-4ebb-8877-a291b49cc6e0\"}"
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/feature-model/fetch-by-uid",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"feature-model",
+						"fetch-by-uid"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create a versioned resource",
 			"request": {
 				"method": "POST",
@@ -124,6 +620,59 @@
 						"api",
 						"versioned-resource",
 						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a versioned resource",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"label\": \"my first, renamed resource\",\n\t\"url\": \"https://github.com/my-repos/nice.git\",\n\t\"version\": \"ae56f0839\",\n\t\"resourceType\": {\n\t\t\"resourceTypeId\": 1,\n\t\t\"label\": \"hdl\"\n\t}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apiHost}}/api/versioned-resource/1",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"versioned-resource",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all versioned resources",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiHost}}/api/versioned-resource",
+					"host": [
+						"{{apiHost}}"
+					],
+					"path": [
+						"api",
+						"versioned-resource"
 					]
 				}
 			},
@@ -192,465 +741,6 @@
 					"path": [
 						"api",
 						"feature-extraction-job"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get all versioned resources",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{apiHost}}/api/versioned-resource",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"versioned-resource"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update a versioned resource",
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"label\": \"my first, renamed resource\",\n\t\"url\": \"https://github.com/my-repos/nice.git\",\n\t\"version\": \"ae56f0839\",\n\t\"resourceType\": {\n\t\t\"resourceTypeId\": 1,\n\t\t\"label\": \"hdl\"\n\t}\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/versioned-resource/1",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"versioned-resource",
-						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get all workflows",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{apiHost}}/api/workflow",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"workflow"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create a workflow",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"label\": \"test workflow\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/workflow",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"workflow"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update a workflow",
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"label\": \"my first, renamed workflow\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/workflow/1",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"workflow",
-						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create a system configuration input",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"label\": \"test sysconfig input\",\n\t\"nixConfigFilename\": \"foo.nix\",\n\t\"nixConfig\": \"{ nix: config }\",\n\t\"workflowId\": 1\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/system-config-input",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"system-config-input"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get all system configuration inputs",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "",
-						"value": "",
-						"type": "text",
-						"disabled": true
-					}
-				],
-				"url": {
-					"raw": "{{apiHost}}/api/system-config-input",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"system-config-input"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create minimal Vulnerability Config Input",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\"\n}"
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/vulnerability-config-input",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"vulnerability-config-input"
-					],
-					"query": [
-						{
-							"key": "",
-							"value": "app",
-							"disabled": true
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Load Feature Model by UID",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"model_uid\":\"7056a7e2-0531-4ebb-8877-a291b49cc6e0\"}"
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/feature-model/fetch-by-uid",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"feature-model",
-						"fetch-by-uid"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add Feature Model to  Vulnerability Config Input",
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModelUid\": \"7efe8010-3966-4211-8138-91aec88fd3ae\"\n}"
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/vulnerability-config-input/1",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"vulnerability-config-input",
-						"1"
-					],
-					"query": [
-						{
-							"key": "",
-							"value": "app",
-							"disabled": true
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "GET a specific Vulnerability Configuration Input Record",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{apiHost}}/api/vulnerability-config-input/1",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"vulnerability-config-input",
-						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create Vulnerability Config",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"workflowId\": 2,\n\t\"label\": \"test vuln config one\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModel\": {\n\t\t\"uid\": \"1abc3948\",\n\t\t\"source\": \"\",\n\t\t\"filename\": \"foo.fm.json\"\n\t}\n}"
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/vulnerability-config-input",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"vulnerability-config-input"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create a report job",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test report\",\n\t\"jobStatus\": {\n\t\t\"statusId\": 1,\n\t\t\"label\": \"running\"\n\t}\n}"
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/report-job",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"report-job"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update a report job",
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Accept",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"jobId\": 2,\n\t\"workflowId\": 2,\n\t\"label\": \"test report two\",\n\t\"status\": {\n\t\t\"statusId\": 3,\n\t\t\"label\": \"succeeded\"\n\t}\n}"
-				},
-				"url": {
-					"raw": "{{apiHost}}/api/report-job/2",
-					"host": [
-						"{{apiHost}}"
-					],
-					"path": [
-						"api",
-						"report-job",
-						"2"
 					]
 				}
 			},

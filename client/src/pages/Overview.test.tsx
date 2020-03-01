@@ -10,7 +10,7 @@ import {
 } from './Overview';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import {
-  WorkflowActionTypes,
+  submitWorkflow,
   IWorkflow,
 } from '../state/workflow';
 
@@ -24,7 +24,7 @@ const genOverviewWrapper = (propsOverrides: Partial<IOverviewProps> = {}): Retur
         triggerReport: jest.fn(),
         workflows: [],
         createWorkflow: jest.fn(),
-        dispatch: jest.fn(),
+        fetchWorkflows: jest.fn(),
         isLoading: false,
         dataRequested: true,
         ...propsOverrides,
@@ -75,10 +75,10 @@ describe('Overview', () => {
   });
 
   it('dispatches action to fetch data if no data has been fetched', () => {
-      const dispatchSpy = jest.fn();
-      genOverviewWrapper({ dataRequested: false, dispatch: dispatchSpy });
+      const fetchWorkflowsSpy = jest.fn();
+      genOverviewWrapper({ dataRequested: false, fetchWorkflows: fetchWorkflowsSpy  });
 
-      expect(dispatchSpy).toHaveBeenCalledWith({ type: WorkflowActionTypes.FETCH_WORKFLOWS });
+      expect(fetchWorkflowsSpy).toHaveBeenCalled();
   });
 
   describe('new workflow modal', () => {
@@ -93,7 +93,7 @@ describe('Overview', () => {
 
     describe('activation lifecycle', () => {
       let wrapper: ReturnType<typeof genOverviewWrapper>;
-      let createWorkflowSpy: (_: string) => void;
+      let createWorkflowSpy: typeof submitWorkflow;
 
       beforeEach(() => {
         createWorkflowSpy = jest.fn();

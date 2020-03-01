@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 
 import {
     IConfig,
@@ -28,8 +28,15 @@ const DEFAULT_HEADERS = {
     accept: 'application/json',
 };
 
+const request = async (config: AxiosRequestConfig): Promise<AxiosResponse> => {
+    return axios
+            .request(config)
+            .then(trapHTMLError)
+            .then(extractData);
+};
+
 export const fetchConfigurator = async (systemUid: string) => {
-    return axios.request({
+    return request({
         url: '/api/feature-model/fetch-by-uid',
         method: 'post',
         headers: {
@@ -40,128 +47,105 @@ export const fetchConfigurator = async (systemUid: string) => {
             model_uid: systemUid,
         },
         /* eslint-enable camelcase */
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const fetchConfiguratorByVulnConfig = async (vulnConfigId: number) => {
-    return axios.request({
+    return request({
         url: `/api/vulnerability-config-input/${vulnConfigId}/feature-model`,
         method: 'get',
         headers: {
             ...DEFAULT_HEADERS,
         },
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const fetchConfigurators = async () => {
-    return axios.request({
+    return request({
         url: '/api/feature-model',
         method: 'get',
         headers: {
             ...DEFAULT_HEADERS,
         }
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const fetchWorkflow = async (id: number) => {
-    return axios.request({
+    return request({
         url: `/api/workflow/${id}`,
         method: 'get',
         headers: {
             ...DEFAULT_HEADERS,
         },
-    })
-    .then(trapHTMLError)
-    .then(extractData);
-}
+    });
+};
 
 export const fetchWorkflows = async () => {
-    return axios.request({
+    return request({
         url: '/api/workflow',
         method: 'get',
         headers: {
             ...DEFAULT_HEADERS,
         },
-    })
-    .then(trapHTMLError)
-    .then(extractData);
-}
+    });
+};
 
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
-    return axios.request({
+    return request({
         url: `/api/feature-model/upload/${systemName}/global_var_cpu`,
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
         },
         data: systemJsonAsString,
-    })
-    .then(trapHTMLError)
-    .then(extractData);
-}
+    });
+};
 
 export const submitVulnerabilityClass = async (workflowId: string, vulnClass: string) => {
-    return axios.request({
+    return request({
         url: `/api/feature-model/create-test/${workflowId}/${vulnClass}`,
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
         },
-        /* eslint-disable camelcase */
         data: {},
-        /* eslint-enable camelcase */
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const fetchSystemConfigurationInput = async (sysConfigId: number) => {
-    return axios.request({
+    return request({
         url: `/api/system-config-input/${sysConfigId}`,
         method: 'get',
         headers: {
             ...DEFAULT_HEADERS,
         },
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const submitSystemConfigurationInput = async (config: INewSystemConfigInput) => {
-    return axios.request({
+    return request({
         url: `/api/system-config-input`,
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
         },
         data: config,
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const updateSystemConfigurationInput = async (config: IServersideSysConfigInput) => {
-    return axios.request({
+    return request({
         url: `/api/system-config-input/${config.sysConfigId}`,
         method: 'put',
         headers: {
             ...DEFAULT_HEADERS,
         },
         data: config,
-    })
-    .then(trapHTMLError)
-    .then(extractData);
-}
+    });
+};
 
 export const submitWorkflow = async (workflowLabel: string) => {
-
-    return axios.request({
+    return request({
         url: '/api/workflow',
         method: 'post',
         headers: {
@@ -170,13 +154,11 @@ export const submitWorkflow = async (workflowLabel: string) => {
         data: {
             label: workflowLabel,
         },
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const submitValidateConfiguration = async (uid: string, selectedNodes: IConfig[]) => {
-    return axios.request({
+    return request({
         url: '/api/feature-model/configure',
         method: 'post',
         headers: {
@@ -188,13 +170,11 @@ export const submitValidateConfiguration = async (uid: string, selectedNodes: IC
             feature_selection: selectedNodes,
         }),
         /* eslint-enable camelcase */
-    })
-    .then(trapHTMLError)
-    .then(extractData);
+    });
 };
 
 export const triggerReport = async (workflowId: number, workflowLabel: string) => {
-    return axios.request({
+    return request({
         url: `/api/report-job`,
         method: 'post',
         headers: {
@@ -204,7 +184,5 @@ export const triggerReport = async (workflowId: number, workflowLabel: string) =
             workflowId,
             label: `report job for ${workflowLabel}`,
         }),
-    })
-    .then(trapHTMLError)
-    .then(extractData);  
-}
+    });
+};

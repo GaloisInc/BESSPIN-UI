@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 
 import {
@@ -33,7 +32,6 @@ import {
     fetchSystemConfigInput,
     getSystemConfigInput,
     submitSystemConfigInput,
-    INewSystemConfigInput,
     ISystemConfigInput,
     updateSystemConfigInput,
 } from '../state/feature-model';
@@ -49,8 +47,8 @@ interface IStateFromProps {
 }
 
 interface IDispatchFromProps {
-    dispatch: Dispatch;
     createSystemConfig: typeof submitSystemConfigInput;
+    fetchSystemConfigInput: typeof fetchSystemConfigInput;
     updateSystemConfig: typeof updateSystemConfigInput;
 }
 
@@ -58,8 +56,8 @@ export type ISystemConfigInputProps  = IStateFromProps & IDispatchFromProps;
 
 export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
     createSystemConfig,
-    dispatch,
     errors,
+    fetchSystemConfigInput,
     isLoading,
     sysConfig,
     sysConfigId,
@@ -74,9 +72,9 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
 
     useEffect(() => {
         if (sysConfigId) {
-            dispatch(fetchSystemConfigInput(sysConfigId));
+            fetchSystemConfigInput(sysConfigId);
         }
-    }, [sysConfigId, dispatch]);
+    }, [sysConfigId, fetchSystemConfigInput]);
 
     useEffect(() => {
         if (sysConfig) {
@@ -225,11 +223,11 @@ const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps =>
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
-    dispatch,
-    createSystemConfig: (config: INewSystemConfigInput) => dispatch(submitSystemConfigInput(config)),
-    updateSystemConfig: (config: ISystemConfigInput) => dispatch(updateSystemConfigInput(config)),
-});
+const mapDispatchToProps = {
+    createSystemConfig: submitSystemConfigInput,
+    fetchSystemConfigInput,
+    updateSystemConfig: updateSystemConfigInput,
+};
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
 
