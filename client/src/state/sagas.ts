@@ -18,6 +18,7 @@ import {
     updateSystemConfigurationInput as updateSystemConfigurationInputApi,
     submitVulnerabilityClass as submitVulnerabilityClassApi,
     triggerReport as triggerReportApi,
+    updateWorkflow as updateWorkflowApi,
 } from '../api/api';
 
 import {
@@ -71,6 +72,9 @@ import {
     triggerReport as triggerReportAction,
     triggerReportError,
     triggerReportSuccess,
+    updateWorkflow as updateWorkflowAction,
+    updateWorkflowError,
+    updateWorkflowSuccess,
     WorkflowActionTypes,
 } from './workflow';
 
@@ -198,6 +202,18 @@ function* submitWorkflow(action: ReturnType<typeof submitWorkflowAction>) {
     }
 }
 
+function* updateWorkflow(action: ReturnType<typeof updateWorkflowAction>) {
+    try {
+        const { id, label } = action.data;
+        const workflow = yield call(updateWorkflowApi, id, label);
+        const mappedWorkflow = mapWorkflow(workflow);
+        yield put(updateWorkflowSuccess(mappedWorkflow));
+    } catch (e) {
+        console.error(e);
+        yield put(updateWorkflowError(e.message));
+    }
+}
+
 function* submitValidateConfiguration(action: ReturnType<typeof submitValidateConfigurationAction>) {
     try {
         const selectionServer = mapValidateRequestForServer(action.data.selection);
@@ -262,4 +278,5 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.UPDATE_SYSTEM_CONFIG_INPUT, updateSystemConfigInput);
     yield takeLatest(WorkflowActionTypes.TRIGGER_REPORT, triggerReport);
     yield takeLatest(WorkflowActionTypes.CLONE_WORKFLOW, cloneWorkflow);
+    yield takeLatest(WorkflowActionTypes.UPDATE_WORKFLOW, updateWorkflow);
 };

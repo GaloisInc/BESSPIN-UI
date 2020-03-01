@@ -32,6 +32,14 @@
             &.clone {
                 min-width: 25px !important;
             }
+
+            &.edit {
+                min-width: 25px !important;
+
+                @at-root td {
+                    width: 40px;
+                }
+            }
         }
     }
 }

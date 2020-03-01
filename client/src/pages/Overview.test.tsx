@@ -26,6 +26,7 @@ const genOverviewWrapper = (propsOverrides: Partial<IOverviewProps> = {}): Retur
         createWorkflow: jest.fn(),
         cloneWorkflow: jest.fn(),
         fetchWorkflows: jest.fn(),
+        updateWorkflow: jest.fn(),
         isLoading: false,
         dataRequested: true,
         ...propsOverrides,
@@ -81,6 +82,18 @@ describe('Overview', () => {
     expect(wrapper.find('button.clone').length).toEqual(1);
   });
 
+  it('renders button to edit a workflow', () => {
+    const wrapper = genOverviewWrapper({
+      workflows:[{
+        id: 1,
+        label: 'TEST WF',
+        createdAt: (new Date(Date.now())).toISOString(),
+      }],
+    });
+
+    expect(wrapper.find('button.edit').length).toEqual(1);
+  });
+
   it('renders loading indicator if we are loading', () => {
     const wrapper = genOverviewWrapper({ isLoading: true });
 
@@ -127,7 +140,7 @@ describe('Overview', () => {
       it('calls our "create" handler with content when the create button is clicked', () => {
         const TEST_LABEL = 'TEST-LABEL';
 
-        wrapper.find('input.new-workflow-label').simulate('blur', { target: { value: TEST_LABEL } });
+        wrapper.find('input.new-workflow-label').simulate('change', { target: { value: TEST_LABEL } });
         wrapper.find('button.create-new-workflow').simulate('click');
 
         expect(createWorkflowSpy).toHaveBeenCalledWith(TEST_LABEL);

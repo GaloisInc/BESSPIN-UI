@@ -100,6 +100,19 @@ export const fetchWorkflows = async () => {
     });
 };
 
+export const updateWorkflow = async (id: number, label: string) => {
+    return request({
+        url: `/api/workflow/${id}`,
+        method: 'put',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: {
+            label,
+        },
+    }); 
+}
+
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
     return request({
         url: `/api/feature-model/upload/${systemName}/global_var_cpu`,

@@ -13,7 +13,7 @@ import {
 } from 'react-bootstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClone } from '@fortawesome/free-solid-svg-icons';
+import { faClone, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 import { IState } from '../state';
 
@@ -25,6 +25,7 @@ import {
   fetchWorkflows,
   IWorkflow,
   triggerReport,
+  updateWorkflow,
 } from '../state/workflow';
 
 import {
@@ -64,6 +65,7 @@ interface IStateFromProps {
 interface IDispatchFromProps {
   createWorkflow: typeof submitWorkflow;
   cloneWorkflow: typeof cloneWorkflow;
+  updateWorkflow: typeof updateWorkflow;
   triggerReport: typeof triggerReport;
   fetchWorkflows: typeof fetchWorkflows;
 }
@@ -78,14 +80,17 @@ export const Overview: React.FC<IOverviewProps> = ({
   createWorkflow,
   cloneWorkflow,
   triggerReport,
+  updateWorkflow,
 }) => {
 
   useEffect(() => {
     dataRequested || fetchWorkflows();
   });
 
-  const [newWorkflow, setNewWorkflow] = useState('');
+  const [workflowLabel, setWorkflowLabel] = useState('');
   const [showWorkflowEditor, setShowWorkflowEditor] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editWorkflow, setEditWorkflow] = useState<IWorkflow | null>(null);
 
   return (
     <Container className='Overview'>
@@ -93,7 +98,7 @@ export const Overview: React.FC<IOverviewProps> = ({
       {isLoading && <LoadingIndicator />}
       <Modal className='workflow-editor' show={showWorkflowEditor} onHide={() => setShowWorkflowEditor(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Create New Workflow</Modal.Title>
+          <Modal.Title>{ isEditMode ? 'Update' : 'Create New' } Workflow</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -103,7 +108,8 @@ export const Overview: React.FC<IOverviewProps> = ({
                 <Form.Control
                   className='new-workflow-label'
                   type='input'
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => setNewWorkflow(e.target.value)} />
+                  value={ workflowLabel }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWorkflowLabel(e.target.value)} />
               </Col>
             </Form.Group>
           </Form>
@@ -111,9 +117,13 @@ export const Overview: React.FC<IOverviewProps> = ({
         <Modal.Footer>
           <Button variant='secondary' onClick={() => setShowWorkflowEditor(false)}>Cancel</Button>
           <Button className='create-new-workflow' variant='primary' onClick={() => {
-            createWorkflow(newWorkflow);
+            isEditMode && editWorkflow ? updateWorkflow({
+              id: editWorkflow.id,
+              label: workflowLabel
+            }) : createWorkflow(workflowLabel);
+            setIsEditMode(false);
             setShowWorkflowEditor(false);
-          }}>Create</Button>
+          }}>{ isEditMode ? 'Update' : 'Create' }</Button>
         </Modal.Footer>
       </Modal>
       <h1>Overview</h1>
@@ -135,7 +145,22 @@ export const Overview: React.FC<IOverviewProps> = ({
         <tbody>
           {workflows && workflows.map((w, i) => (
             <tr className='workflow-row' key={`workflow-${i}`}>
-              <td className='align-middle'>{w.id}</td>
+              <td className='align-middle'>
+                {w.id}
+                <Button
+                  className='edit'
+                  variant='link'
+                  block={ false }
+                  size='sm'
+                  onClick={() => {
+                    setIsEditMode(true);
+                    setEditWorkflow(w);
+                    setWorkflowLabel(w.label)
+                    setShowWorkflowEditor(true);
+                }}>
+                  <FontAwesomeIcon className='far' icon={faEdit}/>
+                </Button>
+              </td>
               <td className='label align-middle'>{w.label}</td>
               <td className='align-middle'>{formatDateTime(w.createdAt)}</td>
               <td className='align-middle'>{w.updatedAt ? formatDateTime(w.updatedAt) : ''}</td>
@@ -190,6 +215,7 @@ const mapDispatchToProps = {
   cloneWorkflow,
   fetchWorkflows,
   triggerReport,
+  updateWorkflow,
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
