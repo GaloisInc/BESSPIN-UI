@@ -24,6 +24,7 @@ const genOverviewWrapper = (propsOverrides: Partial<IOverviewProps> = {}): Retur
         triggerReport: jest.fn(),
         workflows: [],
         createWorkflow: jest.fn(),
+        cloneWorkflow: jest.fn(),
         fetchWorkflows: jest.fn(),
         isLoading: false,
         dataRequested: true,
@@ -66,6 +67,18 @@ describe('Overview', () => {
     const wrapper = genOverviewWrapper();
 
     expect(wrapper.find('button.new-workflow').length).toEqual(1);
+  });
+
+  it('renders button to duplicate a workflow', () => {
+    const wrapper = genOverviewWrapper({
+      workflows:[{
+        id: 1,
+        label: 'TEST WF',
+        createdAt: (new Date(Date.now())).toISOString(),
+      }],
+    });
+
+    expect(wrapper.find('button.clone').length).toEqual(1);
   });
 
   it('renders loading indicator if we are loading', () => {

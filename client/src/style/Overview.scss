@@ -28,6 +28,10 @@
             .spinner-grow {
                 margin-right: 10px;
             }
+
+            &.clone {
+                min-width: 25px !important;
+            }
         }
     }
 }

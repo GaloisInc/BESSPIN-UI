@@ -12,6 +12,9 @@ import {
   Table,
 } from 'react-bootstrap';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClone } from '@fortawesome/free-solid-svg-icons';
+
 import { IState } from '../state';
 
 import {
@@ -59,6 +62,7 @@ interface IStateFromProps {
 
 interface IDispatchFromProps {
   createWorkflow: typeof submitWorkflow;
+  cloneWorkflow: (_:number) => void; // TODO: type based on actual action-creator
   triggerReport: typeof triggerReport;
   fetchWorkflows: typeof fetchWorkflows;
 }
@@ -71,6 +75,7 @@ export const Overview: React.FC<IOverviewProps> = ({
   workflows,
   fetchWorkflows,
   createWorkflow,
+  cloneWorkflow,
   triggerReport,
 }) => {
 
@@ -123,6 +128,7 @@ export const Overview: React.FC<IOverviewProps> = ({
             <th>Last Updated</th>
             <th>Configurations</th>
             <th>Report</th>
+            <th>Clone</th>
           </tr>
         </thead>
         <tbody>
@@ -150,6 +156,14 @@ export const Overview: React.FC<IOverviewProps> = ({
                   }}
                   config={w.report} />
               </td>
+              <td className='align-middle'>
+                <Button
+                  className='clone'
+                  variant='outline-secondary'
+                  onClick={() => cloneWorkflow(w.id)}>
+                  <FontAwesomeIcon className='far' icon={faClone} />
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -172,6 +186,12 @@ const mapStateToProps = (state: IState): IStateFromProps => {
 
 const mapDispatchToProps = {
   createWorkflow: submitWorkflow,
+  cloneWorkflow:  (workflowId: number) => {
+    console.log(`TODO: clone workflow(${workflowId})`);
+    return {
+      type: 'TODO: workflow/clone',
+    };
+  },
   fetchWorkflows,
   triggerReport,
 };
