@@ -5,6 +5,7 @@ import {
 } from 'redux-saga/effects';
 
 import {
+    cloneWorkflow as cloneWorkflowApi,
     fetchConfigurator,
     fetchWorkflow as fetchWorkflowApi,
     fetchWorkflows as fetchWorkflowsApi,
@@ -56,6 +57,9 @@ import {
 } from './feature-model';
 
 import {
+    cloneWorkflow as cloneWorkflowAction,
+    cloneWorkflowError,
+    cloneWorkflowSuccess,
     fetchWorkflow as fetchWorkflowAction,
     fetchWorkflowError,
     fetchWorkflowSuccess,
@@ -108,6 +112,17 @@ function* fetchSystemByVulnConfig(action: ReturnType<typeof fetchSystemByVulnCon
     } catch (e) {
         console.error(e);
         yield put(fetchSystemByVulnConfigFailure(e.message));
+    }
+}
+
+function* cloneWorkflow(action: ReturnType<typeof cloneWorkflowAction>) {
+    try {
+        const workflow = yield call(cloneWorkflowApi, action.data);
+        const mappedWorkflow = mapWorkflow(workflow);
+        yield put(cloneWorkflowSuccess(mappedWorkflow));
+    } catch (e) {
+        console.error(e);
+        yield put(cloneWorkflowError(e.message));
     }
 }
 
@@ -246,4 +261,5 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT, fetchSystemConfigInput);
     yield takeLatest(SystemActionTypes.UPDATE_SYSTEM_CONFIG_INPUT, updateSystemConfigInput);
     yield takeLatest(WorkflowActionTypes.TRIGGER_REPORT, triggerReport);
+    yield takeLatest(WorkflowActionTypes.CLONE_WORKFLOW, cloneWorkflow);
 };
