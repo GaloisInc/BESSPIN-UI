@@ -42,16 +42,5 @@ class SystemConfigurationInput(db.Model, MetaDataColumnsMixin):
         comment='a system configuration input should always be associated with a workflow'
     )
 
-    __table_args__ = (
-        db.UniqueConstraint(
-            # 'featConfigId',
-            # 'hdlId',
-            # 'osId',
-            # 'toolChainId',
-            'nixConfig',
-            name='system_config_inputs_uc'
-        ),
-    )
-
     def __repr__(self):
         return f'<SystemConfigurationInput id="{self.sysConfigId}" workflow="{self.workflowId}" label="{self.label}">'  # noqa E501

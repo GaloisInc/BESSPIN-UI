@@ -143,7 +143,6 @@ def upgrade():
         sa.Column('sysConfigId', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('sysConfigId'),
         sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='SET NULL'),
-        sa.UniqueConstraint('nixConfig', 'workflowId', name='sys_config_workflow_uc')
     )
     op.create_table(
         'testRunInputs',
