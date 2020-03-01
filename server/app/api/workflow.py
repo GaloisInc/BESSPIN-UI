@@ -1,10 +1,12 @@
 from flask import current_app, request
 import json
 from flask_restplus import Resource, fields
+from uuid import uuid4
 
 from . import api
 from app.models import (
     db,
+    FeatureModel,
     SystemConfigurationInput,
     VulnerabilityConfigurationInput,
     Workflow
@@ -164,13 +166,25 @@ class WorkflowCloneApi(Resource):
             db.session.add(sysconfig)
 
         if workflow.vulnerabilityConfigurationInput is not None:
-            vulnConfig = VulnerabilityConfigurationInput(
+            existing_feat_model = workflow.vulnerabilityConfigurationInput.featureModel
+            feat_model = FeatureModel(
+                label=f'COPY - {existing_feat_model.label}',
+                uid=str(uuid4()),  # TODO: the model should really handle UID generation so we don't have this duplication
+                filename=existing_feat_model.filename,
+                source=existing_feat_model.source,
+                conftree=existing_feat_model.conftree,
+                hash=existing_feat_model.hash,
+                configs=existing_feat_model.configs
+            )
+            db.session.add(feat_model)
+
+            vuln_config = VulnerabilityConfigurationInput(
                 label=f'COPY - {workflow.vulnerabilityConfigurationInput.label}',
                 vulnClass=workflow.vulnerabilityConfigurationInput.vulnClass,
-                featureModelUid=workflow.vulnerabilityConfigurationInput.featureModelUid,
+                featureModelUid=feat_model.uid,
                 workflowId=new_workflow.workflowId
             )
-            db.session.add(vulnConfig)
+            db.session.add(vuln_config)
 
         db.session.commit()
 

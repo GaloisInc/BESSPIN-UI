@@ -1,5 +1,6 @@
 from helpers import (
     BesspinTestApiBaseClass,
+    create_featureModel,
     create_reportJob,
     create_sysConfig,
     create_vulnerabilityConfig,
@@ -10,6 +11,7 @@ import json
 from datetime import datetime
 
 from app.models import (
+    FeatureModel,
     JobStatus,
     SystemConfigurationInput,
     VulnerabilityConfigurationInput,
@@ -238,15 +240,20 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
             workflowId=w.workflowId,
             nixConfigFilename='test.nix',
             nixConfig='{ config: "nix" }')
+        fm = create_featureModel(
+            label='fm1',
+            uid='TEST-UID',
+        )
         vc = create_vulnerabilityConfig(
             label='vc1',
             workflowId=w.workflowId,
             vulnClass='TEST VULNCLASS',
-            featureModelUid='TEST-UID`'
+            featureModelUid=fm.uid
         )
 
         self.assertEqual(len(Workflow().query.all()), 1)
         self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
+        self.assertEqual(len(FeatureModel().query.all()), 1)
         self.assertEqual(len(VulnerabilityConfigurationInput().query.all()), 1)
 
         response = self.client.get(f'api/workflow/clone/{w.workflowId}')
@@ -264,3 +271,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         created_vulnconfig = VulnerabilityConfigurationInput.query.get(json_vulnConfig['vulnConfigId'])
         self.assertIsNotNone(created_vulnconfig)
         self.assertNotEqual(created_vulnconfig.vulnConfigId, vc.vulnConfigId)
+        json_feat_model = json_vulnConfig['featureModel']
+        created_feat_model = FeatureModel.query.get(json_feat_model['uid'])
+        self.assertIsNotNone(created_feat_model)
+        self.assertNotEqual(created_feat_model.uid, fm.uid)
