@@ -1,12 +1,14 @@
 from helpers import (
     BesspinTestApiBaseClass,
+    create_sysConfig,
+    create_vulnerabilityConfig,
     create_workflow,
     DEFAULT_HEADERS
 )
 import json
 from datetime import datetime
 
-from app.models import Workflow
+from app.models import SystemConfigurationInput, VulnerabilityConfigurationInput, Workflow
 
 
 class TestWorkflowApi(BesspinTestApiBaseClass):
@@ -143,3 +145,78 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         self.assertIsNone(Workflow.query.get(1))
         response = self.client.get('/api/workflow/1')
         self.assertEqual(response.status_code, 404)
+
+    def test_duplicate_just_workflow(self):
+        w = Workflow().query.all()
+        self.assertListEqual(w, [])
+        w = create_workflow(label='w1')
+
+        self.assertEqual(len(Workflow().query.all()), 1)
+
+        response = self.client.get(f'api/workflow/duplicate/{w.workflowId}')
+
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.get_data(as_text=True))
+        created_workflow = Workflow.query.get(json_response['workflowId'])
+        self.assertIsNotNone(created_workflow)
+
+    def test_duplicate_workflow_with_only_sysconfig(self):
+        w = Workflow().query.all()
+        self.assertListEqual(w, [])
+        w = create_workflow(label='w1')
+        sc = create_sysConfig(
+            label='sc1',
+            workflowId=w.workflowId,
+            nixConfigFilename='test.nix',
+            nixConfig='{ config: "nix" }')
+
+        self.assertEqual(len(Workflow().query.all()), 1)
+        self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
+
+        response = self.client.get(f'api/workflow/duplicate/{w.workflowId}')
+
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.get_data(as_text=True))
+        created_workflow = Workflow.query.get(json_response['workflowId'])
+        self.assertIsNotNone(created_workflow)
+        self.assertNotEqual(created_workflow.workflowId, w.workflowId)
+        json_sysconfig = json_response['systemConfigurationInput']
+        created_sysconfig = SystemConfigurationInput.query.get(json_sysconfig['sysConfigId'])
+        self.assertIsNotNone(created_sysconfig)
+        self.assertNotEqual(created_sysconfig.sysConfigId, sc.sysConfigId)
+
+    def test_duplicate_workflow_sysconfig_and_vulnconfig(self):
+        w = Workflow().query.all()
+        self.assertListEqual(w, [])
+        w = create_workflow(label='w1')
+        sc = create_sysConfig(
+            label='sc1',
+            workflowId=w.workflowId,
+            nixConfigFilename='test.nix',
+            nixConfig='{ config: "nix" }')
+        vc = create_vulnerabilityConfig(
+            label='vc1',
+            workflowId=w.workflowId,
+            vulnClass='TEST VULNCLASS',
+            featureModelUid='TEST-UID`'
+        )
+
+        self.assertEqual(len(Workflow().query.all()), 1)
+        self.assertEqual(len(SystemConfigurationInput().query.all()), 1)
+        self.assertEqual(len(VulnerabilityConfigurationInput().query.all()), 1)
+
+        response = self.client.get(f'api/workflow/duplicate/{w.workflowId}')
+
+        self.assertEqual(response.status_code, 200)
+        json_response = json.loads(response.get_data(as_text=True))
+        created_workflow = Workflow.query.get(json_response['workflowId'])
+        self.assertIsNotNone(created_workflow)
+        self.assertNotEqual(created_workflow.workflowId, w.workflowId)
+        json_sysconfig = json_response['systemConfigurationInput']
+        created_sysconfig = SystemConfigurationInput.query.get(json_sysconfig['sysConfigId'])
+        self.assertIsNotNone(created_sysconfig)
+        self.assertNotEqual(created_sysconfig.sysConfigId, sc.sysConfigId)
+        json_vulnConfig = json_response['vulnerabilityConfigurationInput']
+        created_vulnconfig = VulnerabilityConfigurationInput.query.get(json_vulnConfig['vulnConfigId'])
+        self.assertIsNotNone(created_vulnconfig)
+        self.assertNotEqual(created_vulnconfig.vulnConfigId, vc.vulnConfigId)

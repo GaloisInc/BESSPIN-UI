@@ -3,7 +3,12 @@ import json
 from flask_restplus import Resource, fields
 
 from . import api
-from app.models import db, Workflow
+from app.models import (
+    db,
+    SystemConfigurationInput,
+    VulnerabilityConfigurationInput,
+    Workflow
+)
 from app.api.system_configuration_inputs import existing_sysconfig_input
 from app.api.vulnerability_configuration_inputs import existing_vulnconfig_input
 from app.api.report_job import existing_report_job
@@ -138,3 +143,40 @@ class WorkflowApi(Resource):
             workflow.reportJob.log = 'test log output'
 
         return workflow
+
+
+@ns.route('/duplicate/<int:workflowId>')
+class WorkflowDuplicationApi(Resource):
+    @ns.marshal_with(existing_workflow)
+    def get(self, workflowId):
+        """
+            duplicate a workflow based on the Id passed in
+        """
+        current_app.logger.debug(f'duplicating workflow({workflowId})')
+        workflow = Workflow.query.get_or_404(workflowId)
+
+        new_workflow = Workflow(label=f'COPY - {workflow.label}')
+        db.session.add(new_workflow)
+        db.session.commit()
+
+        if workflow.systemConfigurationInput is not None:
+            sysconfig = SystemConfigurationInput(
+                label=f'COPY - {workflow.systemConfigurationInput.label}',
+                nixConfigFilename=workflow.systemConfigurationInput.nixConfigFilename,
+                nixConfig=workflow.systemConfigurationInput.nixConfig,
+                workflowId=new_workflow.workflowId
+            )
+            db.session.add(sysconfig)
+
+        if workflow.vulnerabilityConfigurationInput is not None:
+            vulnConfig = VulnerabilityConfigurationInput(
+                label=f'COPY - {workflow.vulnerabilityConfigurationInput.label}',
+                vulnClass=workflow.vulnerabilityConfigurationInput.vulnClass,
+                featureModelUid=workflow.vulnerabilityConfigurationInput.featureModelUid,
+                workflowId=new_workflow.workflowId
+            )
+            db.session.add(vulnConfig)
+
+        db.session.commit()
+
+        return new_workflow
