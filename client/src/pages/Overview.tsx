@@ -18,6 +18,7 @@ import { faClone } from '@fortawesome/free-solid-svg-icons';
 import { IState } from '../state';
 
 import {
+  cloneWorkflow,
   getWorkflowIds,
   getWorkflowsMap,
   submitWorkflow,
@@ -62,7 +63,7 @@ interface IStateFromProps {
 
 interface IDispatchFromProps {
   createWorkflow: typeof submitWorkflow;
-  cloneWorkflow: (_:number) => void; // TODO: type based on actual action-creator
+  cloneWorkflow: typeof cloneWorkflow;
   triggerReport: typeof triggerReport;
   fetchWorkflows: typeof fetchWorkflows;
 }
@@ -186,12 +187,7 @@ const mapStateToProps = (state: IState): IStateFromProps => {
 
 const mapDispatchToProps = {
   createWorkflow: submitWorkflow,
-  cloneWorkflow:  (workflowId: number) => {
-    console.log(`TODO: clone workflow(${workflowId})`);
-    return {
-      type: 'TODO: workflow/clone',
-    };
-  },
+  cloneWorkflow,
   fetchWorkflows,
   triggerReport,
 };
