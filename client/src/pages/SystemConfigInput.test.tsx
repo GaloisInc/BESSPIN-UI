@@ -1,6 +1,5 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { Dispatch } from 'redux';
 
 import {
   ISystemConfigInputProps,
@@ -9,15 +8,16 @@ import {
 import {
   submitSystemConfigInput,
   updateSystemConfigInput,
+  fetchSystemConfigInput,
 } from '../state/feature-model';
 
 const genSystemConfigInputWrapper = () => {
     const props: ISystemConfigInputProps = {
       isLoading: false,
       errors: [],
-      dispatch: jest.fn() as Dispatch,
       workflowId: -1,
       createSystemConfig: jest.fn() as typeof submitSystemConfigInput,
+      fetchSystemConfigInput: jest.fn() as typeof fetchSystemConfigInput,
       updateSystemConfig: jest.fn() as typeof updateSystemConfigInput,
     };
 
