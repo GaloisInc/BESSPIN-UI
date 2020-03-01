@@ -70,6 +70,16 @@ export const fetchConfigurators = async () => {
     });
 };
 
+export const cloneWorkflow = async (id: number) => {
+    return request({
+        url: `/api/workflow/clone/${id}`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    });
+};
+
 export const fetchWorkflow = async (id: number) => {
     return request({
         url: `/api/workflow/${id}`,
