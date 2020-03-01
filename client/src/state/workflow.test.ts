@@ -2,6 +2,7 @@ import {
     fetchWorkflowsSuccess,
     IWorkflowState,
     reducer,
+    cloneWorkflowSuccess,
     submitWorkflowSuccess,
 } from './workflow';
 
@@ -123,7 +124,33 @@ describe('workflow', () => {
 
                     expect(reducer(testState, action)).toEqual(testWorkflowState);
                 });
-            });;
+            });
+        });
+
+        describe('when we have successfully cloned a workflow', () => {
+
+            beforeEach(() => {
+                testState = generateTestState({
+                    byId: {
+                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
+                    },
+                    ids: [1],
+                });
+            });
+
+            it('should add the workflow', () => {
+                const testWorkflowState: IWorkflowState = {
+                    byId: {
+                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
+                        2: { id: 2, label: 'COPY - WF ONE', createdAt: 'SOME DATE STRING 2' },
+                    },
+                    ids: [1, 2],
+                };
+                
+                const action = cloneWorkflowSuccess(testWorkflowState.byId[2]);
+
+                expect(reducer(testState, action)).toEqual(testWorkflowState);
+            });
         });
     });
 });
