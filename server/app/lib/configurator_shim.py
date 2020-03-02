@@ -189,7 +189,7 @@ def configuration_algo(cfr_source, feature_selection):
     indicating the success or failure of the validation.
     When `USE_TOOLSUITE` is disabled, it blindly returns true
 
-    :param cfr_source:
+    :param cfr_source: string
     :param feature_selection:
 
     :return: boolean
@@ -203,9 +203,9 @@ def configuration_algo(cfr_source, feature_selection):
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.fm.json'
 
-    current_app.logger.debug('CFR source: ' + str(cfr_source))
+    current_app.logger.debug('CFR source: ' + cfr_source)
     with open(filename_cfr, 'w') as f:
-        f.write(str(cfr_source))
+        f.write(cfr_source)
         f.write(selected_features_to_constraints(feature_selection, even_not_validated=True))
 
     with open(filename_cfr, 'r') as f:
