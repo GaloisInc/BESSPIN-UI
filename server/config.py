@@ -36,6 +36,7 @@ class Config(object):
         'IEX': 'InformationLeakage.cfr',
         'RESOURCE_MANAGEMENT': 'ResourceManagement.cfr',
     }
+    USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
 
 
 class ProductionConfig(Config):

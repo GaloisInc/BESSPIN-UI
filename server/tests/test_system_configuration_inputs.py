@@ -3,38 +3,13 @@ from helpers import (
     create_sysConfig,
     create_workflow,
 )
-from sqlalchemy.exc import IntegrityError
 
 from app.models import (
-    db,
     SystemConfigurationInput,
 )
 
 
 class SystemConfigurationInputModelTestCase(BesspinTestBaseClass):
-
-    def test_unique_constraint(self):
-        wf = create_workflow(label='wf')
-
-        db.session.add(
-            SystemConfigurationInput(
-                label='test sysconfig 1',
-                nixConfigFilename='foo.nix',
-                nixConfig='{ some: config }',
-                workflowId=wf.workflowId
-            )
-        )
-        db.session.add(
-            SystemConfigurationInput(
-                label='test sysconfig 2',
-                nixConfigFilename='bar.nix',
-                nixConfig='{ some: config }',
-                workflowId=wf.workflowId
-            )
-        )
-
-        with self.assertRaises(IntegrityError):
-            db.session.commit()
 
     def test_workflow_relationship(self):
         wf = create_workflow(label='wf')

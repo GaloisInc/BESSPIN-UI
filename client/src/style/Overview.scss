@@ -9,11 +9,13 @@
         padding: 1em;
     }
     .workflow-row {
+        font-size: .9em;
+
         .label {
             text-align: inherit;
         }
         .btn {
-            min-width: 125px;
+            min-width: 110px;
 
             @at-root td {
                 text-align: center;
@@ -25,6 +27,18 @@
 
             .spinner-grow {
                 margin-right: 10px;
+            }
+
+            &.clone {
+                min-width: 25px !important;
+            }
+
+            &.edit {
+                min-width: 25px !important;
+
+                @at-root td {
+                    width: 40px;
+                }
             }
         }
     }

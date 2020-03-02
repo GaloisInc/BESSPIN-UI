@@ -37,6 +37,7 @@
     "lint": "eslint --ext js,ts,tsx src",
     "test": "tsc && react-scripts test",
     "test:coverage": "npm test -- --coverage --watchAll=false",
+    "test:coverage:open": "open coverage/lcov-report/index.html",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

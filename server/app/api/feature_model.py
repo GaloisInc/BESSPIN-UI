@@ -296,7 +296,7 @@ class ConfiguratorConfigure(Resource):
 
         try:
             is_selection_valid = configuration_algo(
-                entry.source,
+                entry.source.decode('utf8'),
                 feature_selection,
             )
         except RuntimeError as err:

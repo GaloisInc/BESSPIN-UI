@@ -52,9 +52,9 @@ export const Report: React.FC<IReportProps> = ({ dataRequested, fetchWorkflow, r
     const aceRef = useRef<AceEditor>(null);
 
     useEffect(() => {
-        const editor  = aceRef?.current;
+        const editor  = aceRef && aceRef.current; // aceRef?.current
         if (editor && report) {
-            const logLineCount = report?.log?.split(/\n/).length;
+            const logLineCount = report && report.log && report.log.split(/\n/).length; // report?.log?.split(/\n/).length;
             if (logLineCount) scrollToLine(editor, logLineCount);
         }
     });
@@ -77,7 +77,7 @@ export const Report: React.FC<IReportProps> = ({ dataRequested, fetchWorkflow, r
                     readOnly={ true }
                     setOptions={{ useWorker: false }}
                     theme='monokai'
-                    value={ report?.log }
+                    value={ report && report.log } // report?.log
                     width='100%'
                     height='85vh' />
             </Container>
@@ -114,7 +114,7 @@ const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps =>
         errors,
         isLoading,
         workflowId,
-        report: workflow?.report,
+        report: (workflow && workflow.report) || undefined, //workflow?.report,
     };
 };
 

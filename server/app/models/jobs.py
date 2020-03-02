@@ -90,6 +90,12 @@ class ReportJob(Job):
         nullable=False
     )
 
+    log = db.Column(
+        db.Text(),
+        nullable=True,
+        comment='log of report',
+    )
+
     __mapper_args__ = {
         'polymorphic_identity': 'report',
     }

@@ -122,11 +122,49 @@ $ docker-compose up
 
 #### ENV vars
 
-There are a few environment variables that can be set to configure how the server runs:
+There are a few environment variables that can be set to configure
+how the server runs:
 
  * PORT: the port to expose (this should map to the first port mentioned in the `-p` argument to docker)
  * HOST: the host to run flask on (defaults to `0.0.0.0` so you can access the server within docker)
  * DEBUG: flag to run flask in debug mode (defaults to `True`)
+
+### Build Docker with toolsuite
+
+The build of the toolsuite follows the one of the basic Docker image and
+it starts by creating a toolsuite image given 4 environment variables:
+
+  * `BINCACHE_LOGIN`: artifactory login
+  * `BINCACHE_APIKEY`: artifactory apikey
+  * `TOKEN_NAME`: gitlab token name
+  * `PRIVATE_TOKEN`: gitlab private token associated with the token name
+
+Provide these parameters as environment variables into the following
+`docker build` command.
+(NOTE: this build can take between 30 minutes to 2 hours depending on state of binary cache)
+```
+docker build -f Dockerfile-toolsuite \
+  --build-arg BINCACHE_LOGIN=$ARTIFACTORY_LOGIN \
+  --build-arg BINCACHE_APIKEY="$(cat ~/.ssh/artifactory_api_key)" \
+  --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN \
+  --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" \
+  -t besspin-toolsuite-image .
+```
+
+This will produce a `besspin-toolsuite-image` that will be used as a base
+image for building the server image. Use the file`docker-compose-toolsuite.yaml`
+to build the client and server images:
+```
+TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME \
+PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" \
+docker-compose -f docker-compose-toolsuite.yaml build
+```
+
+To start and stop the app do the usual docker-compose commands:
+```
+docker-compose -f docker-compose-toolsuite.yaml up
+docker-compose -f docker-compose-toolsuite.yaml dowm
+```
 
 ## Architecture
 
