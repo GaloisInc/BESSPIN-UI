@@ -49,6 +49,7 @@ services:
       HOST: 0.0.0.0
       PORT: 3784
       USE_TOOLSUITE: "True"
+      USE_TOOLSUITE_CONFIGURATOR: "False"
 
 networks:
   proxy-layer:

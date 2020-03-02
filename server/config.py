@@ -37,6 +37,7 @@ class Config(object):
         'RESOURCE_MANAGEMENT': 'ResourceManagement.cfr',
     }
     USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
+    USE_TOOLSUITE_CONFIGURATOR = os.getenv('USE_TOOLSUITE_CONFIGURATOR', False)
 
 
 class ProductionConfig(Config):
