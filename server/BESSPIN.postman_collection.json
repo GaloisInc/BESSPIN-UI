@@ -297,7 +297,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"workflowId\": {{workflowId}},\n\t\"label\": \"test vuln config {{$timestamp}}\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModel\": {\n\t\t\"uid\": \"1abc3948\",\n\t\t\"source\": \"\",\n\t\t\"filename\": \"foo.fm.json\"\n\t}\n}"
+					"raw": "{\n\t\"workflowId\": {{workflowId}},\n\t\"label\": \"test vuln config {{$timestamp}}\",\n\t\"vulnClass\": \"BufferErrors\",\n\t\"featureModel\": {\n\t\t\"uid\": \"1abc3948\",\n\t\t\"source\": \"\",\n\t\t\"filename\": \"foo.fm.json\"\n\t}\n}"
 				},
 				"url": {
 					"raw": "{{apiHost}}/api/vulnerability-config-input",
@@ -330,7 +330,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\"\n}"
+					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BufferErrors\"\n}"
 				},
 				"url": {
 					"raw": "{{apiHost}}/api/vulnerability-config-input",
@@ -400,7 +400,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BOF\",\n\t\"featureModelUid\": \"7efe8010-3966-4211-8138-91aec88fd3ae\"\n}"
+					"raw": "{\n\t\"workflowId\": 1,\n\t\"label\": \"test vuln config 1\",\n\t\"vulnClass\": \"BufferErrors\",\n\t\"featureModelUid\": \"7efe8010-3966-4211-8138-91aec88fd3ae\"\n}"
 				},
 				"url": {
 					"raw": "{{apiHost}}/api/vulnerability-config-input/1",

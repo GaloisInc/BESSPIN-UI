@@ -64,7 +64,7 @@ class TestFeatureModelApi(BesspinTestApiBaseClass):
             label='test vuln config',
             featureModelUid=test_uid,
             workflowId=wf.workflowId,
-            vulnClass='BOF'
+            vulnClass='BufferErrors'
         )
 
         vc = VulnerabilityConfigurationInput.query.filter_by(featureModelUid=test_uid).first()

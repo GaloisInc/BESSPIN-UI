@@ -1,5 +1,7 @@
+import copy
 import re
 
+from config import config
 
 DEFAULT_CONFIG_INI_PATH = '/home/besspinuser/testgen/config.ini'
 
@@ -39,3 +41,23 @@ def set_variable(config_text, variable, value):
         raise RuntimeError('variable not found')
 
     return new_config_text
+
+def set_unique_vuln_class_to_constaints(vuln_class):
+    """
+    :return: string with constraints [ !vulnClass_Test ] for vulnClass different from vuln_class
+    """
+    all_vuln_classes = copy.deepcopy(config['default'].VALID_VULN_CLASSES)
+
+    if vuln_class not in all_vuln_classes.keys():
+        raise RuntimeError('Invalid vuln class : ' + str(vuln_class))
+
+    del all_vuln_classes[vuln_class]
+
+    constr_string = ''
+    for (k,v) in all_vuln_classes.items():
+        if not all_vuln_classes[k].endswith('.cfr'):
+            raise RuntimeError('Vuln class file does not end with cfr')
+        constr_string += "[ !" + all_vuln_classes[k][:-4] + '_Test' + " ]\n"
+
+    return constr_string
+

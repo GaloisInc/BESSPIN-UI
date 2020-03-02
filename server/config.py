@@ -30,11 +30,11 @@ class Config(object):
     TESTING = False
     HOST = os.getenv('HOST', '0.0.0.0')
     VALID_VULN_CLASSES = {
-        'BOF': 'BufferErrors.cfr',
+        'BufferErrors': 'BufferErrors.cfr',
         'PPAC': 'PPAC.cfr',
-        'NUMERIC': 'NumericErrors.cfr',
-        'IEX': 'InformationLeakage.cfr',
-        'RESOURCE_MANAGEMENT': 'ResourceManagement.cfr',
+        'NumericErrors': 'NumericErrors.cfr',
+        'InformationLeakage': 'InformationLeakage.cfr',
+        'ResourceManagement': 'ResourceManagement.cfr',
     }
     USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
     USE_TOOLSUITE_CONFIGURATOR = os.getenv('USE_TOOLSUITE_CONFIGURATOR', False)
