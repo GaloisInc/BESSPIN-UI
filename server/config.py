@@ -36,8 +36,8 @@ class Config(object):
         'InformationLeakage': 'InformationLeakage.cfr',
         'ResourceManagement': 'ResourceManagement.cfr',
     }
-    USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
-    USE_TOOLSUITE_CONFIGURATOR = os.getenv('USE_TOOLSUITE_CONFIGURATOR', False)
+    USE_TOOLSUITE = True if os.getenv('USE_TOOLSUITE', 'False') == 'True' else False
+    USE_TOOLSUITE_CONFIGURATOR = True if os.getenv('USE_TOOLSUITE_CONFIGURATOR', 'False') == 'True' else False
 
 
 class ProductionConfig(Config):
