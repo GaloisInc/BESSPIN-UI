@@ -10,7 +10,7 @@ import {
 } from './Overview';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import {
-  WorkflowActionTypes,
+  submitWorkflow,
   IWorkflow,
 } from '../state/workflow';
 
@@ -24,7 +24,9 @@ const genOverviewWrapper = (propsOverrides: Partial<IOverviewProps> = {}): Retur
         triggerReport: jest.fn(),
         workflows: [],
         createWorkflow: jest.fn(),
-        dispatch: jest.fn(),
+        cloneWorkflow: jest.fn(),
+        fetchWorkflows: jest.fn(),
+        updateWorkflow: jest.fn(),
         isLoading: false,
         dataRequested: true,
         ...propsOverrides,
@@ -68,6 +70,30 @@ describe('Overview', () => {
     expect(wrapper.find('button.new-workflow').length).toEqual(1);
   });
 
+  it('renders button to duplicate a workflow', () => {
+    const wrapper = genOverviewWrapper({
+      workflows:[{
+        id: 1,
+        label: 'TEST WF',
+        createdAt: (new Date(Date.now())).toISOString(),
+      }],
+    });
+
+    expect(wrapper.find('button.clone').length).toEqual(1);
+  });
+
+  it('renders button to edit a workflow', () => {
+    const wrapper = genOverviewWrapper({
+      workflows:[{
+        id: 1,
+        label: 'TEST WF',
+        createdAt: (new Date(Date.now())).toISOString(),
+      }],
+    });
+
+    expect(wrapper.find('button.edit').length).toEqual(1);
+  });
+
   it('renders loading indicator if we are loading', () => {
     const wrapper = genOverviewWrapper({ isLoading: true });
 
@@ -75,10 +101,10 @@ describe('Overview', () => {
   });
 
   it('dispatches action to fetch data if no data has been fetched', () => {
-      const dispatchSpy = jest.fn();
-      genOverviewWrapper({ dataRequested: false, dispatch: dispatchSpy });
+      const fetchWorkflowsSpy = jest.fn();
+      genOverviewWrapper({ dataRequested: false, fetchWorkflows: fetchWorkflowsSpy  });
 
-      expect(dispatchSpy).toHaveBeenCalledWith({ type: WorkflowActionTypes.FETCH_WORKFLOWS });
+      expect(fetchWorkflowsSpy).toHaveBeenCalled();
   });
 
   describe('new workflow modal', () => {
@@ -93,7 +119,7 @@ describe('Overview', () => {
 
     describe('activation lifecycle', () => {
       let wrapper: ReturnType<typeof genOverviewWrapper>;
-      let createWorkflowSpy: (_: string) => void;
+      let createWorkflowSpy: typeof submitWorkflow;
 
       beforeEach(() => {
         createWorkflowSpy = jest.fn();
@@ -114,7 +140,7 @@ describe('Overview', () => {
       it('calls our "create" handler with content when the create button is clicked', () => {
         const TEST_LABEL = 'TEST-LABEL';
 
-        wrapper.find('input.new-workflow-label').simulate('blur', { target: { value: TEST_LABEL } });
+        wrapper.find('input.new-workflow-label').simulate('change', { target: { value: TEST_LABEL } });
         wrapper.find('button.create-new-workflow').simulate('click');
 
         expect(createWorkflowSpy).toHaveBeenCalledWith(TEST_LABEL);

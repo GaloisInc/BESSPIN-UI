@@ -44,6 +44,11 @@ export interface IWorkflow {
     report?: IReportConfig;
 }
 
+export interface IUpdateWorkflow {
+    id: number;
+    label: string;
+}
+
 export interface IWorkflowMap extends Object {
     [id: number]: IWorkflow;
 }
@@ -61,6 +66,9 @@ export const DEFAULT_STATE: IWorkflowState = {
 // Actions
 
 export enum WorkflowActionTypes {
+    CLONE_WORKFLOW = 'workflow/clone',
+    CLONE_WORKFLOW_FAILURE = 'workflow/clone/error',
+    CLONE_WORKFLOW_SUCCESS = 'workflow/clone/success',
     FETCH_WORKFLOW = 'workflow/fetch',
     FETCH_WORKFLOW_FAILURE = 'workflow/fetch/error',
     FETCH_WORKFLOW_SUCCESS = 'workflow/fetch/success',
@@ -73,7 +81,31 @@ export enum WorkflowActionTypes {
     TRIGGER_REPORT = 'workflow/trigger-report',
     TRIGGER_REPORT_FAILURE = 'workflow/trigger-report/error',
     TRIGGER_REPORT_SUCCESS = 'workflow/trigger-report/success',
+    UPDATE_WORKFLOW = 'workflow/update',
+    UPDATE_WORKFLOW_FAILURE = 'workflow/update/error',
+    UPDATE_WORKFLOW_SUCCESS = 'workflow/update/success',
 }
+
+export const cloneWorkflow = (id: number) => {
+    return {
+        type: WorkflowActionTypes.CLONE_WORKFLOW,
+        data: id,
+    } as const;
+};
+
+export const cloneWorkflowError = (error: string) => {
+    return {
+        type: WorkflowActionTypes.CLONE_WORKFLOW_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const cloneWorkflowSuccess = (workflow: IWorkflow) => {
+    return {
+        type: WorkflowActionTypes.CLONE_WORKFLOW_SUCCESS,
+        data: workflow,
+    } as const;
+};
 
 export const fetchWorkflow = (id: number) => {
     return {
@@ -137,6 +169,29 @@ export const submitWorkflowSuccess = (workflow: IWorkflow) => {
     } as const;
 };
 
+export const updateWorkflow = (workflow: IUpdateWorkflow) => {
+    return {
+        type: WorkflowActionTypes.UPDATE_WORKFLOW,
+        data: {
+            ...workflow,
+        },
+    } as const;
+};
+
+export const updateWorkflowError = (error: string) => {
+    return {
+        type: WorkflowActionTypes.UPDATE_WORKFLOW_FAILURE,
+        data: error,
+    } as const;
+};
+
+export const updateWorkflowSuccess = (workflow: IWorkflow) => {
+    return {
+        type: WorkflowActionTypes.UPDATE_WORKFLOW_SUCCESS,
+        data: workflow,
+    } as const;
+};
+
 export const triggerReport = (workflowId: number, workflowLabel: string) => {
     return {
         type: WorkflowActionTypes.TRIGGER_REPORT,
@@ -162,6 +217,9 @@ export const triggerReportSuccess = (workflow: IWorkflow) => {
 };
 
 export type IWorkflowAction = ReturnType<
+    typeof cloneWorkflow |
+    typeof cloneWorkflowError |
+    typeof cloneWorkflowSuccess |
     typeof fetchWorkflow |
     typeof fetchWorkflowError |
     typeof fetchWorkflowSuccess |
@@ -173,7 +231,10 @@ export type IWorkflowAction = ReturnType<
     typeof submitWorkflowSuccess |
     typeof triggerReport |
     typeof triggerReportError |
-    typeof triggerReportSuccess
+    typeof triggerReportSuccess | 
+    typeof updateWorkflow |
+    typeof updateWorkflowError |
+    typeof updateWorkflowSuccess
 >;
 
 // Reducers
@@ -210,6 +271,8 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
                 ids: uniquifyIds(state.ids.concat([action.data.id])),
             }
         case WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS:
+        case WorkflowActionTypes.CLONE_WORKFLOW_SUCCESS:
+        case WorkflowActionTypes.UPDATE_WORKFLOW_SUCCESS:
             return {
                 ...state,
                 byId: {

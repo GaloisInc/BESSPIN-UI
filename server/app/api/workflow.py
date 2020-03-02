@@ -1,9 +1,16 @@
 from flask import current_app, request
 import json
 from flask_restplus import Resource, fields
+from uuid import uuid4
 
 from . import api
-from app.models import db, Workflow
+from app.models import (
+    db,
+    FeatureModel,
+    SystemConfigurationInput,
+    VulnerabilityConfigurationInput,
+    Workflow
+)
 from app.api.system_configuration_inputs import existing_sysconfig_input
 from app.api.vulnerability_configuration_inputs import existing_vulnconfig_input
 from app.api.report_job import existing_report_job
@@ -111,11 +118,6 @@ class WorkflowApi(Resource):
         existing_workflow = Workflow.query.get_or_404(workflowId)
         existing_workflow.label = workflow_input['label']
 
-        if 'testConfigInd' in workflow_input:
-            existing_workflow.testRunId = workflow_input['testRunId']
-        if 'reportJobId' in workflow_input:
-            existing_workflow.reportJobId = workflow_input['reportJobId']
-
         db.session.add(existing_workflow)
         db.session.commit()
 
@@ -138,3 +140,52 @@ class WorkflowApi(Resource):
             workflow.reportJob.log = 'test log output'
 
         return workflow
+
+
+@ns.route('/clone/<int:workflowId>')
+class WorkflowCloneApi(Resource):
+    @ns.marshal_with(existing_workflow)
+    def get(self, workflowId):
+        """
+            clone a workflow based on the Id passed in
+        """
+        current_app.logger.debug(f'cloning workflow({workflowId})')
+        workflow = Workflow.query.get_or_404(workflowId)
+
+        new_workflow = Workflow(label=f'COPY - {workflow.label}')
+        db.session.add(new_workflow)
+        db.session.commit()
+
+        if workflow.systemConfigurationInput is not None:
+            sysconfig = SystemConfigurationInput(
+                label=f'COPY - {workflow.systemConfigurationInput.label}',
+                nixConfigFilename=workflow.systemConfigurationInput.nixConfigFilename,
+                nixConfig=workflow.systemConfigurationInput.nixConfig,
+                workflowId=new_workflow.workflowId
+            )
+            db.session.add(sysconfig)
+
+        if workflow.vulnerabilityConfigurationInput is not None:
+            existing_feat_model = workflow.vulnerabilityConfigurationInput.featureModel
+            feat_model = FeatureModel(
+                label=f'COPY - {existing_feat_model.label}',
+                uid=str(uuid4()),  # TODO: the model should really handle UID generation so we don't have this duplication
+                filename=existing_feat_model.filename,
+                source=existing_feat_model.source,
+                conftree=existing_feat_model.conftree,
+                hash=existing_feat_model.hash,
+                configs=existing_feat_model.configs
+            )
+            db.session.add(feat_model)
+
+            vuln_config = VulnerabilityConfigurationInput(
+                label=f'COPY - {workflow.vulnerabilityConfigurationInput.label}',
+                vulnClass=workflow.vulnerabilityConfigurationInput.vulnClass,
+                featureModelUid=feat_model.uid,
+                workflowId=new_workflow.workflowId
+            )
+            db.session.add(vuln_config)
+
+        db.session.commit()
+
+        return new_workflow

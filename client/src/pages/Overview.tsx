@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Dispatch } from 'redux';
 import { connect } from 'react-redux'
 
 import {
@@ -9,26 +8,24 @@ import {
   Container,
   Form,
   Modal,
-  OverlayTrigger,
   Row,
   Table,
-  Popover,
-  PopoverProps,
-  Spinner,
 } from 'react-bootstrap';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClone, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 import { IState } from '../state';
 
 import {
+  cloneWorkflow,
   getWorkflowIds,
   getWorkflowsMap,
   submitWorkflow,
   fetchWorkflows,
   IWorkflow,
-  IConfig,
-  IReportConfig,
-  JobStatus,
   triggerReport,
+  updateWorkflow,
 } from '../state/workflow';
 
 import {
@@ -38,106 +35,13 @@ import {
 
 import { Header } from '../components/Header';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import {
+  ReportButton,
+  SystemConfigButton,
+  TestConfigButton,
+} from '../components/WorkflowButton';
 
 import '../style/Overview.scss';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons'
-
-// NOTE: Rendering buttons that represent a directed workflow involves
-//       a fair amount of logic to map the state of a given workflow.
-//       Right now we define all the types/components here, but we
-//       should consider pulling them out into their own "components"
-//       files once this UX is solidified
-interface IWorkflowProps {
-  workflowId?: number;
-  config?: IConfig;
-  disabled?: boolean;
-}
-interface IReportProps {
-  workflowId: number;
-  onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  config?: IReportConfig;
-  disabled?: boolean;
-}
-
-interface IViewCreateButtonProps extends IWorkflowProps {
-  label: string;
-  path: string;
-  noNextStep?: boolean;
-  inProgress?: boolean;
-}
-
-interface IWorkflowButton {
-  url: string;
-  label: string;
-  variant?: 'success' | 'warning' | 'danger';
-  disabled?: boolean;
-  noNextStep?: boolean;
-  tooltipError?: string;
-  inProgress?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}
-
-interface IErrorTooltipProps extends PopoverProps {
-  label: string;
-}
-
-const WorkflowButton: React.FC<IWorkflowButton> = ({ url, label, variant, disabled, noNextStep, tooltipError, inProgress, onClick }) => {
-  const renderTooltip: React.FC<IErrorTooltipProps> = (props) => (<Popover {...props} content={true}>{props.label}</Popover>);
-  const variantType = inProgress ? 'warning' :
-                        disabled ? 'secondary' :
-                         variant ? variant : 'primary';
-
-  return tooltipError ?
-    <OverlayTrigger placement='bottom' overlay={(props: IErrorTooltipProps) => renderTooltip({ ...props, label: tooltipError })}>
-      <Button disabled={disabled} variant='danger' href={url}>{label}</Button>
-    </OverlayTrigger>
-    : (
-      <Button disabled={disabled} variant={variantType} href={url} {...(onClick ? { onClick } : null)}>
-        { inProgress && <Spinner as='span' animation='grow' size='sm' role='status' aria-hidden='true' /> }
-        {label}
-        {!(disabled || noNextStep ) && variantType !== 'primary' && <FontAwesomeIcon icon={faChevronRight} />
-        }</Button>
-    );
-};
-
-const CreateEditButton: React.FC<IViewCreateButtonProps> = ({ workflowId, config, path, disabled, label, noNextStep, inProgress }) => {
-  if (config) {
-    return <WorkflowButton
-      disabled={disabled}
-      label={label}
-      noNextStep={noNextStep}
-      tooltipError={config.error && config.error.message}
-      url={`${path}/edit/${workflowId}/${config.id}`}
-      variant={ inProgress ? 'warning' : 'success' }
-      inProgress={inProgress}
-    />;
-  } else {
-    return <WorkflowButton label={label} url={`${path}/create/${workflowId}`} disabled={disabled} noNextStep={noNextStep} />;
-  }
-};
-
-const SystemConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  return <CreateEditButton label='System' path='/system-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
-};
-
-const TestConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  return <CreateEditButton label='Test' path='/test-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
-};
-
-const ReportButton: React.FC<IReportProps> = ({ workflowId, onClick, config, disabled }) => {
-  const inProgress = config && config.status === JobStatus.Running;
-  const label = !config ? 'Build/Run' :
-                inProgress ? 'Running' : 'View';
-  return <WorkflowButton
-          label={label}
-          url={`/report/${workflowId}`}
-          tooltipError={config && config.error && config.error.message}
-          disabled={disabled}
-          noNextStep={true}
-          inProgress={inProgress}
-          onClick={onClick} />;
-};
 
 const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
   if (!workflow.systemConfig) return true;
@@ -148,6 +52,10 @@ const reportShouldBeDisabled = (workflow: IWorkflow): boolean => {
   return false;
 };
 
+const formatDateTime = (dateTime: string): string => {
+  return (new Date(dateTime)).toUTCString();
+};
+
 interface IStateFromProps {
   workflows: IWorkflow[];
   isLoading: boolean;
@@ -155,28 +63,34 @@ interface IStateFromProps {
 }
 
 interface IDispatchFromProps {
-  dispatch: Dispatch;
-  createWorkflow: (_: string) => void;
+  createWorkflow: typeof submitWorkflow;
+  cloneWorkflow: typeof cloneWorkflow;
+  updateWorkflow: typeof updateWorkflow;
   triggerReport: typeof triggerReport;
+  fetchWorkflows: typeof fetchWorkflows;
 }
 
 export type IOverviewProps  = IStateFromProps & IDispatchFromProps;
 
 export const Overview: React.FC<IOverviewProps> = ({
   dataRequested,
-  dispatch,
   isLoading,
   workflows,
+  fetchWorkflows,
   createWorkflow,
+  cloneWorkflow,
   triggerReport,
+  updateWorkflow,
 }) => {
 
   useEffect(() => {
-    dataRequested || (dispatch && dispatch(fetchWorkflows()));
+    dataRequested || fetchWorkflows();
   });
 
-  const [newWorkflow, setNewWorkflow] = useState('');
+  const [workflowLabel, setWorkflowLabel] = useState('');
   const [showWorkflowEditor, setShowWorkflowEditor] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editWorkflow, setEditWorkflow] = useState<IWorkflow | null>(null);
 
   return (
     <Container className='Overview'>
@@ -184,7 +98,7 @@ export const Overview: React.FC<IOverviewProps> = ({
       {isLoading && <LoadingIndicator />}
       <Modal className='workflow-editor' show={showWorkflowEditor} onHide={() => setShowWorkflowEditor(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Create New Workflow</Modal.Title>
+          <Modal.Title>{ isEditMode ? 'Update' : 'Create New' } Workflow</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -194,7 +108,8 @@ export const Overview: React.FC<IOverviewProps> = ({
                 <Form.Control
                   className='new-workflow-label'
                   type='input'
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => setNewWorkflow(e.target.value)} />
+                  value={ workflowLabel }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWorkflowLabel(e.target.value)} />
               </Col>
             </Form.Group>
           </Form>
@@ -202,9 +117,13 @@ export const Overview: React.FC<IOverviewProps> = ({
         <Modal.Footer>
           <Button variant='secondary' onClick={() => setShowWorkflowEditor(false)}>Cancel</Button>
           <Button className='create-new-workflow' variant='primary' onClick={() => {
-            createWorkflow(newWorkflow);
+            isEditMode && editWorkflow ? updateWorkflow({
+              id: editWorkflow.id,
+              label: workflowLabel
+            }) : createWorkflow(workflowLabel);
+            setIsEditMode(false);
             setShowWorkflowEditor(false);
-          }}>Create</Button>
+          }}>{ isEditMode ? 'Update' : 'Create' }</Button>
         </Modal.Footer>
       </Modal>
       <h1>Overview</h1>
@@ -220,22 +139,38 @@ export const Overview: React.FC<IOverviewProps> = ({
             <th>Last Updated</th>
             <th>Configurations</th>
             <th>Report</th>
+            <th>Clone</th>
           </tr>
         </thead>
         <tbody>
           {workflows && workflows.map((w, i) => (
             <tr className='workflow-row' key={`workflow-${i}`}>
-              <td>{w.id}</td>
-              <td className='label'>{w.label}</td>
-              <td>{w.createdAt}</td>
-              <td>{w.updatedAt || ''}</td>
-              <td>
+              <td className='align-middle'>
+                {w.id}
+                <Button
+                  className='edit'
+                  variant='link'
+                  block={ false }
+                  size='sm'
+                  onClick={() => {
+                    setIsEditMode(true);
+                    setEditWorkflow(w);
+                    setWorkflowLabel(w.label)
+                    setShowWorkflowEditor(true);
+                }}>
+                  <FontAwesomeIcon className='far' icon={faEdit}/>
+                </Button>
+              </td>
+              <td className='label align-middle'>{w.label}</td>
+              <td className='align-middle'>{formatDateTime(w.createdAt)}</td>
+              <td className='align-middle'>{w.updatedAt ? formatDateTime(w.updatedAt) : ''}</td>
+              <td className='align-middle'>
                 <ButtonGroup>
                   <SystemConfigButton workflowId={w.id} config={w.systemConfig} />
                   <TestConfigButton workflowId={w.id} config={w.testConfig} />
                 </ButtonGroup>
               </td>
-              <td>
+              <td className='align-middle'>
                 <ReportButton
                   disabled={reportShouldBeDisabled(w)}
                   workflowId={w.id}
@@ -246,6 +181,14 @@ export const Overview: React.FC<IOverviewProps> = ({
                     }
                   }}
                   config={w.report} />
+              </td>
+              <td className='align-middle'>
+                <Button
+                  className='clone'
+                  variant='outline-secondary'
+                  onClick={() => cloneWorkflow(w.id)}>
+                  <FontAwesomeIcon className='far' icon={faClone} />
+                </Button>
               </td>
             </tr>
           ))}
@@ -267,11 +210,13 @@ const mapStateToProps = (state: IState): IStateFromProps => {
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch): IDispatchFromProps => ({
-  dispatch,
-  createWorkflow: (label: string) => dispatch(submitWorkflow(label)),
-  triggerReport: (workflowId: number, workflowLabel: string) => dispatch(triggerReport(workflowId, workflowLabel)),
-});
+const mapDispatchToProps = {
+  createWorkflow: submitWorkflow,
+  cloneWorkflow,
+  fetchWorkflows,
+  triggerReport,
+  updateWorkflow,
+};
 
 const connector = connect(mapStateToProps, mapDispatchToProps);
 
