@@ -4,6 +4,7 @@ import {
     reducer,
     cloneWorkflowSuccess,
     submitWorkflowSuccess,
+    updateWorkflowSuccess,
 } from './workflow';
 
 
@@ -37,8 +38,9 @@ describe('workflow', () => {
                         byId: {
                             1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
                             2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
+                            10: { id: 10, label: 'WF TEN', createdAt: 'SOME DATE STRING 10' },
                         },
-                        ids: [1, 2],
+                        ids: [10, 2, 1],
                     };
                     
                     const action = fetchWorkflowsSuccess(Object.values(testWorkflowState.byId));
@@ -55,7 +57,7 @@ describe('workflow', () => {
                             1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
                             2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
                         },
-                        ids: [1, 2],
+                        ids: [2, 1],
                     });
                 });
 
@@ -66,7 +68,7 @@ describe('workflow', () => {
                             2: { id: 2, label: 'WF TWO', createdAt: 'SOME NEW DATE STRING 2' },
                             3: { id: 3, label: 'WF THREE', createdAt: 'SOME DATE STRING 3' },
                         },
-                        ids: [1, 2, 3],
+                        ids: [3, 2, 1],
                     };
                     
                     const action = fetchWorkflowsSuccess(Object.values(testWorkflowState.byId));
@@ -106,7 +108,7 @@ describe('workflow', () => {
                             1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
                             2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
                         },
-                        ids: [1, 2],
+                        ids: [2, 1],
                     });
                 });
 
@@ -117,7 +119,7 @@ describe('workflow', () => {
                             2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
                             3: { id: 3, label: 'WF THREE', createdAt: 'SOME DATE STRING 3' },
                         },
-                        ids: [1, 2, 3],
+                        ids: [3, 2, 1],
                     };
                     
                     const action = submitWorkflowSuccess(testWorkflowState.byId[3]);
@@ -144,12 +146,38 @@ describe('workflow', () => {
                         1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
                         2: { id: 2, label: 'COPY - WF ONE', createdAt: 'SOME DATE STRING 2' },
                     },
-                    ids: [1, 2],
+                    ids: [2, 1],
                 };
                 
                 const action = cloneWorkflowSuccess(testWorkflowState.byId[2]);
 
                 expect(reducer(testState, action)).toEqual(testWorkflowState);
+            });
+        });
+
+        describe('when we have successfully updated a workflow', () => {
+
+            beforeEach(() => {
+                testState = generateTestState({
+                    byId: {
+                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
+                    },
+                    ids: [1],
+                });
+            });
+
+            it('should add the workflows, updating an existing one', () => {
+                const testWorkflowState: IWorkflowState = {
+                    byId: {
+                        1: { id: 1, label: 'COPY - WF ONE', createdAt: 'SOME DATE STRING 1' },
+                    },
+                    ids: [1],
+                };
+                
+                const action = updateWorkflowSuccess(testWorkflowState.byId[1]);
+                const newState = reducer(testState, action);
+
+                expect(newState).toEqual(testWorkflowState);
             });
         });
     });

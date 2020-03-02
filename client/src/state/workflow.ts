@@ -240,7 +240,11 @@ export type IWorkflowAction = ReturnType<
 // Reducers
 
 const uniquifyIds = (ids: number[]): number[] => {
-    return ids.sort().reduce((acc: number[], id: number) => {
+    const sortDescByNumericValue = (a: number, b: number): number => {
+        return a > b   ? -1 :
+               a === b ?  0 : 1
+    };
+    return ids.sort(sortDescByNumericValue).reduce((acc: number[], id: number) => {
         return acc.includes(id) ? acc : acc.concat(id);
     }, []);
 };
@@ -279,7 +283,7 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
                     ...state.byId,
                     [action.data.id]: action.data,
                 },
-                ids: state.ids.concat(action.data.id),
+                ids: uniquifyIds(state.ids.concat(action.data.id)),
             };
         default:
             return state;
