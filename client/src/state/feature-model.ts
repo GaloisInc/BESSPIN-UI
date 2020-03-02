@@ -147,9 +147,7 @@ export const fetchSystem = (systemUid: string) => {
 export const fetchSystemFailure = (error: string) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_FAILURE,
-        data: {
-            error,
-        },
+        data: error,
     } as const;
 };
 
@@ -174,9 +172,7 @@ export const fetchSystemByVulnConfig = (vulnConfigId: number) => {
 export const fetchSystemByVulnConfigFailure = (error: string) => {
     return {
         type: SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_FAILURE,
-        data: {
-            error,
-        },
+        data: error,
     } as const;
 };
 
@@ -202,9 +198,7 @@ export const submitSystem = (systemName: string, systemJsonString: string) => {
 export const submitSystemFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_SYSTEM_FAILURE,
-        data: {
-            error,
-        },
+        data: error,
     } as const;
 };
 
@@ -231,9 +225,7 @@ export const submitVulnerabilityClass = (workflowId: string, vulnerabilityClassN
 export const submitVulnerabilityClassFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_FAILURE,
-        data: {
-            error,
-        },
+        data: error,
     } as const;
 };
 
@@ -282,9 +274,7 @@ export const submitValidateConfiguration = (uid: string, selection: ISelectionTy
 export const submitValidateConfigurationFailure = (error: string) => {
     return {
         type: SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_FAILURE,
-        data: {
-            error,
-        },
+        data: error,
     } as const;
 };
 
