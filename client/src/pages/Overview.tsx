@@ -123,6 +123,7 @@ export const Overview: React.FC<IOverviewProps> = ({
             }) : createWorkflow(workflowLabel);
             setIsEditMode(false);
             setShowWorkflowEditor(false);
+            setWorkflowLabel('');
           }}>{ isEditMode ? 'Update' : 'Create' }</Button>
         </Modal.Footer>
       </Modal>
