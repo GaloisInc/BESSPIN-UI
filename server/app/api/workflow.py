@@ -63,12 +63,12 @@ existing_workflow = api.inherit(
             required=False,
             description='VulnerabilityConfigurationInput associated with this workflow'
         ),
-        'reportJob': fields.Nested(
+        'reportJobs': fields.List(fields.Nested(
             existing_report_job,
             allow_null=True,
             required=False,
             description='ReportJob associated with this workflow'
-        )
+        ))
     }
 )
 
@@ -130,12 +130,6 @@ class WorkflowApi(Resource):
         """
         current_app.logger.debug(f'fetching workflowId: {workflowId}')
         workflow = Workflow.query.get_or_404(workflowId)
-
-        """
-            NOTE: this contains the `log` in workflow.reportJob.log but maybe
-                  we will need to grab the logfile using
-                  workflow.reportJob.logFilePath...
-        """
 
         return workflow
 
