@@ -48,13 +48,22 @@ class WorkFlowModelTestCase(BesspinTestBaseClass):
         test_sysconfig = SystemConfigurationInput.query.first()
 
         create_reportJob(
-            label='test report',
+            label='first report',
+            sysConfigId=test_sysconfig.sysConfigId,
+            workflowId=test_workflow.workflowId,
+            statusId=JobStatus().query.order_by(JobStatus.statusId.desc()).first().statusId
+        )
+        create_reportJob(
+            label='second report',
             sysConfigId=test_sysconfig.sysConfigId,
             workflowId=test_workflow.workflowId,
             statusId=JobStatus().query.first().statusId
         )
-        test_report_job = ReportJob.query.first()
-        self.assertIsNotNone(test_report_job)
+        test_report_jobs = ReportJob.query.all()
+        self.assertIsNotNone(test_report_jobs)
+        self.assertEqual(len(test_report_jobs), 2, msg='Expected only two report jobs to exist')
 
         test_workflow = Workflow.query.first()
-        self.assertEqual(test_workflow.reportJob.label, 'test report')
+        self.assertEqual(len(test_workflow.reportJobs), 2, msg='Expected to be able to find two report jobs for our workflow')
+        first_report = test_workflow.reportJobs[0]
+        self.assertEqual(first_report.label, 'first report')

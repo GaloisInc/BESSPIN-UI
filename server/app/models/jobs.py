@@ -27,6 +27,10 @@ class JobStatus(db.Model):
             db_conn.add(job_status)
         db_conn.commit()
 
+    @staticmethod
+    def get_status_by_label(label):
+        return JobStatus.query.filter_by(label=label).first()
+
 
 class Job(db.Model, MetaDataColumnsMixin):
     __tablename__ = 'jobs'

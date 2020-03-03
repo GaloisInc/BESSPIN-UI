@@ -37,11 +37,11 @@ export interface IWorkflow {
     id: number;
     label: string;
     createdAt: string;
+    reports: IReportConfig[];
     hasError?: boolean;
     updatedAt?: string;
     systemConfig?: ISystemConfig;
     testConfig?: IVulnerabilityConfig;
-    report?: IReportConfig;
 }
 
 export interface IUpdateWorkflow {
@@ -240,7 +240,11 @@ export type IWorkflowAction = ReturnType<
 // Reducers
 
 const uniquifyIds = (ids: number[]): number[] => {
-    return ids.sort().reduce((acc: number[], id: number) => {
+    const sortDescByNumericValue = (a: number, b: number): number => {
+        return a > b   ? -1 :
+               a === b ?  0 : 1
+    };
+    return ids.sort(sortDescByNumericValue).reduce((acc: number[], id: number) => {
         return acc.includes(id) ? acc : acc.concat(id);
     }, []);
 };
@@ -262,14 +266,6 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
             };
         case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.TRIGGER_REPORT_SUCCESS:
-            return {
-                ...state,
-                byId: {
-                    ...state.byId,
-                    [action.data.id]: action.data,
-                },
-                ids: uniquifyIds(state.ids.concat([action.data.id])),
-            }
         case WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.CLONE_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.UPDATE_WORKFLOW_SUCCESS:
@@ -279,7 +275,7 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
                     ...state.byId,
                     [action.data.id]: action.data,
                 },
-                ids: state.ids.concat(action.data.id),
+                ids: uniquifyIds(state.ids.concat(action.data.id)),
             };
         default:
             return state;
