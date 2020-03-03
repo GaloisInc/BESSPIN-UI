@@ -180,7 +180,7 @@ export const Overview: React.FC<IOverviewProps> = ({
                       triggerReport(w.id, w.label);
                     }
                   }}
-                  config={w.report} />
+                  config={w.report}/>
               </td>
               <td className='align-middle'>
                 <Button

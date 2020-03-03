@@ -136,6 +136,14 @@ class ReportJobListApi(Resource):
             INSERT NIX CALLS HERE...
         """
 
+        new_report_job = ReportJob(
+            label=report_job_input['label'],
+            statusId=report_job_status.statusId,
+            workflowId=report_job_input['workflowId'],
+        )
+        db.session.add(new_report_job)
+        db.session.commit()
+
         if config['default'].USE_TOOLSUITE:
             if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
                 WORK_DIR_OBJ = tempfile.TemporaryDirectory()
@@ -194,17 +202,17 @@ class ReportJobListApi(Resource):
         else:
             log_output = 'TOOLSUITE_NEEDED'
 
-        new_report_job = ReportJob(
-            label=report_job_input['label'],
-            statusId=report_job_status.statusId,
-            workflowId=report_job_input['workflowId'],
-            log=log_output,
-        )
 
-        db.session.add(new_report_job)
+        job_status_succeeded = JobStatus.query.filter_by(label=JobStatus.SUCCEEDED_STATUS).first()
+
+        existing_report_job = ReportJob.query.get_or_404(new_report_job.jobId)
+        existing_report_job.status = job_status_succeeded
+        existing_report_job.log = log_output
+
+        db.session.add(existing_report_job)
         db.session.commit()
 
-        return new_report_job
+        return existing_report_job
 
 
 @ns.route('/<int:jobId>')
