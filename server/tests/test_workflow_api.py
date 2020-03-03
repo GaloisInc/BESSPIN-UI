@@ -160,7 +160,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
 
         response = self.client.get(f'{self.BASE_ENDPOINT}/{rj.jobId}')
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(response.get_json()['reportJob']['log'])
+        self.assertIsNone(response.get_json()['reportJobs'][0]['log'])
 
     def test_get_with_log_data(self):
         wf = create_workflow(label='TEST WORKFLOW')
@@ -176,7 +176,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
 
         response = self.client.get(f'{self.BASE_ENDPOINT}/{rj.jobId}')
         self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.get_json()['reportJob']['log'])
+        self.assertIsNotNone(response.get_json()['reportJobs'][0])
 
     def test_null_subobjects(self):
         wf = create_workflow(label='test workflow')
@@ -185,7 +185,7 @@ class TestWorkflowApi(BesspinTestApiBaseClass):
         json_response = json.loads(response.get_data(as_text=True))
         self.assertIsNone(json_response['systemConfigurationInput'])
         self.assertIsNone(json_response['vulnerabilityConfigurationInput'])
-        self.assertIsNone(json_response['reportJob'])
+        self.assertEqual(json_response['reportJobs'], [])
 
     def test_get_nonexistent_workflow(self):
         self.assertIsNone(Workflow.query.get(1))
