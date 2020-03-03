@@ -24,6 +24,7 @@ describe('mappings', () => {
                     workflowId: 1,
                     createdAt: TEST_CREATED_AT,
                     label: TEST_LABEL,
+                    reportJobs: [],
                 };
             });
 
@@ -32,6 +33,7 @@ describe('mappings', () => {
                     id: 1,
                     label: TEST_LABEL,
                     createdAt: TEST_CREATED_AT,
+                    reports: [],
                 });
             });
 
@@ -44,6 +46,7 @@ describe('mappings', () => {
                         createdAt: TEST_CREATED_AT,
                         updatedAt: TEST_UPDATED_AT,
                         label: TEST_LABEL,
+                        reportJobs: [],
                     };
                 });
 
@@ -53,6 +56,7 @@ describe('mappings', () => {
                         label: TEST_LABEL,
                         createdAt: TEST_CREATED_AT,
                         updatedAt: TEST_UPDATED_AT,
+                        reports: [],
                     } as IWorkflow);
                 });
 
@@ -75,6 +79,7 @@ describe('mappings', () => {
                             createdAt: TEST_CREATED_AT,
                             updatedAt: TEST_UPDATED_AT,
                             label: TEST_LABEL,
+                            reportJobs: [],
                             systemConfigurationInput: {
                                 ...TEST_SYSCONFIG,
                             },
@@ -87,6 +92,7 @@ describe('mappings', () => {
                             label: TEST_LABEL,
                             createdAt: TEST_CREATED_AT,
                             updatedAt: TEST_UPDATED_AT,
+                            reports: [],
                             systemConfig: {
                                 id: TEST_SYSCONFIG.sysConfigId,
                                 label: TEST_SYSCONFIG_LABEL,
@@ -115,6 +121,7 @@ describe('mappings', () => {
                                 createdAt: TEST_CREATED_AT,
                                 updatedAt: TEST_UPDATED_AT,
                                 label: TEST_LABEL,
+                                reportJobs: [],
                                 systemConfigurationInput: {
                                     ...TEST_SYSCONFIG,
                                 },
@@ -130,6 +137,7 @@ describe('mappings', () => {
                                 label: TEST_LABEL,
                                 createdAt: TEST_CREATED_AT,
                                 updatedAt: TEST_UPDATED_AT,
+                                reports: [],
                                 systemConfig: {
                                     id: TEST_SYSCONFIG.sysConfigId,
                                     label: TEST_SYSCONFIG_LABEL,
@@ -174,9 +182,9 @@ describe('mappings', () => {
                                     vulnerabilityConfigurationInput: {
                                         ...TEST_VULN_CONFIG,
                                     },
-                                    reportJob: {
+                                    reportJobs: [{
                                         ...TEST_REPORT,
-                                    },
+                                    }],
                                 };
                             });
 
@@ -201,13 +209,13 @@ describe('mappings', () => {
                                         label: TEST_VULN_CONFIG.label,
                                         featureModel: TEST_VULN_CONFIG.featureModel,
                                     },
-                                    report: {
+                                    reports: [{
                                         id: TEST_REPORT.jobId,
                                         createdAt: TEST_REPORT.createdAt,
                                         updatedAt: TEST_REPORT.updatedAt,
                                         label: TEST_REPORT.label,
                                         status: JobStatus.Running,
-                                    },
+                                    }],
                                 } as IWorkflow);
                             });
 
@@ -226,14 +234,14 @@ describe('mappings', () => {
                                         vulnerabilityConfigurationInput: {
                                             ...TEST_VULN_CONFIG,
                                         },
-                                        reportJob: {
+                                        reportJobs: [{
                                             ...TEST_REPORT,
                                             status: {
                                                 statusId: 2,
                                                 label: JobStatus.Succeeded,
                                             },
                                             log: TEST_REPORT_LOG,
-                                        },
+                                        }],
                                     };
                                 });
 
@@ -258,14 +266,14 @@ describe('mappings', () => {
                                             label: TEST_VULN_CONFIG.label,
                                             featureModel: TEST_VULN_CONFIG.featureModel,
                                         },
-                                        report: {
+                                        reports: [{
                                             id: TEST_REPORT.jobId,
                                             createdAt: TEST_REPORT.createdAt,
                                             updatedAt: TEST_REPORT.updatedAt,
                                             label: TEST_REPORT.label,
                                             status: JobStatus.Succeeded,
                                             log: TEST_REPORT_LOG,
-                                        },
+                                        }],
                                     } as IWorkflow);
                                 });
                             });
@@ -282,13 +290,13 @@ describe('mappings', () => {
 
         it('should simply pass thru the given workflow data', () => {
             const TEST_API_WORKFLOWS: IServersideWorkflow[] = [
-                { workflowId: 1, label: 'w1', createdAt: 'SOME DATESTRING' },
-                { workflowId: 2, label: 'w2', createdAt: 'SOME DATESTRING' },
+                { workflowId: 1, label: 'w1', createdAt: 'SOME DATESTRING', reportJobs: [] },
+                { workflowId: 2, label: 'w2', createdAt: 'SOME DATESTRING', reportJobs: [] },
             ];
 
             const TEST_CLIENT_WORKFLOWS: IWorkflow[] = [
-                { id: 1, label: 'w1', createdAt: 'SOME DATESTRING' },
-                { id: 2, label: 'w2', createdAt: 'SOME DATESTRING' },
+                { id: 1, label: 'w1', createdAt: 'SOME DATESTRING', reports: [] },
+                { id: 2, label: 'w2', createdAt: 'SOME DATESTRING', reports: [] },
             ];
             expect(mapWorkflows(TEST_API_WORKFLOWS)).toEqual(TEST_CLIENT_WORKFLOWS);
         })

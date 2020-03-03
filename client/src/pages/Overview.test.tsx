@@ -51,11 +51,13 @@ describe('Overview', () => {
           id: 1,
           label: 'TEST WORKFLOW ONE',
           createdAt: genDate(),
+          reports: [],
       },
       {
           id: 2,
           label: 'TEST WORKFLOW TWO',
           createdAt: genDate(),
+          reports: [],
       },
     ];
 
@@ -76,6 +78,7 @@ describe('Overview', () => {
         id: 1,
         label: 'TEST WF',
         createdAt: (new Date(Date.now())).toISOString(),
+        reports: [],
       }],
     });
 
@@ -88,6 +91,7 @@ describe('Overview', () => {
         id: 1,
         label: 'TEST WF',
         createdAt: (new Date(Date.now())).toISOString(),
+        reports: [],
       }],
     });
 
