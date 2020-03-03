@@ -26,7 +26,7 @@ interface IErrorTooltipProps extends PopoverProps {
 interface IWorkflowButtonProps {
     url: string;
     label: string;
-    variant?: 'success' | 'warning' | 'danger';
+    variant?: 'success' | 'warning' | 'danger' | 'info';
     disabled?: boolean;
     noNextStep?: boolean;
     tooltipError?: string;
@@ -48,7 +48,7 @@ export const WorkflowButton: React.FC<IWorkflowButtonProps> = ({
     const variantType = inProgress ? 'warning' :
                           disabled ? 'secondary' :
                            variant ? variant : 'primary';
-  
+
     return tooltipError ?
       <OverlayTrigger placement='bottom' overlay={(props: IErrorTooltipProps) => renderTooltip({ ...props, label: tooltipError })}>
         <Button disabled={disabled} variant='danger' href={url}>{label}</Button>
@@ -115,12 +115,24 @@ export const ReportButton: React.FC<IReportButtonProps> = ({ workflowId, onClick
   const inProgress = config && config.status === JobStatus.Running;
   const label = !config ? 'Build/Run' :
                 inProgress ? 'Running' : 'View';
-  return <WorkflowButton
+  return (
+    label === 'View' ?
+      <WorkflowButton
           label={label}
           url={`/report/${workflowId}`}
           tooltipError={config && config.error && config.error.message}
           disabled={disabled}
           noNextStep={true}
           inProgress={inProgress}
-          onClick={onClick} />;
+          variant={'info'}
+          onClick={onClick} /> :
+      <WorkflowButton
+          label={label}
+          url={`/report/${workflowId}`}
+          tooltipError={config && config.error && config.error.message}
+          disabled={disabled}
+          noNextStep={true}
+          inProgress={inProgress}
+          onClick={onClick} />
+  )
 };

@@ -9,6 +9,8 @@ import tempfile
 import copy
 from flask import current_app
 
+from config import config
+
 # pylint: disable=invalid-name
 
 if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
@@ -27,7 +29,6 @@ CMD_CONFIGURATION_ALGO = (
     "cd {} && ".format(WORK_DIR) +
     "clafer -m fmjson {} && besspin-feature-model-tool count-configs {}"
 )
-USE_TOOLSUITE = os.getenv('USE_TOOLSUITE', False)
 
 
 def load_json(filename):
@@ -50,7 +51,7 @@ def convert_model_to_json(source):
     with open(filename_cfr, 'wb') as f:
         f.write(source)
 
-    if USE_TOOLSUITE:
+    if config['default'].USE_TOOLSUITE and config['default'].USE_TOOLSUITE_CONFIGURATOR:
         cp = subprocess.run([
             "su", "-", "besspinuser", "-c",
             "cd ~/tool-suite &&" +
@@ -79,7 +80,7 @@ def fmjson_to_clafer(source):
     Convert a feature model from fm.json format to clafer format,
     when USE_TOOLSUITE is set
     """
-    if (not USE_TOOLSUITE):
+    if (not config['default'].USE_TOOLSUITE):
         return source.decode('utf8')
 
     filename = os.path.join(WORK_DIR, 'generated_file')
@@ -188,21 +189,23 @@ def configuration_algo(cfr_source, feature_selection):
     indicating the success or failure of the validation.
     When `USE_TOOLSUITE` is disabled, it blindly returns true
 
-    :param cfr_source:
+    :param cfr_source: string
     :param feature_selection:
 
     :return: boolean
     """
-    if not USE_TOOLSUITE:
+    if (not config['default'].USE_TOOLSUITE or
+        not config['default'].USE_TOOLSUITE_CONFIGURATOR
+        ):
         return True
 
     filename = os.path.join(WORK_DIR, 'generated_configured_feature_model')
     filename_cfr = filename + '.cfr'
     filename_json = filename + '.fm.json'
 
-    current_app.logger.debug('CFR source: ' + str(cfr_source))
+    current_app.logger.debug('CFR source: ' + cfr_source)
     with open(filename_cfr, 'w') as f:
-        f.write(str(cfr_source))
+        f.write(cfr_source)
         f.write(selected_features_to_constraints(feature_selection, even_not_validated=True))
 
     with open(filename_cfr, 'r') as f:

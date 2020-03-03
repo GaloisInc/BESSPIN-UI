@@ -15,10 +15,13 @@ from app.models import (
     JobStatus,
     ReportJob,
     Workflow,
+    VulnerabilityConfigurationInput,
+    FeatureModel,
 )
 from app.lib.testgen_utils import (
     get_config_ini_template,
     set_variable,
+    set_unique_vuln_class_to_constaints,
 )
 from . import api
 
@@ -122,12 +125,24 @@ class ReportJobListApi(Resource):
         current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
 
         report_job_status = JobStatus.query.filter_by(label=JobStatus.INITIAL_STATUS).first()
-
         current_app.logger.debug(f'setting new report job status to: {report_job_status.label}')
 
+        vulnerability = VulnerabilityConfigurationInput.query.filter_by(workflowId=report_job_input['workflowId']).first()
+        current_app.logger.debug(f'vulnerability class for report: {str(vulnerability.vulnClass)}')
+
+        vuln_feature_model = FeatureModel.query.filter_by(uid=vulnerability.featureModelUid).first()
+        current_app.logger.debug(f'feature model configs_pp: {str(vuln_feature_model.configs_pp)}')
         """
             INSERT NIX CALLS HERE...
         """
+
+        new_report_job = ReportJob(
+            label=report_job_input['label'],
+            statusId=report_job_status.statusId,
+            workflowId=report_job_input['workflowId'],
+        )
+        db.session.add(new_report_job)
+        db.session.commit()
 
         if config['default'].USE_TOOLSUITE:
             if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
@@ -147,7 +162,6 @@ class ReportJobListApi(Resource):
             testgen_config_text = get_config_ini_template()
             current_app.logger.debug('TEMPLATE: ' + str(testgen_config_text))
 
-            testgen_config_text = set_variable(testgen_config_text, 'vulClasses', '[bufferErrors]')
             testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
             testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
             testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
@@ -163,15 +177,16 @@ class ReportJobListApi(Resource):
             besspinuser_gid = pwd.getpwnam('besspinuser').pw_gid
             os.chown(testgen_config_path, besspinuser_uid, besspinuser_gid)
 
+            constraints_text = (
+                "[ BufferErrors_Weakness.Location.Location_Stack => BufferErrors_Weakness.Access.Access_Read]\n" +
+                "[ BufferErrors_Weakness.Location.Location_Heap => BufferErrors_Weakness.Access.Access_Write]\n" +
+                set_unique_vuln_class_to_constaints(vulnerability.vulnClass) +
+                vuln_feature_model.configs_pp
+            )
+            current_app.logger.debug('CONSTRAINTS_TXT: ' + constraints_text)
+
             with open(constraints_path, 'w') as f:
-                f.write(
-                    "[ BufferErrors_Weakness.Location.Location_Stack => BufferErrors_Weakness.Access.Access_Read]\n" +
-                    "[ BufferErrors_Weakness.Location.Location_Heap => BufferErrors_Weakness.Access.Access_Write]\n" +
-                    "[ !PPAC_test ]\n" +
-                    "[ !InformationLeakage_Test ]\n" +
-                    "[ !ResourceManagement_Test ]\n"
-                    "[ !NumericErrors_Test ]\n"
-                )
+                f.write(constraints_text)
             # NOTE: Have to change the permissions and owner from root to besspinuser
             os.chmod(constraints_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
             os.chown(constraints_path, besspinuser_uid, besspinuser_gid)
@@ -187,17 +202,17 @@ class ReportJobListApi(Resource):
         else:
             log_output = 'TOOLSUITE_NEEDED'
 
-        new_report_job = ReportJob(
-            label=report_job_input['label'],
-            statusId=report_job_status.statusId,
-            workflowId=report_job_input['workflowId'],
-            log=log_output,
-        )
 
-        db.session.add(new_report_job)
+        job_status_succeeded = JobStatus.query.filter_by(label=JobStatus.SUCCEEDED_STATUS).first()
+
+        existing_report_job = ReportJob.query.get_or_404(new_report_job.jobId)
+        existing_report_job.status = job_status_succeeded
+        existing_report_job.log = log_output
+
+        db.session.add(existing_report_job)
         db.session.commit()
 
-        return new_report_job
+        return existing_report_job
 
 
 @ns.route('/<int:jobId>')

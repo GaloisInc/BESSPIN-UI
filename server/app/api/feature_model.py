@@ -254,7 +254,7 @@ class TestConfiguratorUpload(Resource):
                 hash=the_hash,
                 conftree=json_feat_model,
                 configs=[],
-                source=cfr_source_bytes
+                source=cfr_source_bytes.decode('utf8')
             )
             db.session.add(new_feature_model)
             db.session.commit()
@@ -296,7 +296,7 @@ class ConfiguratorConfigure(Resource):
 
         try:
             is_selection_valid = configuration_algo(
-                entry.source.decode('utf8'),
+                entry.source,
                 feature_selection,
             )
         except RuntimeError as err:
