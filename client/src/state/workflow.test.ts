@@ -36,9 +36,9 @@ describe('workflow', () => {
                 it('should add the workflows to "byId"', () => {
                     const testWorkflowState: IWorkflowState = {
                         byId: {
-                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
-                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
-                            10: { id: 10, label: 'WF TEN', createdAt: 'SOME DATE STRING 10' },
+                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
+                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2', reports: [] },
+                            10: { id: 10, label: 'WF TEN', createdAt: 'SOME DATE STRING 10', reports: [] },
                         },
                         ids: [10, 2, 1],
                     };
@@ -54,8 +54,8 @@ describe('workflow', () => {
                 beforeEach(() => {
                     testState = generateTestState({
                         byId: {
-                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
-                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
+                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
+                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2', reports: [] },
                         },
                         ids: [2, 1],
                     });
@@ -64,9 +64,9 @@ describe('workflow', () => {
                 it('should add the workflows, updating an existing one', () => {
                     const testWorkflowState: IWorkflowState = {
                         byId: {
-                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
-                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME NEW DATE STRING 2' },
-                            3: { id: 3, label: 'WF THREE', createdAt: 'SOME DATE STRING 3' },
+                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
+                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME NEW DATE STRING 2', reports: [] },
+                            3: { id: 3, label: 'WF THREE', createdAt: 'SOME DATE STRING 3', reports: [] },
                         },
                         ids: [3, 2, 1],
                     };
@@ -89,7 +89,7 @@ describe('workflow', () => {
                 it('should add the workflow to "byId"', () => {
                     const testWorkflowState: IWorkflowState = {
                         byId: {
-                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
+                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
                         },
                         ids: [1],
                     };
@@ -105,8 +105,8 @@ describe('workflow', () => {
                 beforeEach(() => {
                     testState = generateTestState({
                         byId: {
-                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
-                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
+                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
+                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2', reports: [] },
                         },
                         ids: [2, 1],
                     });
@@ -115,9 +115,9 @@ describe('workflow', () => {
                 it('should add the workflows, updating an existing one', () => {
                     const testWorkflowState: IWorkflowState = {
                         byId: {
-                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
-                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2' },
-                            3: { id: 3, label: 'WF THREE', createdAt: 'SOME DATE STRING 3' },
+                            1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
+                            2: { id: 2, label: 'WF TWO', createdAt: 'SOME DATE STRING 2', reports: [] },
+                            3: { id: 3, label: 'WF THREE', createdAt: 'SOME DATE STRING 3', reports: [] },
                         },
                         ids: [3, 2, 1],
                     };
@@ -134,7 +134,7 @@ describe('workflow', () => {
             beforeEach(() => {
                 testState = generateTestState({
                     byId: {
-                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
+                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
                     },
                     ids: [1],
                 });
@@ -143,8 +143,8 @@ describe('workflow', () => {
             it('should add the workflow', () => {
                 const testWorkflowState: IWorkflowState = {
                     byId: {
-                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
-                        2: { id: 2, label: 'COPY - WF ONE', createdAt: 'SOME DATE STRING 2' },
+                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
+                        2: { id: 2, label: 'COPY - WF ONE', createdAt: 'SOME DATE STRING 2', reports: [] },
                     },
                     ids: [2, 1],
                 };
@@ -160,7 +160,7 @@ describe('workflow', () => {
             beforeEach(() => {
                 testState = generateTestState({
                     byId: {
-                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1' },
+                        1: { id: 1, label: 'WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
                     },
                     ids: [1],
                 });
@@ -169,7 +169,7 @@ describe('workflow', () => {
             it('should add the workflows, updating an existing one', () => {
                 const testWorkflowState: IWorkflowState = {
                     byId: {
-                        1: { id: 1, label: 'COPY - WF ONE', createdAt: 'SOME DATE STRING 1' },
+                        1: { id: 1, label: 'COPY - WF ONE', createdAt: 'SOME DATE STRING 1', reports: [] },
                     },
                     ids: [1],
                 };
