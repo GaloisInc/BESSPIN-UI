@@ -25,6 +25,7 @@ from app.lib.testgen_utils import (
 )
 from . import api
 
+
 def make_testgen_command(cmd):
     """
     :param cmd: string of the command to run
@@ -154,10 +155,10 @@ class ReportJobListApi(Resource):
             current_app.logger.debug('WORK_DIR: ' + WORK_DIR)
 
             constraints_path = os.path.join(WORK_DIR, 'constraints_generated.cfr')
-            current_app.logger.debug('Constraints PATH: '+ constraints_path)
+            current_app.logger.debug('Constraints PATH: ' + constraints_path)
 
             testgen_config_path = os.path.join(WORK_DIR, 'config_generated.ini')
-            current_app.logger.debug('CONFIG PATH: '+ testgen_config_path)
+            current_app.logger.debug('CONFIG PATH: ' + testgen_config_path)
 
             testgen_config_text = get_config_ini_template()
             current_app.logger.debug('TEMPLATE: ' + str(testgen_config_text))
@@ -191,7 +192,7 @@ class ReportJobListApi(Resource):
             os.chmod(constraints_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
             os.chown(constraints_path, besspinuser_uid, besspinuser_gid)
 
-            cmd = make_testgen_command('./testgen.sh '+ testgen_config_path)
+            cmd = make_testgen_command('./testgen.sh ' + testgen_config_path)
             cp = subprocess.run(
                 cmd,
                 capture_output=True
@@ -201,7 +202,6 @@ class ReportJobListApi(Resource):
             log_output = str(cp.stdout.decode('utf8'))
         else:
             log_output = 'TOOLSUITE_NEEDED'
-
 
         job_status_succeeded = JobStatus.query.filter_by(label=JobStatus.SUCCEEDED_STATUS).first()
 

@@ -1,7 +1,9 @@
 from helpers import (
     BesspinTestApiBaseClass,
     DEFAULT_HEADERS,
+    create_featureModel,
     create_reportJob,
+    create_vulnerabilityConfig,
     create_workflow
 )
 import json
@@ -30,6 +32,17 @@ class TestReportJobApi(BesspinTestApiBaseClass):
     def test_create(self):
         r = ReportJob().query.all()
         self.assertListEqual(r, [])
+
+        fm = create_featureModel(
+            uid=f'uid-{datetime.utcnow()}',
+            label=f'feat model {datetime.utcnow()}',
+        )
+        create_vulnerabilityConfig(
+            label=f'vuln config {datetime.utcnow()}',
+            workflowId=1,
+            vulnClass='BOF',
+            featureModelUid=fm.uid
+        )
 
         label = f'created report job {datetime.utcnow()}'
         response = self.client.post(
