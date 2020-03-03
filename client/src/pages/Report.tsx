@@ -2,9 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 
 import {
+    Alert,
+    Button,
+    ButtonToolbar,
+    Card,
     Container,
-    Nav,
-    NavDropdown,
+    Dropdown,
+    DropdownButton,
 } from 'react-bootstrap';
 
 import AceEditor from 'react-ace';
@@ -84,51 +88,64 @@ export const Report: React.FC<IReportProps> = ({
         setCurrentReport(reports[0]);
     }, [reports]);
 
+    const mapStatusToVariant = (status: JobStatus): 'success' | 'warning' | 'info' => {
+        switch (status) {
+            case JobStatus.Succeeded:
+                return 'success';
+            case JobStatus.Failed:
+                return 'warning';
+            case JobStatus.Running:
+            default:
+                return 'info';
+        }
+    };
+
     return (
         <Container className='Report'>
             <Header />
-            <h1>Report: {currentReport ? currentReport.label : '...'}</h1>
-            <h3>Last Run: {currentReport ? currentReport.createdAt : ''}</h3>
-            <h4>Status: {currentReport ? currentReport.status : ''}</h4>
-            <Container>
-                <Nav className='report-menu'>
-                    <NavDropdown title='Reports' className='report-dropdown' id={`report-dropdown-${workflowId}`}>
-                        {
-                            reports.map((r, i) => (
-                                <NavDropdown.Item
-                                    className='report-selector'
-                                    key={`report-${r.id}`}
-                                    onClick={(e: any) => {
-                                        e.preventDefault();
-                                        setCurrentReport(reports[i])
-                                    }}>{r.label}</NavDropdown.Item>
-                            ))
-                        }
-                    </NavDropdown>
-                    <Nav.Item>
-                        <Nav.Link
-                            className='rerun-report'
-                            key={`run-${currentReport ? currentReport.id : 0}`}
-                            disabled={!currentReport || currentReport.status === JobStatus.Running}
-                            onClick={(e: any) => {
-                                e.preventDefault();
-                                if (workflowId) triggerReport(workflowId, workflowLabel);
-                        }}>Run again</Nav.Link>
-                    </Nav.Item>
-                </Nav>
-                <AceEditor
-                    ref={aceRef}
-                    className='report-viewer'
-                    mode='plain_text'
-                    cursorStart={10}
-                    name='report-log'
-                    readOnly={ true }
-                    setOptions={{ useWorker: false }}
-                    theme='monokai'
-                    value={ currentReport && currentReport.log }
-                    width='100%'
-                    height='85vh' />
-            </Container>
+            <Card>
+                <Card.Body>
+                    <Card.Title>Report: {currentReport ? currentReport.label : '...'}</Card.Title>
+                    <Card.Subtitle>Last run: {currentReport ? currentReport.createdAt : ''}</Card.Subtitle>
+                    { currentReport && <Alert variant={mapStatusToVariant(currentReport.status)}>{currentReport.status}</Alert> }
+                </Card.Body>
+            </Card>
+            <ButtonToolbar className='report-menu'>
+                <DropdownButton title='Reports' className='report-dropdown' id={`report-dropdown-${workflowId}`}>
+                    {
+                        reports.map((r, i) => (
+                            <Dropdown.Item
+                                className='report-selector'
+                                key={`report-${r.id}`}
+                                onClick={(e: any) => {
+                                    e.preventDefault();
+                                    setCurrentReport(reports[i])
+                                }}>{r.label}</Dropdown.Item>
+                        ))
+                    }
+                </DropdownButton>
+                <Button
+                    className='rerun-report'
+                    variant='outline-success'
+                    key={`run-${currentReport ? currentReport.id : 0}`}
+                    disabled={!currentReport || currentReport.status === JobStatus.Running}
+                    onClick={(e: any) => {
+                        e.preventDefault();
+                        if (workflowId) triggerReport(workflowId, workflowLabel);
+                }}>Run again</Button>
+            </ButtonToolbar>
+            <AceEditor
+                ref={aceRef}
+                className='report-viewer'
+                mode='plain_text'
+                cursorStart={10}
+                name='report-log'
+                readOnly={ true }
+                setOptions={{ useWorker: false }}
+                theme='monokai'
+                value={ currentReport && currentReport.log }
+                width='100%'
+                height='85vh' />
         </Container>
     );
 };

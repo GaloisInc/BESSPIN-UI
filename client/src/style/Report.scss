@@ -2,15 +2,18 @@
 @import '../../node_modules/bootstrap/scss/variables';
 
 .Report {
-    .report-header {
-        background-color: white;
-        border-bottom: 1px solid $gray-400;
-        padding: 1em;
+    .card {
+        margin: 20px 0;
+        .alert {
+            margin: 20px 0 0 0;
+        }
     }
+
     .report-menu {
+        padding: 20px;
         background-color: white;
-    }
-    h3,h4 {
-        color: $gray-300;
+        .rerun-report {
+            margin-left: 1em;
+        }
     }
 }
