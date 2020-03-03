@@ -1,8 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 
 import {
     Container,
+    Nav,
+    NavDropdown,
 } from 'react-bootstrap';
 
 import AceEditor from 'react-ace';
@@ -22,18 +24,24 @@ import {
     fetchWorkflow,
     getWorkflowById,
     IReportConfig,
+    JobStatus,
+    triggerReport,
 } from '../state/workflow';
 
+import '../style/Report.scss'
+
 interface IStateFromProps {
+    dataRequested: boolean;
     errors: string[];
     isLoading: boolean;
-    report?: IReportConfig;
-    dataRequested: boolean;
+    workflowLabel: string;
+    reports: IReportConfig[];
     workflowId?: number;
 }
 
 interface IDispatchFromProps {
     fetchWorkflow: typeof fetchWorkflow;
+    triggerReport: typeof triggerReport;
 }
 
 export type IReportProps  = IStateFromProps & IDispatchFromProps;
@@ -48,26 +56,66 @@ const scrollToLine = (ace: AceEditor, line: number): void => {
     }
 };
 
-export const Report: React.FC<IReportProps> = ({ dataRequested, fetchWorkflow, report, workflowId }) => {
+export const Report: React.FC<IReportProps> = ({
+    dataRequested,
+    fetchWorkflow,
+    reports,
+    triggerReport,
+    workflowId,
+    workflowLabel,
+}) => {
     const aceRef = useRef<AceEditor>(null);
 
+    const [currentReport, setCurrentReport] = useState(reports[0]);
+
     useEffect(() => {
-        const editor  = aceRef && aceRef.current; // aceRef?.current
-        if (editor && report) {
-            const logLineCount = report && report.log && report.log.split(/\n/).length; // report?.log?.split(/\n/).length;
+        const editor  = aceRef && aceRef.current;
+        if (editor && currentReport) {
+            const logLineCount = currentReport && currentReport.log && currentReport.log.split(/\n/).length;
             if (logLineCount) scrollToLine(editor, logLineCount);
         }
     });
 
     useEffect(() => {
-        if (!dataRequested && workflowId) fetchWorkflow(Number(workflowId));
+        if (!dataRequested && workflowId) fetchWorkflow(workflowId);
     });
+
+    useEffect(() => {
+        setCurrentReport(reports[0]);
+    }, [reports]);
 
     return (
         <Container className='Report'>
             <Header />
-            <h1>Report: {report ? report.label : '...'}</h1>
+            <h1>Report: {currentReport ? currentReport.label : '...'}</h1>
+            <h3>Last Run: {currentReport ? currentReport.createdAt : ''}</h3>
+            <h4>Status: {currentReport ? currentReport.status : ''}</h4>
             <Container>
+                <Nav className='report-menu'>
+                    <NavDropdown title='Reports' className='report-dropdown' id={`report-dropdown-${workflowId}`}>
+                        {
+                            reports.map((r, i) => (
+                                <NavDropdown.Item
+                                    className='report-selector'
+                                    key={`report-${r.id}`}
+                                    onClick={(e: any) => {
+                                        e.preventDefault();
+                                        setCurrentReport(reports[i])
+                                    }}>{r.label}</NavDropdown.Item>
+                            ))
+                        }
+                    </NavDropdown>
+                    <Nav.Item>
+                        <Nav.Link
+                            className='rerun-report'
+                            key={`run-${currentReport ? currentReport.id : 0}`}
+                            disabled={!currentReport || currentReport.status === JobStatus.Running}
+                            onClick={(e: any) => {
+                                e.preventDefault();
+                                if (workflowId) triggerReport(workflowId, workflowLabel);
+                        }}>Run again</Nav.Link>
+                    </Nav.Item>
+                </Nav>
                 <AceEditor
                     ref={aceRef}
                     className='report-viewer'
@@ -77,7 +125,7 @@ export const Report: React.FC<IReportProps> = ({ dataRequested, fetchWorkflow, r
                     readOnly={ true }
                     setOptions={{ useWorker: false }}
                     theme='monokai'
-                    value={ report && report.log } // report?.log
+                    value={ currentReport && currentReport.log }
                     width='100%'
                     height='85vh' />
             </Container>
@@ -88,7 +136,7 @@ export const Report: React.FC<IReportProps> = ({ dataRequested, fetchWorkflow, r
 interface IOwnProps {
     match: {
         params: {
-            workflowId: number;
+            workflowId: string;
         }
     }
 }
@@ -104,22 +152,24 @@ const mapStateToProps = (state: IState, ownProps: IOwnProps): IStateFromProps =>
             }
         }
     } = ownProps;
-    const workflow = getWorkflowById(state, workflowId);
 
-
+    const parsedWorkflowId = workflowId ? parseInt(workflowId, 10) : undefined;
+    const workflow = !!parsedWorkflowId ? getWorkflowById(state, parsedWorkflowId) : undefined;
     const errors = error ? [error] : [];
 
     return {
         dataRequested,
         errors,
         isLoading,
-        workflowId,
-        report: (workflow && workflow.report) || undefined, //workflow?.report,
+        workflowId: parsedWorkflowId,
+        workflowLabel: (workflow && workflow.label) || '',
+        reports: (workflow && workflow.reports) || [],
     };
 };
 
 const mapDispatchToProps: IDispatchFromProps = {
     fetchWorkflow,
+    triggerReport,
 };
 
 const connector = connect(mapStateToProps, mapDispatchToProps);

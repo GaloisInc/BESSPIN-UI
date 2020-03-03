@@ -7,17 +7,17 @@ import {
 import {
     cloneWorkflow as cloneWorkflowApi,
     fetchConfigurator,
+    fetchConfiguratorByVulnConfig as fetchConfiguratatorByVulnConfigApi,
+    fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
     fetchWorkflow as fetchWorkflowApi,
     fetchWorkflows as fetchWorkflowsApi,
-    fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
-    fetchConfiguratorByVulnConfig as fetchConfiguratatorByVulnConfigApi,
     submitConfigurator,
-    submitWorkflow as submitWorkflowApi,
     submitSystemConfigurationInput as submitSystemConfigurationInputApi,
     submitValidateConfiguration as submitValidateConfigurationApi,
-    updateSystemConfigurationInput as updateSystemConfigurationInputApi,
     submitVulnerabilityClass as submitVulnerabilityClassApi,
+    submitWorkflow as submitWorkflowApi,
     triggerReport as triggerReportApi,
+    updateSystemConfigurationInput as updateSystemConfigurationInputApi,
     updateWorkflow as updateWorkflowApi,
 } from '../api/api';
 

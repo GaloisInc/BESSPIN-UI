@@ -37,11 +37,11 @@ export interface IWorkflow {
     id: number;
     label: string;
     createdAt: string;
+    reports: IReportConfig[];
     hasError?: boolean;
     updatedAt?: string;
     systemConfig?: ISystemConfig;
     testConfig?: IVulnerabilityConfig;
-    report?: IReportConfig;
 }
 
 export interface IUpdateWorkflow {
@@ -266,14 +266,6 @@ export const reducer = (state = DEFAULT_STATE, action: IWorkflowAction) => {
             };
         case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.TRIGGER_REPORT_SUCCESS:
-            return {
-                ...state,
-                byId: {
-                    ...state.byId,
-                    [action.data.id]: action.data,
-                },
-                ids: uniquifyIds(state.ids.concat([action.data.id])),
-            }
         case WorkflowActionTypes.SUBMIT_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.CLONE_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.UPDATE_WORKFLOW_SUCCESS:

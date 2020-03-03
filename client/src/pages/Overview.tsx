@@ -176,12 +176,12 @@ export const Overview: React.FC<IOverviewProps> = ({
                   disabled={reportShouldBeDisabled(w)}
                   workflowId={w.id}
                   onClick={ (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                    if (!w.report) {
+                    if (w.reports.length === 0) {
                       e.preventDefault();
                       triggerReport(w.id, w.label);
                     }
                   }}
-                  config={w.report} />
+                  config={w.reports[0]} />
               </td>
               <td className='align-middle'>
                 <Button

@@ -82,11 +82,11 @@ export interface IServersideWorkflow {
     workflowId: number;
     label: string;
     createdAt: string;
+    reportJobs: IServersideReport[];
     updatedAt?: string;
     systemConfigurationInput?: IServersideSysConfigInput;
     vulnerabilityConfigurationInput?: IServersideVulnConfigInput;
     testConfigId?: number;
-    reportJob?: IServersideReport;
 }
 
 /* eslint-enable camelcase */
@@ -213,6 +213,14 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
         createdAt: workflow.createdAt,
         updatedAt: workflow.updatedAt,
         label: workflow.label,
+        reports: workflow.reportJobs.reverse().map(r => ({
+            id: r.jobId,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
+            label: r.label,
+            status: mapJobStatusLabel(r.status.label),
+            ...(r.log ? { log: r.log } : null),
+        })),
         ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
             systemConfig: {
                 id: workflow.systemConfigurationInput.sysConfigId,
@@ -230,16 +238,6 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
                 updatedAt: workflow.vulnerabilityConfigurationInput.updatedAt,
                 label: workflow.vulnerabilityConfigurationInput.label,
                 featureModel: workflow.vulnerabilityConfigurationInput.featureModel,
-            },
-        } : null),
-        ...(workflow.reportJob ? {
-            report: {
-                id: workflow.reportJob.jobId,
-                createdAt: workflow.reportJob.createdAt,
-                updatedAt: workflow.reportJob.updatedAt,
-                label: workflow.reportJob.label,
-                status: mapJobStatusLabel(workflow.reportJob.status.label),
-                ...(workflow.reportJob.log ? { log: workflow.reportJob.log } : null),
             },
         } : null),
     };
