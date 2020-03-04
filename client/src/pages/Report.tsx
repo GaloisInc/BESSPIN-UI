@@ -146,7 +146,18 @@ export const Report: React.FC<IReportProps> = ({
                 value={ currentReport && currentReport.log }
                 width='100%'
                 height='85vh' />
+            <p />
+            <h1>PPAS results</h1>
+            <h2>CPU_Power</h2>
+            <Button variant='primary'>15</Button>
+            <h2>CPU_Performance</h2>
+            <Button variant='secondary'>1.2 GHz</Button>
+            <h2>CPU_Area</h2>
+            <Button>257</Button>
+            <h2>CPU_Security</h2>
+            <Button variant='success'>99.5</Button>
         </Container>
+
     );
 };
 
