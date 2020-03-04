@@ -26,6 +26,7 @@ interface IErrorTooltipProps extends PopoverProps {
 interface IWorkflowButtonProps {
     url: string;
     label: string;
+    className?: string;
     variant?: 'success' | 'warning' | 'danger' | 'info';
     disabled?: boolean;
     noNextStep?: boolean;
@@ -37,6 +38,7 @@ interface IWorkflowButtonProps {
 export const WorkflowButton: React.FC<IWorkflowButtonProps> = ({
   url,
   label,
+  className,
   variant,
   disabled,
   noNextStep,
@@ -51,10 +53,10 @@ export const WorkflowButton: React.FC<IWorkflowButtonProps> = ({
 
     return tooltipError ?
       <OverlayTrigger placement='bottom' overlay={(props: IErrorTooltipProps) => renderTooltip({ ...props, label: tooltipError })}>
-        <Button disabled={disabled} variant='danger' href={url}>{label}</Button>
+        <Button className={className || '' } disabled={disabled} variant='danger' href={url}>{label}</Button>
       </OverlayTrigger>
       : (
-        <Button disabled={disabled} variant={variantType} href={url} {...(onClick ? { onClick } : null)}>
+        <Button className={className || ''} disabled={disabled} variant={variantType} href={url} {...(onClick ? { onClick } : null)}>
           { inProgress && <Spinner as='span' animation='grow' size='sm' role='status' aria-hidden='true' /> }
           { label }
           { !(disabled || noNextStep) && variantType !== 'primary' && <FontAwesomeIcon icon={faChevronRight} /> }
@@ -120,6 +122,7 @@ export const ReportButton: React.FC<IReportButtonProps> = ({ workflowId, onClick
       <WorkflowButton
           label={label}
           url={`/report/${workflowId}`}
+          className='report'
           tooltipError={config && config.error && config.error.message}
           disabled={disabled}
           noNextStep={true}
@@ -129,6 +132,7 @@ export const ReportButton: React.FC<IReportButtonProps> = ({ workflowId, onClick
       <WorkflowButton
           label={label}
           url={`/report/${workflowId}`}
+          className='report'
           tooltipError={config && config.error && config.error.message}
           disabled={disabled}
           noNextStep={true}
