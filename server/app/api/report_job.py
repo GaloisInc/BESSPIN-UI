@@ -179,8 +179,6 @@ class ReportJobListApi(Resource):
             os.chown(testgen_config_path, besspinuser_uid, besspinuser_gid)
 
             constraints_text = (
-                "[ BufferErrors_Weakness.Location.Location_Stack => BufferErrors_Weakness.Access.Access_Read]\n" +
-                "[ BufferErrors_Weakness.Location.Location_Heap => BufferErrors_Weakness.Access.Access_Write]\n" +
                 set_unique_vuln_class_to_constaints(vulnerability.vulnClass) +
                 vuln_feature_model.configs_pp
             )
