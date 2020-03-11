@@ -1,8 +1,13 @@
+import {
+    fetchConfigurators,
+    fetchWorkflows,
+    submitConfigurator,
+    submitWorkflow,
+} from './api';
+
 import axios from 'axios';
 jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;;
-
-import { fetchConfigurators, submitConfigurator } from './api';
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('api', () => {
 
@@ -75,6 +80,38 @@ describe('api', () => {
         });
     });
 
+    describe('fetchWorkflows', () => {
+
+        describe('happy path', () => {
+            const TEST_DATA = [
+                { id: 1, label: 'w1' },
+                { id: 2, label: 'w2' },
+            ];
+
+            beforeEach(() => {
+                mockedAxios.request.mockImplementation(() => {
+                    return Promise.resolve({ data: [...TEST_DATA] });
+                });
+            });
+
+            it('should give us data extracted from the response', (done) => {
+                fetchWorkflows()
+                    .then(data => {
+                        expect(data).toEqual(TEST_DATA);
+                        done();
+                    })
+                    .catch(done);
+            });
+        });
+
+        describe('error cases', () => {
+
+            it.todo('traps exceptions');
+
+            it.todo('traps HTML responses');
+        });
+    });
+
     describe('submitConfigurator', () => {
         const TEST_SYSTEM_NAME = 'test-system-name';
         const TEST_SYSTEM_JSON_STRING = JSON.stringify({ test: 'foo' });
@@ -144,5 +181,37 @@ describe('api', () => {
                 });
             });
         });
-    })
+    });
+
+    describe('submitWorkflow', () => {
+        const TEST_WORKFLOW_LABEL = 'w1';
+
+        describe('happy path', () => {
+            const TEST_DATA = {
+                label: TEST_WORKFLOW_LABEL,
+            };
+
+            beforeEach(() => {
+                mockedAxios.request.mockImplementation(() => {
+                    return Promise.resolve({ data: { ...TEST_DATA } });
+                });
+            });
+
+            it('should give us the actual data taken out of the response', (done) => {
+                submitWorkflow(TEST_WORKFLOW_LABEL)
+                    .then(data => {
+                        expect(data).toEqual(TEST_DATA);
+                        done();
+                    })
+                    .catch(done);
+            });
+        });
+
+        describe('error cases', () => {
+
+            it.todo('should trap execptions');
+
+            it.todo('should trap HTML coming from API');
+        });
+    });
 });

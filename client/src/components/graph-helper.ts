@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */ // disabling for now
 import {
     DataSet,
     Network,
@@ -11,16 +12,16 @@ import {
 
 import {
     SelectionMode,
-    ISystemEntry,
+    IFeatureModelRecord,
     selectFeature,
     ISelection,
-} from '../state/system';
+} from '../state/feature-model';
 
 import {
     selection_search,
 } from '../state/selection';
 
-export interface IFeature {
+interface IFeature {
     gcard: string;
     card: string;
     name: string;
@@ -28,7 +29,7 @@ export interface IFeature {
     parent: string;
 }
 
-export interface IFeatureModelVersion {
+interface IFeatureModelVersion {
     base: number;
 }
 
@@ -36,13 +37,13 @@ export interface IFeatureMap {
     [key: string]: IFeature;
 }
 
-export interface IFeatureContraint {
+interface IFeatureConstraint {
     kind: string;
     name: string;
 }
 
 export interface IFeatureModel {
-    constraints: IFeatureContraint[];
+    constraints: IFeatureConstraint[];
     features: IFeatureMap;
     roots: string[];
     version: IFeatureModelVersion;
@@ -152,7 +153,7 @@ let systemUid: string;
 export const graphFeatureModel = (
     domNode: HTMLDivElement,
     selectFeature: SelectFeatureCallback,
-    system: ISystemEntry,
+    system: IFeatureModelRecord,
 ) => {
 
     const options = {

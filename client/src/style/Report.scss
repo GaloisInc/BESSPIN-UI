@@ -1,0 +1,19 @@
+@import '../../node_modules/bootstrap/scss/functions';
+@import '../../node_modules/bootstrap/scss/variables';
+
+.Report {
+    .card {
+        margin: 20px 0;
+        .alert {
+            margin: 20px 0 0 0;
+        }
+    }
+
+    .report-menu {
+        padding: 20px;
+        background-color: white;
+        .rerun-report {
+            margin-left: 1em;
+        }
+    }
+}

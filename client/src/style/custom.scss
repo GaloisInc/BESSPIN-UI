@@ -1,5 +1,4 @@
 $body-bg: #2d78bd;
-$body-color: white;
 $table-color: black;
 
 /* import the necessary Bootstrap files */
@@ -12,3 +11,7 @@ $theme-colors: (
 
 /* finally, import Bootstrap */
 @import '../../node_modules/bootstrap/scss/bootstrap';
+
+h1 {
+  color: white;
+}

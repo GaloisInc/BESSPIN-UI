@@ -1,6 +1,6 @@
 # BESSPIN UI
 
-![alt text](server/images/screenshot_UI.png "Screenshot UI")
+![alt text](docs/screenshot_UI.png "Screenshot UI")
 
 *Disclaimer: this UI is under development is considered a
  proof-of-concept towards a prototype.*
@@ -65,30 +65,31 @@ The UI has it's own [README.md](./client/README.md) that details it's structure
 
 All api routes are prefixed with `/api`. You can access an interactive Swagger UI to explore the API via `http://0.0.0.0:3784/api/doc`
 
-## Requirements
+### Running locally
 
-- `python3`
-- `pip3`
-- `flask`, restful APIs framework:
-- `nodejs`
-```
-pip3 install flask
-```
-- `clafer` version 0.5, with fm-json
-- web browser: Chrome or Firefox.
+The best way to run this application locally is to run the following commant:
 
-## Start the configurator
+```
+$ TOKEN_NAME='<<NAME OF YOUR GITLAB ACCESS TOKEN>>' PRIVATE_TOKEN='<<VALUE OF YOUR TOKEN>>' docker-compose up
+```
 
-To start the feature model configurator, first start the web server:
+This will run the API/UI server locally on your machine using docker and docker-compose. It should show log output from both applications.
+
+#### Stopping the server
+
+You should be able to simply hit `Ctrl-C` to quit the servers. To fully shut down the docker containers, issue the command:
+
 ```
-python3 server_flask.py
+$ docker-compose down
 ```
+
+#### Customizing the clafer version used
 
 It is also possible to indicate a specific version of Clafer to use, by
 setting the environment variable `BESSPIN_CLAFER`:
 
 ```
-BESSPIN_CLAFER=<path-to-clafer> python3 server_flask.py
+BESSPIN_CLAFER=<path-to-clafer> TOKEN_NAME='<<GITLAB ACCESS TOKEN NAME>> ' PRIVATE_TOKEN='<<GITLAB TOKEN>>' docker-compose up
 ```
 
 The UI is accessible at the url:
@@ -105,6 +106,7 @@ command:
 
 - `TOKEN_NAME` for the name of the personal access token
 - `PRIVATE_TOKEN` the private token value
+- `DB_PATH` if you want to customize the path to the sqlite database
 
 ```
 docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
@@ -120,11 +122,49 @@ $ docker-compose up
 
 #### ENV vars
 
-There are a few environment variables that can be set to configure how the server runs:
+There are a few environment variables that can be set to configure
+how the server runs:
 
  * PORT: the port to expose (this should map to the first port mentioned in the `-p` argument to docker)
  * HOST: the host to run flask on (defaults to `0.0.0.0` so you can access the server within docker)
  * DEBUG: flag to run flask in debug mode (defaults to `True`)
+
+### Build Docker with toolsuite
+
+The build of the toolsuite follows the one of the basic Docker image and
+it starts by creating a toolsuite image given 4 environment variables:
+
+  * `BINCACHE_LOGIN`: artifactory login
+  * `BINCACHE_APIKEY`: artifactory apikey
+  * `TOKEN_NAME`: gitlab token name
+  * `PRIVATE_TOKEN`: gitlab private token associated with the token name
+
+Provide these parameters as environment variables into the following
+`docker build` command.
+(NOTE: this build can take between 30 minutes to 2 hours depending on state of binary cache)
+```
+docker build -f Dockerfile-toolsuite \
+  --build-arg BINCACHE_LOGIN=$ARTIFACTORY_LOGIN \
+  --build-arg BINCACHE_APIKEY="$(cat ~/.ssh/artifactory_api_key)" \
+  --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN \
+  --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" \
+  -t besspin-toolsuite-image .
+```
+
+This will produce a `besspin-toolsuite-image` that will be used as a base
+image for building the server image. Use the file`docker-compose-toolsuite.yaml`
+to build the client and server images:
+```
+TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME \
+PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" \
+docker-compose -f docker-compose-toolsuite.yaml build
+```
+
+To start and stop the app do the usual docker-compose commands:
+```
+docker-compose -f docker-compose-toolsuite.yaml up
+docker-compose -f docker-compose-toolsuite.yaml dowm
+```
 
 ## Architecture
 
@@ -140,13 +180,13 @@ Client Side:
 - Pipeline UI
 - Dashboard UI
 
-![alt text](server/images/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
+![alt text](docs/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
 
 ### Data Model
 
 The API backing the BESSPIN UI uses the following data model:
 
-![BESSPIN Data Model](server/db/Data-Model.svg)
+![BESSPIN Data Model](docs/Data-Model.svg)
 
 #### Key Concepts
 

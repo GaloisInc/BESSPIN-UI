@@ -70,6 +70,14 @@ RUN git clone "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssit
 WORKDIR /home/besspinuser/tool-suite
 RUN git checkout develop
 
-
-RUN sudo curl --netrc-file /home/besspinuser/.config/nix/netrc https://artifactory.galois.com/besspin_generic-nix/nix-cache-info
+RUN sudo curl https://$BINCACHE_LOGIN:$BINCACHE_APIKEY@artifactory.galois.com/besspin_generic-nix/nix-cache-info
 RUN . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell
+
+WORKDIR /home/besspinuser
+RUN git clone "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/testgen.git"
+WORKDIR /home/besspinuser/testgen
+RUN git checkout develop
+RUN git submodule update --init --recursive
+RUN . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell
+
+WORKDIR /home/besspinuser/tool-suite

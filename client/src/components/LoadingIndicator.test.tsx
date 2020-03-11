@@ -8,13 +8,13 @@ import {
 import { LoadingIndicator } from './LoadingIndicator';
 
 describe('LoadingIndicator', () => {
-    let wrapper;
+    let wrapper: ReturnType<typeof shallow>;
 
     beforeEach(() => {
         wrapper = shallow(<LoadingIndicator />);
     })
 
     it('should have a spinner', () => {
-        expect(wrapper.find(Spinner)).toBeTruthy();``
+        expect(wrapper.find(Spinner)).toBeTruthy();
     });
 });

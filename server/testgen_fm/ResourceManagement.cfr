@@ -1,0 +1,35 @@
+// Lando/Clafer formal model of Resource Management error
+// vulnerabilities and concrete tests.
+
+// @author Alexander Bakst <abakst@galois.com>
+// @author Joe Kiniry <kiniry@galois.com>
+
+ResourceManagement_Test ?
+  or ResourceManagement_CWEs
+    CWE_395
+    CWE_476
+    CWE_486
+    CWE_690
+    CWE_761
+    CWE_772
+    CWE_825
+
+  xor ResourceManagement_test
+    ResourceManagement_test_395
+    ResourceManagement_test_476
+    ResourceManagement_test_486
+    ResourceManagement_test_690
+    ResourceManagement_test_761
+    ResourceManagement_test_772
+    ResourceManagement_test_825
+
+[ ResourceManagement_test_395 => CWE_395 ]
+[ ResourceManagement_test_476 => CWE_476 ]
+[ ResourceManagement_test_486 => CWE_486 ]
+[ ResourceManagement_test_690 => CWE_690 ]
+[ ResourceManagement_test_761 => CWE_761 ]
+[ ResourceManagement_test_772 => CWE_772 ]
+[ ResourceManagement_test_825 => CWE_825 ]
+
+// End of Resource Management error model
+

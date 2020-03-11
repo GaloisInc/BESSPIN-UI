@@ -17,14 +17,30 @@ describe('ConfigureCpu', () => {
             lastUpdate: genDate(),
             featureCount: 42,
             filename: 'TEST.fm.json',
+            configs: [],
+            conftree: {
+              constraints: [],
+              features: {},
+              roots: [],
+              version: { base: 1 },
+            },
+            selectionUndos: [],
         };
-        const onConfiguratorSubmitSpy = jest.fn();
+        const submitValidateConfigurationSpy = jest.fn();
+        const submitSystemSpy = jest.fn();
+        const selectFeatureSpy = jest.fn();
+        const selectFeatureUndoSpy = jest.fn();
+        const selectFeatureRedoSpy = jest.fn();
         const fetchSystemSpy = jest.fn();
 
         const wrapper = mount(
             <MemoryRouter initialEntries={['/configure']}>
                 <ConfigureCpu
-                    onConfiguratorSubmit={ onConfiguratorSubmitSpy }
+                    submitValidateConfiguration={ submitValidateConfigurationSpy }
+                    submitSystem={ submitSystemSpy }
+                    selectFeature={ selectFeatureSpy }
+                    selectFeatureUndo={ selectFeatureUndoSpy }
+                    selectFeatureRedo={ selectFeatureRedoSpy }
                     fetchSystem={ fetchSystemSpy }
                     dataRequested={ true }
                     systemUid={ testSystem.uid }

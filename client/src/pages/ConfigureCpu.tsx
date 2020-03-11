@@ -24,13 +24,13 @@ import { getDataRequested } from '../state/ui';
 import {
     fetchSystem,
     getSystem,
-    ISystemEntry,
+    IFeatureModelRecord,
     submitSystem,
     submitValidateConfiguration,
     selectFeature,
     selectFeatureUndo,
     selectFeatureRedo,
-} from '../state/system';
+} from '../state/feature-model';
 
 
 import { Header } from '../components/Header';
@@ -47,11 +47,11 @@ export interface IConfigureCpuProps {
     selectFeatureUndo: typeof selectFeatureUndo,
     selectFeatureRedo: typeof selectFeatureRedo,
     submitValidateConfiguration: typeof submitValidateConfiguration;
-    system: ISystemEntry;
+    system: IFeatureModelRecord;
     systemUid: string;
 }
 
-const DEFAULT_FEATURE_MODEL: IFeatureModel = {
+export const DEFAULT_FEATURE_MODEL: IFeatureModel = {
     constraints: [],
     features: {},
     roots: [],
@@ -74,14 +74,12 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     //       state. However, this makes testing interactions that use state
     //       very difficult
     const fileInputRef = useRef(null);
-    const [configuratorModel, setConfiguratorModel] = useState(DEFAULT_FEATURE_MODEL);
+    const [configuratorModel, setConfiguratorModel] = useState("");
     const [modelName, setModelName] = useState('');
 
     useEffect(() => {
         if (systemUid && !system.uid ) {
             fetchSystem(systemUid);
-        } else if (system && system.conftree) {
-            setConfiguratorModel(system.conftree);
         }
     }, [systemUid, fetchSystem, system]);
 
@@ -97,9 +95,13 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
             reader.onload = (e) => {
                 const configuratorModelString = e && e.target ? e.target.result as string : null;
                 if (configuratorModelString) {
-                    const configModelAsJSON = JSON.parse(configuratorModelString);
-                    console.log(configModelAsJSON);
-                    setConfiguratorModel(configModelAsJSON);
+                    if (fileToRead.name.endsWith('.fm.json')) {
+                        const configModelAsJSON = JSON.parse(configuratorModelString);
+                        console.log(configModelAsJSON);
+                        setConfiguratorModel(JSON.stringify(configModelAsJSON));
+                    } else if (fileToRead.name.endsWith('.cfr')) {
+                        setConfiguratorModel(configuratorModelString);
+                    }
                 }
             };
         }
@@ -108,7 +110,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
     const onSubmitHandler = useCallback(() => {
         if (configuratorModel) {
             // TODO: pass model object rather than string
-            submitSystem(modelName, JSON.stringify(configuratorModel));
+            submitSystem(modelName, configuratorModel);
         }
     }, [modelName, configuratorModel, submitSystem]);
 
@@ -181,7 +183,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                             mode='json'
                             theme='monokai'
                             name='editor-source'
-                            value={ system && system.source ? JSON.stringify(JSON.parse(system.source), null, '\t') : '' }
+                            value={ system && system.source ? system.source : '' }
                             readOnly={ true }
                             setOptions={{ useWorker: false }}
                         />

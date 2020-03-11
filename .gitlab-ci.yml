@@ -5,14 +5,26 @@ variables:
 before_script:
   - docker info
 
-build_image:
+build_server_image:
   script:
     - docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
   tags:
     - "besspin-ui-tag"
 
-test:
+test_server:
   script:
-    - docker run besspin-ui:latest nosetests /besspin-ui/test_server.py
+    - docker run besspin-ui:latest sh -c 'cd server && flask test unit'
+  tags:
+    - "besspin-ui-tag"
+
+build_ui_image:
+  script:
+    - docker build -f client/Dockerfile -t besspin-ui-client .
+  tags:
+    - "besspin-ui-tag"
+
+test_ui:
+  script:
+    - docker run --env CI=true besspin-ui-client:latest npm test
   tags:
     - "besspin-ui-tag"

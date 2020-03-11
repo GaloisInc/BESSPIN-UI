@@ -1,7 +1,8 @@
+/* eslint-disable camelcase */ // disabling for now
 import {
     SelectionMode,
     ISelectionType,
-} from './system';
+} from './feature-model';
 
 
 export type ISelection = ISelectionType[]
