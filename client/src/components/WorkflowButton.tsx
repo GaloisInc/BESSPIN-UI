@@ -102,8 +102,8 @@ export const SystemConfigButton: React.FC<IWorkflowProps> = ({ workflowId, confi
   return <CreateEditButton label='System' path='/system-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
 };
 
-export const TestConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
-  return <CreateEditButton label='Test' path='/test-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
+export const VulnConfigButton: React.FC<IWorkflowProps> = ({ workflowId, config, disabled }) => {
+  return <CreateEditButton label='Vuln' path='/vuln-configuration' workflowId={workflowId} config={config} disabled={disabled} />;
 };
 
 interface IReportButtonProps {

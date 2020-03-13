@@ -38,7 +38,7 @@ import { LoadingIndicator } from '../components/LoadingIndicator';
 import {
   ReportButton,
   SystemConfigButton,
-  TestConfigButton,
+  VulnConfigButton,
 } from '../components/WorkflowButton';
 
 import '../style/Overview.scss';
@@ -168,7 +168,7 @@ export const Overview: React.FC<IOverviewProps> = ({
               <td className='align-middle'>
                 <ButtonGroup>
                   <SystemConfigButton workflowId={w.id} config={w.systemConfig} />
-                  <TestConfigButton workflowId={w.id} config={w.testConfig} />
+                  <VulnConfigButton workflowId={w.id} config={w.testConfig} />
                 </ButtonGroup>
               </td>
               <td className='align-middle'>

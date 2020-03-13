@@ -110,7 +110,7 @@ export const updateWorkflow = async (id: number, label: string) => {
         data: {
             label,
         },
-    }); 
+    });
 }
 
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
@@ -126,7 +126,7 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
 
 export const submitVulnerabilityClass = async (workflowId: string, vulnClass: string) => {
     return request({
-        url: `/api/feature-model/create-test/${workflowId}/${vulnClass}`,
+        url: `/api/feature-model/create-vuln-config/${workflowId}/${vulnClass}`,
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,

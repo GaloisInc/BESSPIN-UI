@@ -26,8 +26,8 @@ export const App: React.FC = () => {
                     <Route path='/configure-cpu/:systemUid?' component={ ConnectedConfigureCpu } />
                     <Route path='/system-configuration/create/:workflowId' component={ ConnectedSystemConfigInput } />
                     <Route path='/system-configuration/edit/:workflowId/:systemConfigId' component={ ConnectedSystemConfigInput } />
-                    <Route path='/test-configuration/create/:workflowId' component={ConnectedVulnerability} />
-                    <Route path='/test-configuration/edit/:workflowId/:testId' component={ConnectedVulnerability} />
+                    <Route path='/vuln-configuration/create/:workflowId' component={ConnectedVulnerability} />
+                    <Route path='/vuln-configuration/edit/:workflowId/:testId' component={ConnectedVulnerability} />
                     <Route path='/report/:workflowId' component={ ConnectedReport } />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>

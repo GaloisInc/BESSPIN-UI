@@ -12,7 +12,7 @@ import {
     CreateEditButton,
     ReportButton,
     SystemConfigButton,
-    TestConfigButton,
+    VulnConfigButton,
     WorkflowButton,
 } from './WorkflowButton';
 
@@ -180,11 +180,11 @@ describe('SystemConfigButton', () => {
     });
 });
 
-describe('TestConfigButton', () => {
+describe('VulnConfigButton', () => {
     const testWorkflowId = 1;
 
     it('should render a CreateEditButton component with the appropriate label and path', () => {
-        const wrapper = mount(<TestConfigButton workflowId={testWorkflowId} config={undefined}/>)
+        const wrapper = mount(<VulnConfigButton workflowId={testWorkflowId} config={undefined}/>)
         const button = wrapper.find(CreateEditButton);
 
         expect(button).toHaveLength(1);
@@ -192,7 +192,7 @@ describe('TestConfigButton', () => {
 
         const props = button.props();
 
-        expect(props.path).toEqual('/test-configuration');
+        expect(props.path).toEqual('/vuln-configuration');
     });
 });
 
