@@ -38,6 +38,7 @@ import { LoadingIndicator } from '../components/LoadingIndicator';
 import {
   ReportButton,
   SystemConfigButton,
+  TestgenConfigButton,
   VulnConfigButton,
 } from '../components/WorkflowButton';
 
@@ -168,6 +169,7 @@ export const Overview: React.FC<IOverviewProps> = ({
               <td className='align-middle'>
                 <ButtonGroup>
                   <SystemConfigButton workflowId={w.id} config={w.systemConfig} />
+                  <TestgenConfigButton workflowId={w.id} config={w.testgenConfig} />
                   <VulnConfigButton workflowId={w.id} config={w.testConfig} />
                 </ButtonGroup>
               </td>

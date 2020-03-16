@@ -24,6 +24,10 @@ export interface ISystemConfig extends IConfig {
     nixConfig: string;
 }
 
+export interface ITestgenConfig extends IConfig {
+    configInput: string;
+}
+
 export interface IVulnerabilityConfig extends IConfig {
     featureModel: string;
 }
@@ -41,6 +45,7 @@ export interface IWorkflow {
     hasError?: boolean;
     updatedAt?: string;
     systemConfig?: ISystemConfig;
+    testgenConfig?: ITestgenConfig;
     testConfig?: IVulnerabilityConfig;
 }
 
@@ -231,7 +236,7 @@ export type IWorkflowAction = ReturnType<
     typeof submitWorkflowSuccess |
     typeof triggerReport |
     typeof triggerReportError |
-    typeof triggerReportSuccess | 
+    typeof triggerReportSuccess |
     typeof updateWorkflow |
     typeof updateWorkflowError |
     typeof updateWorkflowSuccess

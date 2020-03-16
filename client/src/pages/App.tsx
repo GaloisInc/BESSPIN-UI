@@ -10,6 +10,7 @@ import { ConnectedDashboard } from './Dashboard';
 import { ConnectedConfigureCpu } from './ConfigureCpu';
 import { ConnectedOverview } from './Overview';
 import { ConnectedSystemConfigInput } from './SystemConfigInput';
+import { ConnectedTestgenConfigInput } from './TestgenConfigInput';
 import { ConnectedVulnerability } from './Vulnerability';
 import { ConnectedReport } from './Report';
 
@@ -26,8 +27,10 @@ export const App: React.FC = () => {
                     <Route path='/configure-cpu/:systemUid?' component={ ConnectedConfigureCpu } />
                     <Route path='/system-configuration/create/:workflowId' component={ ConnectedSystemConfigInput } />
                     <Route path='/system-configuration/edit/:workflowId/:systemConfigId' component={ ConnectedSystemConfigInput } />
-                    <Route path='/vuln-configuration/create/:workflowId' component={ConnectedVulnerability} />
-                    <Route path='/vuln-configuration/edit/:workflowId/:testId' component={ConnectedVulnerability} />
+                    <Route path='/testgen-configuration/create/:workflowId' component={ ConnectedTestgenConfigInput } />
+                    <Route path='/testgen-configuration/edit/:workflowId/:testgenConfigId' component={ ConnectedTestgenConfigInput } />
+                    <Route path='/vuln-configuration/create/:workflowId' component={ ConnectedVulnerability } />
+                    <Route path='/vuln-configuration/edit/:workflowId/:testId' component={ ConnectedVulnerability } />
                     <Route path='/report/:workflowId' component={ ConnectedReport } />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>

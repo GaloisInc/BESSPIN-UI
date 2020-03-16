@@ -1,0 +1,19 @@
+/* import the necessary Bootstrap files */
+@import '../../node_modules/bootstrap/scss/functions';
+@import '../../node_modules/bootstrap/scss/variables';
+
+.TestgenConfigInput {
+    .testgen-config-form {
+        background-color: $white;
+        padding: 1em;
+
+        .form-control-file {
+            margin-left: 2em;
+            width: 100%;
+        }
+    }
+
+    .config-viewer {
+        width: 100%;
+    }
+}
