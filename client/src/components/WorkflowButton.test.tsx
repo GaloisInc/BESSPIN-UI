@@ -188,7 +188,7 @@ describe('VulnConfigButton', () => {
         const button = wrapper.find(CreateEditButton);
 
         expect(button).toHaveLength(1);
-        expect(button.text()).toEqual('Test');
+        expect(button.text()).toEqual('Vuln');
 
         const props = button.props();
 
