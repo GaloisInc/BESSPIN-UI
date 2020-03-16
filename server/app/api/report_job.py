@@ -120,7 +120,8 @@ class ReportJobListApi(Resource):
     def post(self):
         report_job_input = json.loads(request.data)
 
-        if Workflow.query.get(report_job_input['workflowId']) is None:
+        workflow = Workflow.query.get(report_job_input['workflowId'])
+        if workflow is None:
             return abort(400, 'Unable to find given workflow', workflowId=report_job_input['workflowId'])
 
         current_app.logger.debug(f'creating report job for workflow: {report_job_input["workflowId"]}')
@@ -160,13 +161,20 @@ class ReportJobListApi(Resource):
             testgen_config_path = os.path.join(WORK_DIR, 'config_generated.ini')
             current_app.logger.debug('CONFIG PATH: ' + testgen_config_path)
 
-            testgen_config_text = get_config_ini_template()
-            current_app.logger.debug('TEMPLATE: ' + str(testgen_config_text))
+            if (workflow.testgenConfigInput):
+                current_app.logger.debug('USE TESTGEN CONFIG INPUT FROM DB')
+                testgen_config_text = workflow.testgenConfigInput.configInput
+                testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
+                testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
+                testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
+            else:
+                testgen_config_text = get_config_ini_template()
+                current_app.logger.debug('USE TEMPLATE TESTGEN CONFIG INPUT: ' + str(testgen_config_text))
+                testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
+                testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
+                testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
+                testgen_config_text = set_variable(testgen_config_text, 'nTests', '2')
 
-            testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
-            testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
-            testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
-            testgen_config_text = set_variable(testgen_config_text, 'nTests', '2')
             current_app.logger.debug(testgen_config_text)
 
             with open(testgen_config_path, 'w') as f:

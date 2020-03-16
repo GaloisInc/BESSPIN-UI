@@ -8,6 +8,7 @@ class Workflow(db.Model, MetaDataColumnsMixin):
     workflowId = db.Column(db.Integer, primary_key=True)
 
     systemConfigurationInput = db.relationship('SystemConfigurationInput', uselist=False, backref='workflow')
+    testgenConfigInput = db.relationship('TestgenConfigInput', uselist=False, backref='workflow')
     vulnerabilityConfigurationInput = db.relationship('VulnerabilityConfigurationInput', uselist=False, backref='workflow')
     reportJobs = db.relationship('ReportJob', uselist=True, backref='workflow')
 
