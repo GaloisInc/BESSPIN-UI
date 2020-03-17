@@ -149,6 +149,22 @@ def upgrade():
         sa.PrimaryKeyConstraint('sysConfigId'),
         sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='CASCADE'),
     )
+    op.create_table(
+        'testgenConfigInputs',
+        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+        sa.Column('createdAt', sa.DateTime(), nullable=False),
+        sa.Column('updatedAt', sa.DateTime(), nullable=True),
+        sa.Column('workflowId', sa.Integer(), nullable=False),
+        sa.Column(
+            'configInput',
+            sa.Text(),
+            nullable=True,
+            comment='This column is the config.init text'
+        ),
+        sa.Column('testgenConfigId', sa.Integer(), nullable=False),
+        sa.PrimaryKeyConstraint('testgenConfigId'),
+        sa.ForeignKeyConstraint(['workflowId'], ['workflows.workflowId'], ondelete='CASCADE'),
+    )
     # Not needed yet...
     # op.create_table(
     #     'testRunInputs',
@@ -193,6 +209,7 @@ def downgrade():
     op.drop_table('feature_models')
     op.drop_table('testRunInputs')
     op.drop_table('systemConfigurationInputs')
+    op.drop_table('testgenConfigInputs')
     op.drop_table('workflows')
     op.drop_table('reportJobs')
     op.drop_table('featureExtractionJobs')

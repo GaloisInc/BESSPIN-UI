@@ -110,7 +110,7 @@ export const updateWorkflow = async (id: number, label: string) => {
         data: {
             label,
         },
-    }); 
+    });
 }
 
 export const submitConfigurator = async (systemName: string, systemJsonAsString: string) => {
@@ -126,7 +126,7 @@ export const submitConfigurator = async (systemName: string, systemJsonAsString:
 
 export const submitVulnerabilityClass = async (workflowId: string, vulnClass: string) => {
     return request({
-        url: `/api/feature-model/create-test/${workflowId}/${vulnClass}`,
+        url: `/api/feature-model/create-vuln-config/${workflowId}/${vulnClass}`,
         method: 'post',
         headers: {
             ...DEFAULT_HEADERS,
@@ -164,6 +164,37 @@ export const updateSystemConfigurationInput = async (config: IServersideSysConfi
             ...DEFAULT_HEADERS,
         },
         data: config,
+    });
+};
+
+export const createTestgenConfigInput = async (workflowId: string) => {
+    return request({
+        url: `/api/testgen-config-input/create/${workflowId}`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+    });
+};
+
+export const submitTestgenConfigInput = async (workflowId: string, testgenConfigId: number, testgenConfigInput: string) => {
+    return request({
+        url: `/api/testgen-config-input/submit/${workflowId}/${testgenConfigId.toString()}`,
+        method: 'post',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
+        data: { configInput: testgenConfigInput },
+    });
+};
+
+export const fetchTestgenConfigInput = async (workflowId: string, testgenConfigId: number) => {
+    return request({
+        url: `/api/testgen-config-input/fetch/${workflowId}/${testgenConfigId}`,
+        method: 'get',
+        headers: {
+            ...DEFAULT_HEADERS,
+        },
     });
 };
 

@@ -6,7 +6,9 @@ import {
     ValidateResult,
 } from '../state/feature-model';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
+import { ITestgenConfigInputRecord } from '../state/testgenConfigInput';
 import { IWorkflow, JobStatus } from '../state/workflow';
+
 
 
 export interface IConfig {
@@ -69,6 +71,15 @@ export interface IServersideSysConfigInput {
     nixConfig: string;
 }
 
+export interface IServersideTestgenConfigInput {
+    testgenConfigId: number;
+    workflowId: number;
+    label: string;
+    createdAt: string;
+    updatedAt?: string;
+    configInput: string;
+}
+
 export interface IServersideVulnConfigInput {
     vulnConfigId: number;
     workflowId: number;
@@ -85,6 +96,7 @@ export interface IServersideWorkflow {
     reportJobs: IServersideReport[];
     updatedAt?: string;
     systemConfigurationInput?: IServersideSysConfigInput;
+    testgenConfigInput?: IServersideTestgenConfigInput;
     vulnerabilityConfigurationInput?: IServersideVulnConfigInput;
     testConfigId?: number;
 }
@@ -185,6 +197,10 @@ export const mapSystemConfigInputToServerside = (config: ISystemConfigInput): IS
     };
 };
 
+export const mapTestgenConfigInput = (config: IServersideTestgenConfigInput): ITestgenConfigInputRecord => {
+    return config;
+}
+
 export const mapValidateRequestForServer = (validateRequest: ISelectionType[]): IConfig[] => {
     const configs = validateRequest.map<IConfig>((c: ISelectionType) => {
         return {
@@ -229,6 +245,15 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
                 nixFilename: workflow.systemConfigurationInput.nixConfigFilename,
                 nixConfig: workflow.systemConfigurationInput.nixConfig,
                 updatedAt: workflow.systemConfigurationInput.updatedAt,
+            },
+        } : null),
+        ...(workflow.testgenConfigInput && workflow.testgenConfigInput.testgenConfigId ? {
+            testgenConfig: {
+                id: workflow.testgenConfigInput.testgenConfigId,
+                label: workflow.testgenConfigInput.label,
+                createdAt: workflow.testgenConfigInput.createdAt,
+                configInput: workflow.testgenConfigInput.configInput,
+                updatedAt: workflow.testgenConfigInput.updatedAt,
             },
         } : null),
         ...(workflow.vulnerabilityConfigurationInput && workflow.vulnerabilityConfigurationInput.vulnConfigId ? {

@@ -8,10 +8,12 @@ from app.models import (
     db,
     FeatureModel,
     SystemConfigurationInput,
+    TestgenConfigInput,
     VulnerabilityConfigurationInput,
     Workflow
 )
 from app.api.system_configuration_inputs import existing_sysconfig_input
+from app.api.testgen_config_input import existing_testgen_config_input
 from app.api.vulnerability_configuration_inputs import existing_vulnconfig_input
 from app.api.report_job import existing_report_job
 
@@ -57,6 +59,11 @@ existing_workflow = api.inherit(
             allow_null=True,
             required=False,
             description='SystemConfigurationInput associated with this workflow'),
+        'testgenConfigInput': fields.Nested(
+            existing_testgen_config_input,
+            allow_null=True,
+            required=False,
+            description='TestgenConfigInput associated with this workflow'),
         'vulnerabilityConfigurationInput': fields.Nested(
             existing_vulnconfig_input,
             allow_null=True,
@@ -156,6 +163,14 @@ class WorkflowCloneApi(Resource):
                 workflowId=new_workflow.workflowId
             )
             db.session.add(sysconfig)
+
+        if workflow.testgenConfigInput is not None:
+            testgenconfig = TestgenConfigInput(
+                label=f'COPY - {workflow.testgenConfigInput.label}',
+                configInput=workflow.testgenConfigInput.configInput,
+                workflowId=new_workflow.workflowId
+            )
+            db.session.add(testgenconfig)
 
         if workflow.vulnerabilityConfigurationInput is not None:
             existing_feat_model = workflow.vulnerabilityConfigurationInput.featureModel

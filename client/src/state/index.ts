@@ -17,6 +17,10 @@ import {
     IWorkflowState,
 } from './workflow';
 import {
+    reducerTestgenConfigInput as testgenConfigInput,
+    ITestgenConfigInputState,
+} from './testgenConfigInput';
+import {
     reducer as testResults,
     ITestResultsState,
 } from './test-results';
@@ -29,6 +33,7 @@ import { rootSaga } from './sagas';
 export interface IState {
     system: IFeatureModelConfigState,
     systemConfigInput: ISystemConfigInputState,
+    testgenConfigInput: ITestgenConfigInputState,
     testResults: ITestResultsState,
     ui: IUiState,
     workflow: IWorkflowState,
@@ -37,6 +42,7 @@ export interface IState {
 const rootReducer = combineReducers({
     system,
     systemConfigInput,
+    testgenConfigInput,
     testResults,
     ui,
     workflow,

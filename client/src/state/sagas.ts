@@ -9,6 +9,9 @@ import {
     fetchConfigurator,
     fetchConfiguratorByVulnConfig as fetchConfiguratatorByVulnConfigApi,
     fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
+    createTestgenConfigInput as createTestgenConfigInputApi,
+    submitTestgenConfigInput as submitTestgenConfigInputApi,
+    fetchTestgenConfigInput as fetchTestgenConfigInputApi,
     fetchWorkflow as fetchWorkflowApi,
     fetchWorkflows as fetchWorkflowsApi,
     submitConfigurator,
@@ -24,6 +27,7 @@ import {
 import {
     mapConfiguratorToSystem,
     mapSystemConfigInput,
+    mapTestgenConfigInput,
     mapUploadConfiguratorToSystem,
     mapValidateResponse,
     mapValidateRequestForServer,
@@ -31,6 +35,19 @@ import {
     mapWorkflows,
     mapSystemConfigInputToServerside,
 } from '../api/mappings';
+
+import {
+    createTestgenConfigInput as createTestgenConfigInputAction,
+    createTestgenConfigInputSuccess,
+    createTestgenConfigInputFailure,
+    submitTestgenConfigInput as submitTestgenConfigInputAction,
+    submitTestgenConfigInputSuccess,
+    submitTestgenConfigInputFailure,
+    fetchTestgenConfigInput as fetchTestgenConfigInputAction,
+    fetchTestgenConfigInputSuccess,
+    fetchTestgenConfigInputFailure,
+    TestgenConfigActionTypes,
+} from './testgenConfigInput'
 
 import {
     fetchSystem as fetchSystemAction,
@@ -105,6 +122,44 @@ function* fetchSystemConfigInput(action: ReturnType<typeof fetchSystemConfigurat
     } catch (e) {
         console.error(e);
         yield put(fetchSystemConfigInputFailure(e.message));
+    }
+}
+
+function* createTestgenConfigInput(action: ReturnType<typeof createTestgenConfigInputAction>) {
+    try {
+        const testgenConfigInputRecord = yield call(createTestgenConfigInputApi, action.data.workflowId);
+        const mappedTestgenConfig = mapTestgenConfigInput(testgenConfigInputRecord);
+        yield put(createTestgenConfigInputSuccess(mappedTestgenConfig));
+    } catch (e) {
+        console.error(e);
+        yield put(createTestgenConfigInputFailure(e.message));
+    }
+}
+
+function* submitTestgenConfigInput(action: ReturnType<typeof submitTestgenConfigInputAction>) {
+    try {
+        const testgenConfigInputRecord = yield call(
+            submitTestgenConfigInputApi,
+            action.data.workflowId,
+            action.data.testgenConfigId,
+            action.data.configInput
+        );
+        const mappedTestgenConfig = mapTestgenConfigInput(testgenConfigInputRecord);
+        yield put(submitTestgenConfigInputSuccess(mappedTestgenConfig));
+    } catch (e) {
+        console.error(e);
+        yield put(submitTestgenConfigInputFailure(e.message));
+    }
+}
+
+function* fetchTestgenConfigInput(action: ReturnType<typeof fetchTestgenConfigInputAction>) {
+    try {
+        const testgenConfig = yield call(fetchTestgenConfigInputApi, action.data.workflowId, action.data.testgenConfigId);
+        const mappedTestgenConfig = mapTestgenConfigInput(testgenConfig);
+        yield put(fetchTestgenConfigInputSuccess(mappedTestgenConfig));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchTestgenConfigInputFailure(e.message));
     }
 }
 
@@ -270,6 +325,9 @@ export function* rootSaga() {
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN, fetchSystemByVulnConfig);
     yield takeLatest(SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION, submitValidateConfiguration);
+    yield takeLatest(TestgenConfigActionTypes.CREATE_TESTGEN_CONFIG_INPUT, createTestgenConfigInput);
+    yield takeLatest(TestgenConfigActionTypes.SUBMIT_TESTGEN_CONFIG_INPUT, submitTestgenConfigInput);
+    yield takeLatest(TestgenConfigActionTypes.FETCH_TESTGEN_CONFIG_INPUT, fetchTestgenConfigInput);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOWS, fetchWorkflows);
     yield takeLatest(WorkflowActionTypes.FETCH_WORKFLOW, fetchWorkflow);
     yield takeLatest(WorkflowActionTypes.SUBMIT_WORKFLOW, submitWorkflow);
