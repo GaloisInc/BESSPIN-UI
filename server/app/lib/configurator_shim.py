@@ -53,7 +53,6 @@ def convert_model_to_json(source):
 
     if config['default'].USE_TOOLSUITE and config['default'].USE_TOOLSUITE_CONFIGURATOR:
         cp = subprocess.run([
-            "su", "-", "besspinuser", "-c",
             "cd ~/tool-suite &&" +
             "nix-shell --run " + quote(CMD_CLAFER.format(filename_cfr))],
             capture_output=True
@@ -90,7 +89,6 @@ def fmjson_to_clafer(source):
     cmd = quote(CMD_PRINT_CLAFER.format(filename_json))
 
     cp = subprocess.run([
-        "su", "-", "besspinuser", "-c",
         "cd ~/tool-suite &&" +
         "nix-shell --run " + cmd],
         capture_output=True)
@@ -214,7 +212,6 @@ def configuration_algo(cfr_source, feature_selection):
 
     cmd = quote(CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json))
     cp = subprocess.run([
-        "su", "-", "besspinuser", "-c",
         "cd ~/tool-suite &&" +
         "nix-shell --run " + cmd],
         capture_output=True)

@@ -32,8 +32,8 @@ def make_testgen_command(cmd):
 
     :return: list of parameters for subprocess to use
     """
-    nix_cmd = "cd ~/testgen &&" + "nix-shell --run " + quote(cmd)
-    return ["su", "-", "besspinuser", "-c", nix_cmd]
+    nix_cmd = f'cd ~/testgen && . $HOME/.nix-shell --run {quote(cmd)}'
+    return [nix_cmd]
 
 
 """
@@ -194,9 +194,6 @@ class ReportJobListApi(Resource):
 
             with open(constraints_path, 'w') as f:
                 f.write(constraints_text)
-            # NOTE: Have to change the permissions and owner from root to besspinuser
-            os.chmod(constraints_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-            os.chown(constraints_path, besspinuser_uid, besspinuser_gid)
 
             cmd = make_testgen_command('./testgen.sh ' + testgen_config_path)
             cp = subprocess.run(
