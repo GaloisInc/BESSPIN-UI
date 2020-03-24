@@ -1,41 +1,23 @@
-# To build this Dockerfile do the build with the environment variables
-# BINCACHE_LOGIN, BINCACHE_APIKEY, TOKEN_NAME, PRIVATE_TOKEN
+# Dockerfile-toolsuite
+#
+# Purpose: overlays necessary Nix and toolsuite-related libraries on top of the
+#          besspin-user-image
 
-# docker build -f Dockerfile-toolsuite --build-arg BINCACHE_LOGIN=$ARTIFACTORY_LOGIN --build-arg BINCACHE_APIKEY="$(cat ~/.ssh/artifactory_api_key)" --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN --build-arg PRIVATE_TOKEN="$(cat ~/.ssh/PERSO_ACCESS_TOKEN.txt)" -t besspin-toolsuite-image .
+FROM besspin-user-image:latest AS builder
 
-FROM ubuntu:bionic
-
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ bionic universe multiverse"
-
-RUN apt-get install -y sudo xz-utils curl ssh git python3-pip
-
-# Adapted from https://github.com/holochain/holonix/pull/63/files
-WORKDIR /
-
-RUN apt-get install -y sudo xz-utils curl ssh git
-RUN adduser --disabled-password --gecos '' besspinuser
-RUN adduser besspinuser sudo
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# nix expects the nixbld group
-RUN addgroup --system nixbld
-RUN adduser besspinuser nixbld
-
-# use the besspinuser user
 USER besspinuser
 ENV USER besspinuser
+
 WORKDIR /home/besspinuser
 
 # disable nix sandboxing in docker
-RUN mkdir -p /home/besspinuser/.config/nix && echo 'sandbox = false' > /home/besspinuser/.config/nix/nix.conf
+RUN mkdir -p /home/besspinuser/.config/nix && \
+    echo 'sandbox = false' > /home/besspinuser/.config/nix/nix.conf
 
 # Add some configuration settings to nix.conf
 RUN echo 'trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= besspin.galois.com-1:8IqXQ2FM1J5CuPD+KN9KK4z6WHve4KF3d9zGRK+zsBw=' >> /home/besspinuser/.config/nix/nix.conf && \
     echo 'substituters = https://artifactory.galois.com/besspin_generic-nix/ https://cache.nixos.org/' >> /home/besspinuser/.config/nix/nix.conf && \
     echo 'netrc-file = /home/besspinuser/.config/nix/netrc' >> /home/besspinuser/.config/nix/nix.conf
-
 
 # Set the login and APIKEY for artifactory
 ARG BINCACHE_LOGIN
@@ -43,9 +25,6 @@ ARG BINCACHE_APIKEY
 RUN echo 'machine artifactory.galois.com' > /home/besspinuser/.config/nix/netrc && \
     echo "login ${BINCACHE_LOGIN}" >> /home/besspinuser/.config/nix/netrc && \
     echo "password ${BINCACHE_APIKEY}" >> /home/besspinuser/.config/nix/netrc
-
-
-WORKDIR /home/besspinuser/
 
 RUN git clone https://github.com/bluespec/Piccolo.git
 
@@ -55,9 +34,6 @@ RUN curl https://nixos.org/nix/install | sh
 
 ARG TOKEN_NAME
 ARG PRIVATE_TOKEN
-RUN mkdir /home/besspinuser/.ssh/
-RUN touch /home/besspinuser/.ssh/known_hosts
-RUN ssh-keyscan gitlab-ext.galois.com >> /home/besspinuser/.ssh/known_hosts
 
 RUN touch /home/besspinuser/.gitconfig && \
     echo "[url \"https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/\"]\n\
@@ -65,8 +41,10 @@ RUN touch /home/besspinuser/.gitconfig && \
 [url \"git@gitlab-ext.galois.com:\"]\n\
     pushInsteadOf = \"git@gitlab-ext.galois.com:\"" >> /home/besspinuser/.gitconfig
 
+# NOTE: if we can use master, we should switch to just fetching the archive...
+#       see https://docs.gitlab.com/ee/api/repositories.html#get-file-archive
+RUN git clone --depth 1 --single-branch --branch develop "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/tool-suite.git"
 
-RUN git clone "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/tool-suite.git"
 WORKDIR /home/besspinuser/tool-suite
 RUN git checkout develop
 
@@ -74,10 +52,23 @@ RUN sudo curl https://$BINCACHE_LOGIN:$BINCACHE_APIKEY@artifactory.galois.com/be
 RUN . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell
 
 WORKDIR /home/besspinuser
-RUN git clone "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/testgen.git"
+
+# NOTE: if we can use master, we should switch to just fetching the archive...
+#       see https://docs.gitlab.com/ee/api/repositories.html#get-file-archive
+RUN git clone --depth 1 --single-branch --branch develop "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/testgen.git"
+
 WORKDIR /home/besspinuser/testgen
+
 RUN git checkout develop
 RUN git submodule update --init --recursive
 RUN . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell
 
-WORKDIR /home/besspinuser/tool-suite
+FROM besspin-user-image:latest AS final
+
+USER besspinuser
+WORKDIR /home/besspinuser
+
+# NOTE: this needs to be double-checked once we have Nix running from the besspin server
+RUN rm /home/besspinuser/.gitconfig
+
+COPY --from=builder /home/besspinuser /home/besspinuser
