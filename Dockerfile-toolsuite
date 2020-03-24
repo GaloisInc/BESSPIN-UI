@@ -68,7 +68,8 @@ FROM besspin-user-image:latest AS final
 USER besspinuser
 WORKDIR /home/besspinuser
 
+COPY --from=builder /home/besspinuser /home/besspinuser
+COPY --from=builder /nix /nix
+
 # NOTE: this needs to be double-checked once we have Nix running from the besspin server
 RUN rm /home/besspinuser/.gitconfig
-
-COPY --from=builder /home/besspinuser /home/besspinuser
