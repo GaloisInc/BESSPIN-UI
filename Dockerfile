@@ -1,4 +1,4 @@
-FROM besspin-user-image:latest AS builder
+FROM besspin-user-image:latest
 
 USER besspinuser
 ENV USER besspinuser
@@ -18,6 +18,7 @@ WORKDIR /clafer/clafer
 RUN curl -sSL https://get.haskellstack.org/ | sh
 ENV PATH="/home/besspinuser/.local/bin:${PATH}"
 RUN stack install clafer
+RUN . $HOME/.nix-profile/etc/profile.d/nix.sh
 
 WORKDIR /besspin-ui
 COPY . /besspin-ui
@@ -27,15 +28,6 @@ WORKDIR /besspin-ui/server
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 RUN pip3 install -r requirements.txt
-
-# Actual image
-FROM besspin-user-image:latest AS final
-
-COPY --from=builder /clafer/clafer /clafer/clafer
-COPY --from=builder /home/besspinuser/.local /home/besspinuser/.local
-COPY --from=builder /besspin-ui /besspin-ui
-
-WORKDIR /besspin-ui
 
 # have the flask server run on port 3784
 ENV PORT 3784

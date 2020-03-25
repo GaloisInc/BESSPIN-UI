@@ -32,7 +32,7 @@ def make_testgen_command(cmd):
 
     :return: list of parameters for subprocess to use
     """
-    nix_cmd = f'cd ~/testgen && . $HOME/.nix-shell --run {quote(cmd)}'
+    nix_cmd = f'cd ~/testgen && nix-shell --run {quote(cmd)}'
     return [nix_cmd]
 
 
@@ -200,8 +200,8 @@ class ReportJobListApi(Resource):
                 cmd,
                 capture_output=True
             )
-            current_app.logger.debug('Clafer stdout: ' + str(cp.stdout.decode('utf8')))
-            current_app.logger.debug('Clafer stderr: ' + str(cp.stderr.decode('utf8')))
+            current_app.logger.debug('Testgen stdout: ' + str(cp.stdout.decode('utf8')))
+            current_app.logger.debug('Testgen stderr: ' + str(cp.stderr.decode('utf8')))
             log_output = str(cp.stdout.decode('utf8'))
         else:
             log_output = 'TOOLSUITE_NEEDED'

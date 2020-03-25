@@ -3,7 +3,7 @@
 # Purpose: overlays necessary Nix and toolsuite-related libraries on top of the
 #          besspin-user-image
 
-FROM besspin-user-image:latest AS builder
+FROM besspin-user-image:latest
 
 USER besspinuser
 ENV USER besspinuser
@@ -63,13 +63,7 @@ RUN git checkout develop
 RUN git submodule update --init --recursive
 RUN . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell
 
-FROM besspin-user-image:latest AS final
-
-USER besspinuser
 WORKDIR /home/besspinuser
-
-COPY --from=builder /home/besspinuser /home/besspinuser
-COPY --from=builder /nix /nix
 
 # NOTE: this needs to be double-checked once we have Nix running from the besspin server
 RUN rm /home/besspinuser/.gitconfig

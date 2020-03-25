@@ -1,4 +1,4 @@
-FROM besspin-toolsuite-image:latest AS builder
+FROM besspin-toolsuite-image:latest
 
 USER besspinuser
 ENV USER besspinuser
@@ -27,21 +27,14 @@ WORKDIR /besspin-ui/server
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 RUN pip3 install -r requirements.txt
-
-# Actual image
-FROM besspin-toolsuite-image:latest AS final
-
-USER besspinuser
-
-COPY --from=builder /clafer/clafer /clafer/clafer
-COPY --from=builder /home/besspinuser/.local /home/besspinuser/.local
-COPY --from=builder /besspin-ui /besspin-ui
-
-WORKDIR /besspin-ui
+RUN . $HOME/.nix-profile/etc/profile.d/nix.sh
 
 # have the flask server run on port 3784
 ENV PORT 3784
 EXPOSE 3784
 
 ENV BESSPIN_CLAFER /home/besspinuser/.local/bin/clafer
+
+WORKDIR /besspin-ui
+
 CMD ["scripts/entrypoint.sh"]
