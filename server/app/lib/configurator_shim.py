@@ -8,6 +8,7 @@ from shlex import quote
 import tempfile
 import copy
 from flask import current_app
+from app.lib.nix import run_nix_subprocess
 
 from config import config
 
@@ -52,11 +53,7 @@ def convert_model_to_json(source):
         f.write(source)
 
     if config['default'].USE_TOOLSUITE and config['default'].USE_TOOLSUITE_CONFIGURATOR:
-        cp = subprocess.run([
-            "cd ~/tool-suite &&" +
-            "nix-shell --run " + quote(CMD_CLAFER.format(filename_cfr))],
-            capture_output=True
-        )
+        cp = run_nix_subprocess('~/toolsuite', quote(CMD_CLAFER.format(filename_cfr)))
     else:
         cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
 
@@ -88,10 +85,7 @@ def fmjson_to_clafer(source):
         f.write(source)
     cmd = quote(CMD_PRINT_CLAFER.format(filename_json))
 
-    cp = subprocess.run([
-        "cd ~/tool-suite &&" +
-        "nix-shell --run " + cmd],
-        capture_output=True)
+    cp = run_nix_subprocess('~/tool-suite', cmd)
     current_app.logger.debug('besspin-feature-model-tool stdout: ' + str(cp.stdout))
     current_app.logger.debug('besspin-feature-model-tool stderr: ' + str(cp.stderr))
 
@@ -193,8 +187,7 @@ def configuration_algo(cfr_source, feature_selection):
     :return: boolean
     """
     if (not config['default'].USE_TOOLSUITE or
-        not config['default'].USE_TOOLSUITE_CONFIGURATOR
-        ):
+            not config['default'].USE_TOOLSUITE_CONFIGURATOR):
         return True
 
     filename = os.path.join(WORK_DIR, 'generated_configured_feature_model')
@@ -211,10 +204,7 @@ def configuration_algo(cfr_source, feature_selection):
         current_app.logger.debug('CFR+CONSTRAINTS: \n' + text)
 
     cmd = quote(CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json))
-    cp = subprocess.run([
-        "cd ~/tool-suite &&" +
-        "nix-shell --run " + cmd],
-        capture_output=True)
+    cp = run_nix_subprocess('~/toolsuite', cmd)
     current_app.logger.debug('configuration algo stdout: ' + str(cp.stdout))
     current_app.logger.debug('configuration algo stderr: ' + str(cp.stderr))
 
