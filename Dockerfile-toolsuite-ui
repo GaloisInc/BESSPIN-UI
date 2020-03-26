@@ -8,10 +8,11 @@ ARG PRIVATE_TOKEN
 
 WORKDIR /clafer
 
-# NOTE: if we can use master, we should switch to just fetching the archive...
-#       see https://docs.gitlab.com/ee/api/repositories.html#get-file-archive
-RUN sudo git clone --depth=1 "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/clafer.git" && \
-    sudo chown besspinuser clafer
+RUN sudo curl --silent --header "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" https://gitlab-ext.galois.com/api/v4/projects/ssith%2Fclafer/repository/archive?sha=master -o clafer.tar
+RUN sudo tar xvf clafer.tar && \
+    sudo mv clafer-* clafer && \
+    sudo chown besspinuser clafer && \
+    sudo rm clafer.tar
 
 WORKDIR /clafer/clafer
 
