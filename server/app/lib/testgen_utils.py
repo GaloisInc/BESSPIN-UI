@@ -20,6 +20,30 @@ def get_config_ini_template():
         config_text = f.read()
     return config_text
 
+<<<<<<< HEAD
+=======
+def get_variable(config_text, variable):
+    """
+    Get the value of a variable in config text
+
+    :param config_text: str
+    :param variable: str
+
+    :return: value
+    """
+    pat = re.compile(variable)
+
+    for line in config_text.splitlines():
+        altered_line = line
+        if pat.match(line):
+            l = line.split(' = ')
+            res = l[1]
+            res = res[1:][:-1] # to remove the double quotes "
+            return res
+
+    raise RuntimeError('variable not found')
+
+>>>>>>> Implement arch-extract api server side
 
 def set_variable(config_text, variable, value):
     """
