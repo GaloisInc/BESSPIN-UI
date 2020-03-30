@@ -1,0 +1,15 @@
+/* import the necessary Bootstrap files */
+@import '../../node_modules/bootstrap/scss/functions';
+@import '../../node_modules/bootstrap/scss/variables';
+
+.ArchExtract {
+    .arch-extract-config-form {
+        padding: 1em;
+
+        .form-control-file {
+            padding: 3em;
+            margin-left: 2em;
+            width: 100%;
+        }
+    }
+}

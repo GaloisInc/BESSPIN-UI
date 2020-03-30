@@ -9,7 +9,11 @@ import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { ITestgenConfigInputRecord } from '../state/testgenConfigInput';
 import { IWorkflow, JobStatus } from '../state/workflow';
 
-
+import {
+    IArchExtractRecord,
+    IArchExtractOutputRecord,
+    IArchExtractListElem,
+} from '../state/archExtract';
 
 export interface IConfig {
     uid: string;
@@ -99,6 +103,31 @@ export interface IServersideWorkflow {
     testgenConfigInput?: IServersideTestgenConfigInput;
     vulnerabilityConfigurationInput?: IServersideVulnConfigInput;
     testConfigId?: number;
+}
+
+export interface IServersideArchExtractListElem {
+    archExtractId: number,
+    label: string,
+}
+
+export interface IServersideArchExtractList {
+    archExtractIdList: IServersideArchExtractListElem[]
+}
+
+export interface IServersideArchExtractRecord {
+    archExtractId: number,
+    archExtractInput: string,
+}
+
+interface IServersideArchExtractOutput {
+    archExtractOutputId: number,
+    archExtractOutputFilename: string,
+    archExtractOutputContent?: string,
+    archExtractOutputContentConverted?: string,
+}
+
+export interface IServersideArchExtractOutputList {
+    archExtractOutputList: IServersideArchExtractOutput[]
 }
 
 /* eslint-enable camelcase */
@@ -271,3 +300,23 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
 export const mapWorkflows = (workflows: IServersideWorkflow[]): IWorkflow[] => {
     return workflows.map(mapWorkflow);
 };
+
+export const mapArchExtractList = (archExtractList: IServersideArchExtractList): IArchExtractListElem[] => {
+    return archExtractList.archExtractIdList;
+}
+
+export const mapArchExtractFetch = (serverResp: IServersideArchExtractRecord): IArchExtractRecord => {
+    return serverResp;
+}
+
+export const mapArchExtractNew = (serverResp: IServersideArchExtractRecord): IArchExtractRecord => {
+    return serverResp;
+}
+
+export const mapArchExtractRun = (archExtractOutputList: IServersideArchExtractOutputList): IArchExtractOutputRecord[] => {
+    return archExtractOutputList.archExtractOutputList;
+}
+
+export const mapArchExtractConvert = (archExtractOutput: IServersideArchExtractOutput): IArchExtractOutputRecord => {
+    return archExtractOutput;
+}

@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 
+import { IArchExtractAction, ArchExtractActionTypes } from './archExtract';
 import { ISystemAction, SystemActionTypes } from './feature-model';
 import {
     WorkflowActionTypes,
@@ -34,12 +35,18 @@ export const isLoading = () => {
 export type IUiAction =
     ReturnType<typeof isLoading> |
     ISystemAction |
-    IWorkflowAction;
+    IWorkflowAction |
+    IArchExtractAction;
 
 // Reducers
 
 export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
     switch (action.type) {
+        case ArchExtractActionTypes.LIST_ARCH_EXTRACT:
+        case ArchExtractActionTypes.FETCH_ARCH_EXTRACT:
+        case ArchExtractActionTypes.NEW_ARCH_EXTRACT:
+        case ArchExtractActionTypes.RUN_ARCH_EXTRACT:
+        case ArchExtractActionTypes.CONVERT_ARCH_EXTRACT:
         case WorkflowActionTypes.FETCH_WORKFLOW:
         case WorkflowActionTypes.FETCH_WORKFLOWS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT:
@@ -57,6 +64,11 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
                 ...state,
                 isLoading: true,
             };
+        case ArchExtractActionTypes.LIST_ARCH_EXTRACT_SUCCESS:
+        case ArchExtractActionTypes.FETCH_ARCH_EXTRACT_SUCCESS:
+        case ArchExtractActionTypes.NEW_ARCH_EXTRACT_SUCCESS:
+        case ArchExtractActionTypes.RUN_ARCH_EXTRACT_SUCCESS:
+        case ArchExtractActionTypes.CONVERT_ARCH_EXTRACT_SUCCESS:
         case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_SUCCESS:
@@ -72,6 +84,11 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
                 error: '',
                 isLoading: false,
             };
+        case ArchExtractActionTypes.LIST_ARCH_EXTRACT_FAILURE:
+        case ArchExtractActionTypes.FETCH_ARCH_EXTRACT_FAILURE:
+        case ArchExtractActionTypes.NEW_ARCH_EXTRACT_FAILURE:
+        case ArchExtractActionTypes.RUN_ARCH_EXTRACT_FAILURE:
+        case ArchExtractActionTypes.CONVERT_ARCH_EXTRACT_FAILURE:
         case WorkflowActionTypes.FETCH_WORKFLOW_FAILURE:
         case WorkflowActionTypes.FETCH_WORKFLOWS_FAILURE:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_FAILURE:

@@ -35,6 +35,7 @@ export const Header: React.FC = () => {
                 Arch-extract
               </NavDropdown.Item>
             </NavDropdown>
+            <Nav.Link href='/arch-extract'>ArchExtract</Nav.Link>
             <Nav.Link href='/'>Overview</Nav.Link>
             {/*
             <Nav.Link href='/vuln-class-selector'>vuln class selector</Nav.Link>
