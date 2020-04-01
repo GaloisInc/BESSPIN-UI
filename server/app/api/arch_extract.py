@@ -46,7 +46,7 @@ arch_extract_list_elem = api.model('ArchExtractListElem', {
 })
 
 arch_extract_list = api.model('ArchExtractList', {
-    'archExtractIdList': fields.List(fields.Nested(arch_extract_list_elem)),
+    'archExtractIdList': fields.List(fields.Nested(arch_extract_list_elem, skip_none=True)),
 })
 
 arch_extract_new_input = api.model('ArchExtractNewInput', {
@@ -83,7 +83,9 @@ arch_extract_record = api.model('ArchExtract', {
         reuired=True,
         description='Text of the arch-extract config',
     ),
-    'archExtractOutputList': fields.List(fields.Nested(arch_extract_output_record),
+    'archExtractOutputList': fields.List(
+        fields.Nested(arch_extract_output_record, skip_none=True),
+        skip_none=True,
         reuired=False,
         description='arch-extract Output List',
     )
@@ -97,7 +99,7 @@ arch_extract_input = api.model('ArchExtractInput', {
 })
 
 arch_extract_output_list = api.model('ArchExtractOutputList', {
-    'archExtractOutputList': fields.List(fields.Nested(arch_extract_output_record)),
+    'archExtractOutputList': fields.List(fields.Nested(arch_extract_output_record, skip_none=True)),
 })
 
 
@@ -126,7 +128,7 @@ class ArchExtractListApi(Resource):
 
 @ns.route('/fetch/<string:archExtractId>')
 class ArchExtractFetchApi(Resource):
-    @ns.marshal_list_with(arch_extract_record)
+    @ns.marshal_list_with(arch_extract_record, skip_none=True)
     def get(self, archExtractId):
         current_app.logger.debug(f'fetching an arch extract entry')
         existing_arch_extract = ArchExtract.query.get_or_404(int(archExtractId))
