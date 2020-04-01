@@ -3,7 +3,7 @@
 # Purpose: overlays necessary Nix and toolsuite-related libraries on top of the
 #          besspin-user-image
 
-FROM besspin-user-image:latest
+FROM artifactory.galois.com:5008/besspin-base-user:latest
 
 USER besspinuser
 ENV USER besspinuser
