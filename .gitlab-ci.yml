@@ -8,7 +8,7 @@ before_script:
 
 pull_server_image:
   script:
-    - echo "$BESSPIN_GALOIS_ARTIFACTORY" | docker login --username besspin_galois --password-stdin $BESSPIN_ARTIFACTORY_HOST || true
+    - echo "$BESSPIN_GALOIS_ARTIFACTORY" | docker login --username besspin_galois --password-stdin $BESSPIN_ARTIFACTORY || true
     - docker pull artifactory.galois.com:5008/besspin-ui:latest
   tags:
     - "besspin-ui-tag"
