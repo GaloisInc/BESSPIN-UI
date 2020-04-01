@@ -1,14 +1,13 @@
 variables:
   # GITLAB_PERSO_ACCESS_TOKEN_NAME: "VM-UI-TokenTil2020"
   # GITLAB_PERSO_ACCESS_TOKEN_PATH: "/home/gitlab-runner/.gitlabcredentials/PERSO_ACCESS_TOKEN.txt"
-  BESSPIN_ARTIFACTORY_HOST: "artifactory.galois.com:5001"
 
 before_script:
   - docker info
 
 pull_server_image:
   script:
-    - echo "$BESSPIN_GALOIS_ARTIFACTORY" | docker login $BESSPIN_ARTIFACTORY_HOST --username besspin_galois --password-stdin $BESSPIN_GALOIS_ARTIFACTORY || true
+    - echo "$BESSPIN_GALOIS_ARTIFACTORY" | docker login artifactory.galois.com:5001 --username besspin_galois --password-stdin $BESSPIN_GALOIS_ARTIFACTORY || true
     - docker pull artifactory.galois.com:5008/besspin-ui:latest
   tags:
     - "besspin-ui-tag"
