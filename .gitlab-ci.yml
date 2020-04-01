@@ -1,7 +1,7 @@
 variables:
   # GITLAB_PERSO_ACCESS_TOKEN_NAME: "VM-UI-TokenTil2020"
   # GITLAB_PERSO_ACCESS_TOKEN_PATH: "/home/gitlab-runner/.gitlabcredentials/PERSO_ACCESS_TOKEN.txt"
-  BESSPIN_ARTIFACTORY_HOST: "artifactory.galois.com:5008"
+  BESSPIN_ARTIFACTORY_HOST: "artifactory.galois.com:5001"
 
 before_script:
   - docker info
