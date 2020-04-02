@@ -161,14 +161,6 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                                 </div>
                             </InputGroup>
                         </Col>
-                        <Col sm={10}>
-                            <Button
-                                className='submit-config btn btn-light btn-outline-secondary'
-                                onClick={ onSubmitHandler }>
-                                <FontAwesomeIcon icon={ faPlus }/>
-                                <span> Upload Config </span>
-                            </Button>
-                        </Col>
                     </Form.Group>
                 </Form>
             </Container>
@@ -182,6 +174,20 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                 value={ nixConfig }
                 width='100%'
                 height='65vh' />
+            <Container className='sysconfig-form'>
+                <Form>
+                    <Form.Group as={Row}>
+                        <Col sm={10}>
+                            <Button
+                                className='submit-config btn btn-light btn-outline-secondary'
+                                onClick={ onSubmitHandler }>
+                                <FontAwesomeIcon icon={ faPlus }/>
+                                <span> Upload Config </span>
+                            </Button>
+                        </Col>
+                    </Form.Group>
+                </Form>
+            </Container>
         </Container>
     );
 };
