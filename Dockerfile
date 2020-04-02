@@ -1,4 +1,4 @@
-FROM besspin-user-image:latest
+FROM artifactory.galois.com:5008/besspin-toolsuite:latest
 
 USER besspinuser
 ENV USER besspinuser
