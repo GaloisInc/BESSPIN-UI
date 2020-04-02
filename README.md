@@ -97,20 +97,23 @@ The UI is accessible at the url:
 http://localhost:3784/
 ```
 
-### Build Docker image
+### Build/Publish Docker image
 
-To build the docker image, you need to provide some `personal access
-token` credentials to access the gitlab repos. This is done by
-providing the environment variables to the docker `docker build`
-command:
+Built images are published to Artifactory. In order to build/publish images,
+there is a helper script (`./scripts/publish-docker-images.sh`) which you
+use to tag/build/publish all the necessary images. This file depends upon
+an ENV file (`./scripts/production.env`) which you set up with the necessary
+environmental variables. Use `./scripts/sample.env` as your template. It
+requires the following variables to be defined:
 
 - `TOKEN_NAME` for the name of the personal access token
 - `PRIVATE_TOKEN` the private token value
-- `DB_PATH` if you want to customize the path to the sqlite database
+- `BINCACHE_LOGIN` for the artifactory username
+- `BINCACHE_APIKEY` the api token to use
 
-```
-docker build -f Dockerfile --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" -t besspin-ui .
-```
+**WARNING** this script takes a long time to run (~20min to build the images
+and ~2hr to push them to artifactory). You may want to consider disabling any
+settings that automatically put your machine to sleep while this is running.
 
 ### Running in Docker
 
@@ -209,3 +212,4 @@ Once inputs are gathered, they are expected to be used to run a job within nix t
  - a path to the nix store directory containing the actual generated artifact(s) from the job
 
 Given that there are jobs for most of the top-level inputs, there is a "jobs" super-type table and sub-types for each of the specific inputs. It is expected that each unique combination of inputs will correspond to exactly one successful job run, but that is a requirement that the API layer must enforce.
+
