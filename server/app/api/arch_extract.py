@@ -16,11 +16,9 @@ from app.models import (
     ArchExtract,
     ArchExtractOutput,
 )
-from app.lib.testgen_utils import (
+from app.lib.toolsuite_utils import (
+    get_config_arch_extract_template,
     get_variable,
-)
-from app.lib.arch_extract_utils import (
-    get_config_arch_extract_template
 )
 from . import api
 

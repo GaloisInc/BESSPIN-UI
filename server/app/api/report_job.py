@@ -16,7 +16,7 @@ from app.models import (
     VulnerabilityConfigurationInput,
     FeatureModel,
 )
-from app.lib.testgen_utils import (
+from app.lib.toolsuite_utils import (
     get_config_ini_template,
     set_variable,
     set_unique_vuln_class_to_constaints,

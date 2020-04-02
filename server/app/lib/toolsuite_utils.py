@@ -15,13 +15,25 @@ def get_config_ini_template():
     """
 
     current_app.logger.debug(f'Loading default config.ini at: {DEFAULT_CONFIG_INI_PATH}')
-    
+
     with open(DEFAULT_CONFIG_INI_PATH, 'r') as f:
         config_text = f.read()
     return config_text
 
-<<<<<<< HEAD
-=======
+def get_config_arch_extract_template(cpu):
+    """
+    Get the default arch-extract config file
+
+    :param cpu:
+    :return: str of config file
+    """
+
+    DEFAULT_ARCH_EXTRACT_CONFIG = f'/home/besspinuser/tool-suite/tutorial/{cpu}.toml'
+
+    with open(DEFAULT_ARCH_EXTRACT_CONFIG, 'r') as f:
+        config_text = f.read()
+    return config_text
+
 def get_variable(config_text, variable):
     """
     Get the value of a variable in config text
@@ -43,7 +55,6 @@ def get_variable(config_text, variable):
 
     raise RuntimeError('variable not found')
 
->>>>>>> Implement arch-extract api server side
 
 def set_variable(config_text, variable, value):
     """
