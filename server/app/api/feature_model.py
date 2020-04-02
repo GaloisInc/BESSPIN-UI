@@ -210,13 +210,13 @@ class ConfiguratorUpload(Resource):
             return abort(500, str(err))
 
 
-@ns.route('/create-test/<path:subpath>')
+@ns.route('/create-vuln-config/<path:subpath>')
 class TestConfiguratorUpload(Resource):
     # NOTE: we cannot use "expect" here because we are using file-upload
     @ns.marshal_with(uploadResponse)
     def post(self, subpath):
         """
-        create a test-configuration, given a vulnerability class
+        create a vuln-configuration, given a vulnerability class
         """
         workflowId, vuln_name = subpath.split('/')
 
