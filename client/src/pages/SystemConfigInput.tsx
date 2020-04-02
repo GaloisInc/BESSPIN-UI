@@ -163,7 +163,7 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                         </Col>
                         <Col sm={10}>
                             <Button
-                                className='btn btn-light btn-outline-secondary'
+                                className='submit-config btn btn-light btn-outline-secondary'
                                 onClick={ onSubmitHandler }>
                                 <FontAwesomeIcon icon={ faPlus }/>
                                 <span> Upload Config </span>
@@ -176,7 +176,7 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                 className='config-viewer'
                 mode='json'
                 name='editor-configs'
-                readOnly={ true }
+                onChange={ (newConfig) => setNixConfig(newConfig) }
                 setOptions={{ useWorker: false }}
                 theme='monokai'
                 value={ nixConfig }
