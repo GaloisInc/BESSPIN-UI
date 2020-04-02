@@ -6,3 +6,6 @@ node_modules
 **/*.configured
 server/**/*.db
 server/tmp
+scripts/dev.env
+scripts/test.env
+scripts/production.env

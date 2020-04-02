@@ -1,8 +1,6 @@
 import os
 import stat
 import pwd
-import subprocess
-from shlex import quote
 import tempfile
 
 import json
@@ -23,17 +21,8 @@ from app.lib.testgen_utils import (
     set_variable,
     set_unique_vuln_class_to_constaints,
 )
+from app.lib.nix import run_nix_subprocess
 from . import api
-
-
-def make_testgen_command(cmd):
-    """
-    :param cmd: string of the command to run
-
-    :return: list of parameters for subprocess to use
-    """
-    nix_cmd = "cd ~/testgen &&" + "nix-shell --run " + quote(cmd)
-    return ["su", "-", "besspinuser", "-c", nix_cmd]
 
 
 """
@@ -194,17 +183,10 @@ class ReportJobListApi(Resource):
 
             with open(constraints_path, 'w') as f:
                 f.write(constraints_text)
-            # NOTE: Have to change the permissions and owner from root to besspinuser
-            os.chmod(constraints_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-            os.chown(constraints_path, besspinuser_uid, besspinuser_gid)
 
-            cmd = make_testgen_command('./testgen.sh ' + testgen_config_path)
-            cp = subprocess.run(
-                cmd,
-                capture_output=True
-            )
-            current_app.logger.debug('Clafer stdout: ' + str(cp.stdout.decode('utf8')))
-            current_app.logger.debug('Clafer stderr: ' + str(cp.stderr.decode('utf8')))
+            cp = run_nix_subprocess('~/testgen', f'./testgen.sh {testgen_config_path} ; ./scripts/CI/ciJobDecision.py runOnPush')
+            current_app.logger.debug('Testgen stdout: ' + str(cp.stdout.decode('utf8')))
+            current_app.logger.debug('Testgen stderr: ' + str(cp.stderr.decode('utf8')))
             log_output = str(cp.stdout.decode('utf8'))
         else:
             log_output = 'TOOLSUITE_NEEDED'

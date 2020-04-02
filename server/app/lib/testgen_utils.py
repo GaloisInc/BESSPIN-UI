@@ -1,9 +1,11 @@
 import copy
 import re
+from flask import current_app
 
 from config import config
 
 DEFAULT_CONFIG_INI_PATH = '/home/besspinuser/testgen/config.ini'
+
 
 def get_config_ini_template():
     """
@@ -11,9 +13,13 @@ def get_config_ini_template():
 
     :return: str of config.ini file
     """
+
+    current_app.logger.debug(f'Loading default config.ini at: {DEFAULT_CONFIG_INI_PATH}')
+    
     with open(DEFAULT_CONFIG_INI_PATH, 'r') as f:
         config_text = f.read()
     return config_text
+
 
 def set_variable(config_text, variable, value):
     """
@@ -42,6 +48,7 @@ def set_variable(config_text, variable, value):
 
     return new_config_text
 
+
 def set_unique_vuln_class_to_constaints(vuln_class):
     """
     :return: string with constraints [ !vulnClass_Test ] for vulnClass different from vuln_class
@@ -54,10 +61,9 @@ def set_unique_vuln_class_to_constaints(vuln_class):
     del all_vuln_classes[vuln_class]
 
     constr_string = ''
-    for (k,v) in all_vuln_classes.items():
+    for (k, v) in all_vuln_classes.items():
         if not all_vuln_classes[k].endswith('.cfr'):
             raise RuntimeError('Vuln class file does not end with cfr')
         constr_string += "[ !" + all_vuln_classes[k][:-4] + '_Test' + " ]\n"
 
     return constr_string
-
