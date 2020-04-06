@@ -21,7 +21,7 @@ from app.lib.toolsuite_utils import (
     get_variable,
 )
 from . import api
-
+from app.lib.nix import run_nix_subprocess
 
 ns = api.namespace(
     'arch-extract',
@@ -99,16 +99,6 @@ arch_extract_input = api.model('ArchExtractInput', {
 arch_extract_output_list = api.model('ArchExtractOutputList', {
     'archExtractOutputList': fields.List(fields.Nested(arch_extract_output_record, skip_none=True)),
 })
-
-
-def make_arch_extract_command(cmd):
-    """
-    :param cmd: string of the command to run
-
-    :return: list of parameters for subprocess to use
-    """
-    nix_cmd = "cd ~/tool-suite &&" + "nix-shell --run " + quote(cmd)
-    return ["su", "-", "besspinuser", "-c", nix_cmd]
 
 
 @ns.route('/list')
@@ -200,11 +190,7 @@ class ArchExtractRunApi(Resource):
             with open(arch_extract_config_file_path, 'w') as f:
                 f.write(existing_arch_extract.archExtractInput)
 
-            cmd = make_arch_extract_command(f'besspin-arch-extract {arch_extract_config_file_path} visualize')
-            cp = subprocess.run(
-                cmd,
-                capture_output=True
-            )
+            cp = run_nix_subprocess('~/tool-suite', f'besspin-arch-extract {arch_extract_config_file_path} visualize')
             current_app.logger.debug('besspin-arch-extract stdout: ' + str(cp.stdout.decode('utf8')))
             current_app.logger.debug('besspin-arch-extract stderr: ' + str(cp.stderr.decode('utf8')))
             log_output = str(cp.stdout.decode('utf8'))
@@ -261,13 +247,9 @@ class ArchExtractConvertApi(Resource):
             f.write(existing_arch_extract_output.archExtractOutputContent.decode())
 
         dot_to_png = '${f%.dot}.png'
-        cmd_png = make_arch_extract_command(f'for f in {WORK_DIR}/*.dot; do dot -Tpng $f -o {dot_to_png}; done')
+        cmd_png = f'for f in {WORK_DIR}/*.dot; do dot -Tpng $f -o {dot_to_png}; done'
         current_app.logger.debug(f'command to execute: {cmd_png}')
-        cp_png = subprocess.run(
-            cmd_png,
-            check=True,
-            capture_output=True
-        )
+        cp_png = run_nix_subprocess('~/tool-suite', cmd_png)
         current_app.logger.debug('png stdout: ' + str(cp_png.stdout.decode('utf8')))
         current_app.logger.debug('png stderr: ' + str(cp_png.stderr.decode('utf8')))
 
