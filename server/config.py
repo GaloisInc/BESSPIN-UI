@@ -36,6 +36,13 @@ class Config(object):
         'InformationLeakage': 'InformationLeakage.cfr',
         'ResourceManagement': 'ResourceManagement.cfr',
     }
+    TESTGEN_VULN_DIR_MAP = {
+        'BufferErrors': '1_BufferErrors',
+        'PPAC': '2_PPAC',
+        'ResourceManagement': '3_ResourceManagement',
+        'InformationLeakage': '5_InformationLeakage',
+        'NumericErrors': '7_NumericErrors'
+    }
     USE_TOOLSUITE = True if os.getenv('USE_TOOLSUITE', 'False') == 'True' else False
     USE_TOOLSUITE_CONFIGURATOR = True if os.getenv('USE_TOOLSUITE_CONFIGURATOR', 'False') == 'True' else False
 
