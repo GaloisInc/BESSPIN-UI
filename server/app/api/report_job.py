@@ -257,6 +257,15 @@ class ReportJobListApi(Resource):
         existing_report_job.status = job_status_succeeded
         existing_report_job.log = log_output
 
+        for score in scores:
+            cs = CweScore(
+                reportJobId=existing_report_job.jobId,
+                cwe=score.cwe,
+                score=score.score,
+                notes=score.notes
+            )
+            db.session.add(cs)
+
         db.session.add(existing_report_job)
         db.session.commit()
 
