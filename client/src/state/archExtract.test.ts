@@ -30,7 +30,7 @@ describe('archExtract', () => {
                     testState = generateTestState();
                 });
 
-                it('', () => {
+                it('should add a list of archExtract jobs', () => {
                     const resultState: IArchExtractState = {
                         ...DEFAULT_STATE,
                         archExtractIdList: [
@@ -59,7 +59,7 @@ describe('archExtract', () => {
                     testState = generateTestState();
                 });
 
-                it('', () => {
+                it('should add an archExtract record', () => {
                     const resultState: IArchExtractState = {
                         ...DEFAULT_STATE,
                         archExtractRecord: {
@@ -82,7 +82,7 @@ describe('archExtract', () => {
                     testState = generateTestState();
                 });
 
-                it('', () => {
+                it('should add a new archExtract job', () => {
                     const resultState: IArchExtractState = {
                         ...DEFAULT_STATE,
                         archExtractRecord: {
@@ -113,7 +113,7 @@ describe('archExtract', () => {
                     },
                 };
 
-                it('', () => {
+                it('should update an archExtract job with a different input', () => {
                     const resultState: IArchExtractState = {
                         ...DEFAULT_STATE,
                         archExtractRecord: {
@@ -144,7 +144,7 @@ describe('archExtract', () => {
                         archExtractInput: 'DUMMY_INPUT',
                     }
                 }
-                it('', () => {
+                it('should update the list of archExtract output', () => {
                     const resultState: IArchExtractState = {
                         ...DEFAULT_STATE,
                         archExtractRecord: {
@@ -183,7 +183,7 @@ describe('archExtract', () => {
                     archExtractOutputContentConverted: 'ab12313b345',
                 };
 
-                it('', () => {
+                it('should update the output record properly', () => {
                     const resultState: IArchExtractState = {
                         ...DEFAULT_STATE,
                         archExtractOutputRecord: outputRecord,
