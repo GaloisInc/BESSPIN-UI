@@ -94,12 +94,13 @@ class ReportJob(Job):
         db.ForeignKey('workflows.workflowId', ondelete='CASCADE'),
         nullable=False
     )
-
     log = db.Column(
         db.Text(),
         nullable=True,
         comment='log of report',
     )
+
+    scores = db.relationship('CweScore', back_populates='report')
 
     __mapper_args__ = {
         'polymorphic_identity': 'report',

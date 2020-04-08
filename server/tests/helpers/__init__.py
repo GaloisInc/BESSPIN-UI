@@ -5,6 +5,7 @@ import logging
 from app import create_app
 from app.models import (
     db,
+    CweScore,
     FeatureModel,
     ReportJob,
     SystemConfigurationInput,
@@ -94,6 +95,17 @@ def create_ArchExtractOutput(**kwargs) -> ArchExtractOutput:
     vc = ArchExtractOutput(**kwargs)
     add_to_db(vc)
     return vc
+
+
+def create_cwe_score(**kwargs) -> CweScore:
+    cs = CweScore(
+        reportJobId=kwargs['reportJobId'],
+        cwe=kwargs['cwe'],
+        score=kwargs['score'],
+        notes=kwargs['notes']
+    )
+    add_to_db(cs)
+    return cs
 
 
 class BesspinTestBaseClass(unittest.TestCase):

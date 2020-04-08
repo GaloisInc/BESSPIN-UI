@@ -48,6 +48,16 @@ def upgrade():
         sa.ForeignKeyConstraint(['featureModelUid'], ['feature_models.uid']),
     )
     op.create_table(
+        'cweScores',
+        sa.Column('scoreId', sa.Integer(), nullable=False),
+        sa.Column('cwe', sa.Integer(), nullable=False, comment='CWE number'),
+        sa.Column('score', sa.String(length=23), nullable=False, comment='string value of CWE test score'),
+        sa.Column('notes', sa.String(length=256), nullable=True, comment='notes for test score'),
+        sa.Column('reportJobId', sa.Integer(), nullable=False),
+        sa.PrimaryKeyConstraint('scoreId'),
+        sa.ForeignKeyConstraint(['reportJobId'], ['reportJobs.jobId'], ondelete='CASCADE')
+    )
+    op.create_table(
         'jobs',
         sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
         sa.Column('createdAt', sa.DateTime(), nullable=False),
