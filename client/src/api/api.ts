@@ -35,6 +35,61 @@ const request = async (config: AxiosRequestConfig): Promise<AxiosResponse> => {
             .then(extractData);
 };
 
+export const listArchExtract = async () => {
+    return request({
+        url: 'api/arch-extract/list',
+        method: 'get',
+        headers: { ...DEFAULT_HEADERS },
+        data: {},
+    });
+};
+
+export const fetchArchExtract = async (archExtractId: number) => {
+    return request({
+        url: `api/arch-extract/fetch/${archExtractId.toString()}`,
+        method: 'get',
+        headers: { ...DEFAULT_HEADERS },
+        data: {},
+    });
+};
+
+export const newArchExtract = async (cpuTemplate: string, label: string) => {
+    return request({
+        url: `api/arch-extract/new/${cpuTemplate}`,
+        method: 'post',
+        headers: { ...DEFAULT_HEADERS },
+        data: { label: label },
+    });
+};
+
+export const submitArchExtract = async (archExtractId: number, archExtractInput: string) => {
+    return request({
+        url: `api/arch-extract/submit/${archExtractId.toString()}`,
+        method: 'post',
+        headers: { ...DEFAULT_HEADERS },
+        data: {
+            archExtractInput
+        },
+    });
+};
+
+export const runArchExtract = async (archExtractId: number) => {
+    return request({
+        url: `api/arch-extract/run/${archExtractId.toString()}`,
+        method: 'post',
+        headers: { ...DEFAULT_HEADERS },
+        data: {},
+    });
+};
+
+export const convertArchExtract = async (archExtractOutputId: number) => {
+    return request({
+        url: `api/arch-extract/convert/${archExtractOutputId.toString()}`,
+        method: 'get',
+        headers: { ...DEFAULT_HEADERS },
+    });
+};
+
 export const fetchConfigurator = async (systemUid: string) => {
     return request({
         url: '/api/feature-model/fetch-by-uid',

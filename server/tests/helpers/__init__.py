@@ -11,6 +11,8 @@ from app.models import (
     VersionedResource,
     VulnerabilityConfigurationInput,
     Workflow,
+    ArchExtract,
+    ArchExtractOutput,
 )
 
 DEFAULT_HEADERS = {'Content-type': 'application/json'}
@@ -80,6 +82,16 @@ def create_vulnerabilityConfig(**kwargs) -> VulnerabilityConfigurationInput:
         workflowId=kwargs['workflowId'],
         vulnClass=kwargs['vulnClass']
     )
+    add_to_db(vc)
+    return vc
+
+def create_ArchExtract(**kwargs) -> ArchExtract:
+    vc = ArchExtract(**kwargs)
+    add_to_db(vc)
+    return vc
+
+def create_ArchExtractOutput(**kwargs) -> ArchExtractOutput:
+    vc = ArchExtractOutput(**kwargs)
     add_to_db(vc)
     return vc
 

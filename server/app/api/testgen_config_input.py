@@ -6,7 +6,7 @@ from datetime import datetime
 from . import api
 from app.models import db, TestgenConfigInput, Workflow
 
-from app.lib.testgen_utils import (
+from app.lib.toolsuite_utils import (
     get_config_ini_template,
 )
 

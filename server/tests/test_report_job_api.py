@@ -40,7 +40,7 @@ class TestReportJobApi(BesspinTestApiBaseClass):
         create_vulnerabilityConfig(
             label=f'vuln config {datetime.utcnow()}',
             workflowId=1,
-            vulnClass='BOF',
+            vulnClass='BufferErrors',
             featureModelUid=fm.uid
         )
 

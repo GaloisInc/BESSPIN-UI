@@ -15,10 +15,45 @@ def get_config_ini_template():
     """
 
     current_app.logger.debug(f'Loading default config.ini at: {DEFAULT_CONFIG_INI_PATH}')
-    
+
     with open(DEFAULT_CONFIG_INI_PATH, 'r') as f:
         config_text = f.read()
     return config_text
+
+def get_config_arch_extract_template(cpu):
+    """
+    Get the default arch-extract config file
+
+    :param cpu:
+    :return: str of config file
+    """
+
+    DEFAULT_ARCH_EXTRACT_CONFIG = f'/home/besspinuser/tool-suite/tutorial/{cpu}.toml'
+
+    with open(DEFAULT_ARCH_EXTRACT_CONFIG, 'r') as f:
+        config_text = f.read()
+    return config_text
+
+def get_variable(config_text, variable):
+    """
+    Get the value of a variable in config text
+
+    :param config_text: str
+    :param variable: str
+
+    :return: value
+    """
+    pat = re.compile(variable)
+
+    for line in config_text.splitlines():
+        altered_line = line
+        if pat.match(line):
+            l = line.split(' = ')
+            res = l[1]
+            res = res[1:][:-1] # to remove the double quotes "
+            return res
+
+    raise RuntimeError('variable not found')
 
 
 def set_variable(config_text, variable, value):

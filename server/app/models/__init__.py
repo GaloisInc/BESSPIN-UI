@@ -15,3 +15,4 @@ from .test_run_inputs import TestRunInput  # noqa: E402, F401Y
 from .jobs import Job, JobStatus, FeatureExtractionJob, ReportJob  # noqa: E501, E402, F401Y
 from .workflows import Workflow  # noqa: E501, E402, F401Y
 from .feature_models import FeatureModel  # noqa: E501, E402, F401Y
+from .arch_extract import ArchExtract, ArchExtractOutput  # noqa: E501, E402, F401Y
