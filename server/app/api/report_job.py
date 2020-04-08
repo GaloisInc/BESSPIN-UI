@@ -1,15 +1,18 @@
+import csv
+import json
 import os
-import stat
 import pwd
+import stat
+import sys
 import tempfile
 
-import json
 from flask import current_app, request
 from flask_restplus import abort, Resource, fields
 
 from config import config
 from app.models import (
     db,
+    CweScore,
     JobStatus,
     ReportJob,
     Workflow,
@@ -115,9 +118,54 @@ def save_test_config(workflow: Workflow, constraints_path: str, testgen_config_p
         f.write(testgen_config_text)
 
 
-def fetch_scores(scorePath: str):
-    current_app.logger.debug(f'Looking for scores in {scorePath}')
-    return []
+def fetch_scores(score_path: str):
+    current_app.logger.debug(f'Looking for scores in "{score_path}"')
+
+    scores = []
+
+    try:
+        with open(score_path) as csvfile:
+            score_reader = csv.reader(csvfile)
+            for row in score_reader:
+                score = {'cwe': row[0], 'score': row[1], 'notes': row[3:]}
+                scores.append(score)
+    except FileNotFoundError:
+        current_app.logger.error(f'Unable to find scores file: "{score_path}"')
+    except:  # noqa E722
+        current_app.logger.error(f'Unexpected error reading {score_path} "{sys.exc_info()[0]}"')
+
+    return scores
+
+
+def generate_test_constraints(work_dir: str, vulnerability: VulnerabilityConfigurationInput, vuln_feature_model: FeatureModel):
+    constraints_path = os.path.join(work_dir, 'constraints_generated.cfr')
+    current_app.logger.debug('Constraints PATH: ' + constraints_path)
+
+    constraints_text = (
+        set_unique_vuln_class_to_constaints(vulnerability.vulnClass) +
+        vuln_feature_model.configs_pp
+    )
+    current_app.logger.debug('CONSTRAINTS_TXT: ' + constraints_text)
+
+    with open(constraints_path, 'w') as f:
+        f.write(constraints_text)
+
+    return constraints_path
+
+
+def generate_test_config(work_dir: str, constraints_path: str, workflow: Workflow):
+    testgen_config_path = os.path.join(work_dir, 'config_generated.ini')
+    current_app.logger.debug('CONFIG PATH: ' + testgen_config_path)
+
+    save_test_config(workflow, constraints_path, testgen_config_path)
+
+    # NOTE: Have to change the permissions and owner from root to besspinuser
+    os.chmod(testgen_config_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+    besspinuser_uid = pwd.getpwnam('besspinuser').pw_uid
+    besspinuser_gid = pwd.getpwnam('besspinuser').pw_gid
+    os.chown(testgen_config_path, besspinuser_uid, besspinuser_gid)
+
+    return testgen_config_path
 
 
 def make_nix_call(workflow: Workflow, vulnerability: VulnerabilityConfigurationInput, vuln_feature_model: FeatureModel):
@@ -129,44 +177,27 @@ def make_nix_call(workflow: Workflow, vulnerability: VulnerabilityConfigurationI
 
     current_app.logger.debug('WORK_DIR: ' + WORK_DIR)
 
-    constraints_path = os.path.join(WORK_DIR, 'constraints_generated.cfr')
-    current_app.logger.debug('Constraints PATH: ' + constraints_path)
-
-    testgen_config_path = os.path.join(WORK_DIR, 'config_generated.ini')
-    current_app.logger.debug('CONFIG PATH: ' + testgen_config_path)
-
-    save_test_config(workflow, constraints_path, testgen_config_path)
-
-    # NOTE: Have to change the permissions and owner from root to besspinuser
-    os.chmod(testgen_config_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-    besspinuser_uid = pwd.getpwnam('besspinuser').pw_uid
-    besspinuser_gid = pwd.getpwnam('besspinuser').pw_gid
-    os.chown(testgen_config_path, besspinuser_uid, besspinuser_gid)
-
-    constraints_text = (
-        set_unique_vuln_class_to_constaints(vulnerability.vulnClass) +
-        vuln_feature_model.configs_pp
-    )
-    current_app.logger.debug('CONSTRAINTS_TXT: ' + constraints_text)
-
-    with open(constraints_path, 'w') as f:
-        f.write(constraints_text)
+    constraints_path = generate_test_constraints(WORK_DIR, vulnerability, vuln_feature_model)
+    testgen_config_path = generate_test_config(WORK_DIR, constraints_path, workflow)
 
     try:
-        cp = run_nix_subprocess('~/testgen', f'./testgen.sh {testgen_config_path} ; ./scripts/CI/ciJobDecision.py runOnPush')
+        testgen_path = config['default'].TESTGEN_PATH
+        cp = run_nix_subprocess(testgen_path, f'./testgen.sh {testgen_config_path} ; ./scripts/CI/ciJobDecision.py runOnPush')
 
         current_app.logger.debug('Testgen stdout: ' + str(cp.stdout.decode('utf8')))
         current_app.logger.debug('Testgen stderr: ' + str(cp.stderr.decode('utf8')))
 
         log_output = str(cp.stdout.decode('utf8'))
-    except:
-        current_app.logger.debug(f'Unexpected error {sys.exc_info()[0]}')
 
-    scores = []
-
-    # if cp.returncode == 0:
-    scorePath = os.path.join(WORK_DIR, config['TESTGEN_VULN_DIR_MAP'][vulnerability.vulnClass])
-    scores = fetch_scores(scorePath)
+        current_app.logger.debug(f'testgen_path="{testgen_path}')
+        score_path = os.path.join(testgen_path, 'workDir', config['default'].TESTGEN_VULN_DIR_MAP[vulnerability.vulnClass], 'scores.csv')
+        scores = fetch_scores(score_path)
+    except TypeError as err:
+        current_app.logger.error(f'Unexpected error running nix: {err}')
+    except:  # noqa E722
+        current_app.logger.error(f'Unexpected error running nix: {sys.exc_info()[0]}')
+        log_output = 'Exception occurred runing tests. Please check server logs for more information'
+        scores = []
 
     return [log_output, scores]
 

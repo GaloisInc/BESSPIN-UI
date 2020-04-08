@@ -36,6 +36,7 @@ class Config(object):
         'InformationLeakage': 'InformationLeakage.cfr',
         'ResourceManagement': 'ResourceManagement.cfr',
     }
+    TESTGEN_PATH = os.path.abspath(os.path.expanduser('~/testgen'))
     TESTGEN_VULN_DIR_MAP = {
         'BufferErrors': '1_BufferErrors',
         'PPAC': '2_PPAC',
