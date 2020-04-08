@@ -95,12 +95,13 @@ export const ArchExtract: React.FC<IProps> = ({
     const [loadExisting, setLoadExisting] = useState(-42);
     const [cpuTemplate, setCpuTemplate] = useState('');
     const [newLabel, setNewLabel] = useState('');
+    const [selectedDotFile, setSelectedDotFile] = useState(-42);
 
     useEffect(() => {
         if (archExtractIdList === undefined) {
             listArchExtract();
         }
-    }, [archExtractIdList]);
+    }, [archExtractIdList, listArchExtract]);
 
     useEffect(() => {
         if (archExtractRecord) {
@@ -116,7 +117,7 @@ export const ArchExtract: React.FC<IProps> = ({
         <Container className='ArchExtract'>
             <Header />
             <h1>Architecture Extraction</h1>
-            <Container className='arch-extract-config-form'>
+            <Container className='load-arch-extract'>
                 { isLoading && <LoadingIndicator /> }
                 { errors && errors.length > 0 && <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }</Alert> }
                 <Form>
@@ -164,50 +165,67 @@ export const ArchExtract: React.FC<IProps> = ({
                 </Button>
                 <br />
             </Container>
-            <ButtonGroup>
-                <Button
-                    onClick={() => submitArchExtract(archExtractRecord.archExtractId, editorText) }
-                    disabled={(archExtractRecord.archExtractId > 0)? false : true}
-                >
-                    Save
-                </Button>
+
+            <Container className='edit-arch-extract-input'>
+                <ButtonGroup>
+                    <Button
+                        onClick={() => submitArchExtract(archExtractRecord.archExtractId, editorText) }
+                        disabled={(archExtractRecord.archExtractId > 0)? false : true}
+                    >
+                        Save
+                    </Button>
+                </ButtonGroup>
+
+                <AceEditor
+                    mode="python"
+                    name='editor-arch-extract'
+                    //setOptions={{ useWorker: false }}
+                    theme='monokai'
+                    //value={ configInput? configInput : '' }
+                    onChange={ (newValue) => setEditorText(newValue) }
+                    value={ editorText }
+                    width='100%'
+                    height='35vh' />
                 <Button
                     onClick={() => runArchExtract(archExtractRecord.archExtractId) }
                     disabled={(archExtractRecord.archExtractId > 0)? false: true}
                 >
                     Build
                 </Button>
-            </ButtonGroup>
+            </Container>
 
-            <AceEditor
-                mode="python"
-                name='editor-arch-extract'
-                //setOptions={{ useWorker: false }}
-                theme='monokai'
-                //value={ configInput? configInput : '' }
-                onChange={ (newValue) => setEditorText(newValue) }
-                value={ editorText }
-                width='100%'
-                height='35vh' />
-            <Form>
-                <Form.Group controlId="SelectArchExtractOuput">
-                    <Form.Label>Convert dot to PNG: </Form.Label>
-                    <Form.Control as="select" onChange={ (event:any) => convertArchExtract(event.target.value) }>
-                        { (archExtractRecord.archExtractOutputList ?
-                            archExtractRecord.archExtractOutputList: []
-                            ).map((value, index, array) => <option value={value.archExtractOutputId}> {value.archExtractOutputFilename} </option>) }
-                    </Form.Control>
-                </Form.Group>
-            </Form>
 
-            <TransformWrapper>
-            <TransformComponent>
-            { (archExtractOutputRecord !== undefined) ?
-                <img id="ItemPreview" src={png_dyn}></img> :
-                <div />
-            }
-            </TransformComponent>
-            </TransformWrapper>
+            <Container className='convert-arch-extract'>
+                <Form>
+                    <Form.Group controlId="SelectArchExtractOuput">
+                        <Form.Label>Select dot file to convert to PNG: </Form.Label>
+                        <Form.Control as="select" onClick={ (event:any) => setSelectedDotFile(event.target.value) }>
+                            { (archExtractRecord.archExtractOutputList ?
+                                archExtractRecord.archExtractOutputList: []
+                                ).map((value, index, array) => <option value={value.archExtractOutputId}> {value.archExtractOutputFilename} </option>) }
+                        </Form.Control>
+                    </Form.Group>
+                </Form>
+                <Button
+                    onClick={() => convertArchExtract(selectedDotFile) }
+                    disabled={(selectedDotFile === -42)}
+                >
+                    Convert
+                </Button>
+
+                <Container className='converted-arch-extract'>
+                    <div>
+                        <TransformWrapper>
+                        <TransformComponent>
+                        { (archExtractOutputRecord !== undefined) ?
+                            <img id="ItemPreview" src={png_dyn}></img> :
+                            <div />
+                        }
+                        </TransformComponent>
+                        </TransformWrapper>
+                    </div>
+                </Container>
+            </Container>
         </Container>
     );
 };

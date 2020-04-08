@@ -3,13 +3,28 @@
 @import '../../node_modules/bootstrap/scss/variables';
 
 .ArchExtract {
-    .arch-extract-config-form {
+    .load-arch-extract {
         padding: 1em;
 
         .form-control-file {
             padding: 3em;
             margin-left: 2em;
             width: 100%;
+        }
+    }
+    .edit-arch-extract-input {
+        padding: 1em;
+    }
+    .convert-arch-extract {
+        padding: 1em;
+
+        .converted-arch-extract {
+            padding: 1em;
+            div:first-child {
+                border-style: solid;
+                border-width: 1px;
+                border-color: black;
+            }
         }
     }
 }
