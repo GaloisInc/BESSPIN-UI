@@ -27,6 +27,8 @@ services:
     user: besspinuser
     # to build the image, edit a /script/production.env
     # ./script/publish-docker-images.sh
+    # In order to override the BESSPIN_UI_VERSION from the .env file you have to
+    # export the variable in the terminal, for example `export BESSPIN_UI_VERSION=latest`
     image: "artifactory.galois.com:5008/besspin-ui:${BESSPIN_UI_VERSION}"
     restart: always
     networks:
@@ -40,7 +42,6 @@ services:
       - './server:/besspin-ui/server'
       - './scripts/:/besspin-ui/scripts'
     environment:
-      # BESSPIN_UI_VERSION: latest
       DB_PATH: /besspin-ui/server # NOTE: if we use this docker-compose set up in production, we will need to remove this variable
       XDG_BASE_DATA: /home/besspinuser/.local/share
       LC_ALL: C.UTF-8
