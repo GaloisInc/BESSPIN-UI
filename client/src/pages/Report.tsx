@@ -149,15 +149,17 @@ export const Report: React.FC<IReportProps> = ({
                 }}>Run again</Button>
             </ButtonToolbar>
             { currentReport && currentReport.scores.length > 0 &&
-                <Table striped bordered hover>
+                <Table className='scores' striped bordered hover>
                     <thead>
-                        <th>CWE</th>
-                        <th>Score</th>
-                        <th>Notes</th>
+                        <tr>
+                            <th>CWE</th>
+                            <th>Score</th>
+                            <th>Notes</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        { currentReport.scores.map(s => (
-                            <tr>
+                        { currentReport.scores.map((s, i) => (
+                            <tr key={`score-${i}`}>
                                 <td>{s.cwe}</td>
                                 <td>{s.score}</td>
                                 <td>{s.notes}</td>
