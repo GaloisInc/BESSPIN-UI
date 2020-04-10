@@ -204,6 +204,7 @@ describe('ReportButton', () => {
             id: testConfigId,
             createdAt: 'SOME DATE STRING',
             status: JobStatus.Running,
+            scores: [],
             ...overrides,
         };
     };
