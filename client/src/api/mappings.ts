@@ -7,9 +7,13 @@ import {
 } from '../state/feature-model';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { ITestgenConfigInputRecord } from '../state/testgenConfigInput';
-import { IWorkflow, JobStatus } from '../state/workflow';
+import { ITestScore, IWorkflow, JobStatus } from '../state/workflow';
 
-
+import {
+    IArchExtractRecord,
+    IArchExtractOutputRecord,
+    IArchExtractListElem,
+} from '../state/archExtract';
 
 export interface IConfig {
     uid: string;
@@ -51,6 +55,13 @@ interface IServersideJobStatus {
     label: string;
 }
 
+interface IServersideScore {
+    scoreId: number;
+    cwe: number;
+    score: string;
+    notes: string;
+}
+
 export interface IServersideReport {
     jobId: number;
     createdAt: string;
@@ -58,6 +69,7 @@ export interface IServersideReport {
     label: string;
     workflowId: number;
     status: IServersideJobStatus;
+    scores: IServersideScore[];
     log?: string;
 }
 
@@ -99,6 +111,31 @@ export interface IServersideWorkflow {
     testgenConfigInput?: IServersideTestgenConfigInput;
     vulnerabilityConfigurationInput?: IServersideVulnConfigInput;
     testConfigId?: number;
+}
+
+export interface IServersideArchExtractListElem {
+    archExtractId: number,
+    label: string,
+}
+
+export interface IServersideArchExtractList {
+    archExtractIdList: IServersideArchExtractListElem[]
+}
+
+export interface IServersideArchExtractRecord {
+    archExtractId: number,
+    archExtractInput: string,
+}
+
+interface IServersideArchExtractOutput {
+    archExtractOutputId: number,
+    archExtractOutputFilename: string,
+    archExtractOutputContent?: string,
+    archExtractOutputContentConverted?: string,
+}
+
+export interface IServersideArchExtractOutputList {
+    archExtractOutputList: IServersideArchExtractOutput[]
 }
 
 /* eslint-enable camelcase */
@@ -174,6 +211,15 @@ const mapJobStatusLabel = (label: string): JobStatus => {
     }
 };
 
+const mapTestScores = (scores: IServersideScore[]): ITestScore[] => {
+    return scores.map<ITestScore>(s => ({
+        id: s.scoreId,
+        cwe: s.cwe,
+        score: s.score,
+        notes: s.notes,
+    }));
+};
+
 export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystemConfigInput => {
     return {
         id: config.sysConfigId,
@@ -235,6 +281,7 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
             updatedAt: r.updatedAt,
             label: r.label,
             status: mapJobStatusLabel(r.status.label),
+            scores: mapTestScores(r.scores),
             ...(r.log ? { log: r.log } : null),
         })),
         ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
@@ -271,3 +318,23 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
 export const mapWorkflows = (workflows: IServersideWorkflow[]): IWorkflow[] => {
     return workflows.map(mapWorkflow);
 };
+
+export const mapArchExtractList = (archExtractList: IServersideArchExtractList): IArchExtractListElem[] => {
+    return archExtractList.archExtractIdList;
+}
+
+export const mapArchExtractFetch = (serverResp: IServersideArchExtractRecord): IArchExtractRecord => {
+    return serverResp;
+}
+
+export const mapArchExtractNew = (serverResp: IServersideArchExtractRecord): IArchExtractRecord => {
+    return serverResp;
+}
+
+export const mapArchExtractRun = (archExtractOutputList: IServersideArchExtractOutputList): IArchExtractOutputRecord[] => {
+    return archExtractOutputList.archExtractOutputList;
+}
+
+export const mapArchExtractConvert = (archExtractOutput: IServersideArchExtractOutput): IArchExtractOutputRecord => {
+    return archExtractOutput;
+}

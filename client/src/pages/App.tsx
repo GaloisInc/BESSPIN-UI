@@ -9,6 +9,7 @@ import {
 import { ConnectedDashboard } from './Dashboard';
 import { ConnectedConfigureCpu } from './ConfigureCpu';
 import { ConnectedOverview } from './Overview';
+import { ConnectedArchExtract } from './ArchExtract';
 import { ConnectedSystemConfigInput } from './SystemConfigInput';
 import { ConnectedTestgenConfigInput } from './TestgenConfigInput';
 import { ConnectedVulnerability } from './Vulnerability';
@@ -32,6 +33,8 @@ export const App: React.FC = () => {
                     <Route path='/vuln-configuration/create/:workflowId' component={ ConnectedVulnerability } />
                     <Route path='/vuln-configuration/edit/:workflowId/:testId' component={ ConnectedVulnerability } />
                     <Route path='/report/:workflowId' component={ ConnectedReport } />
+                    <Route path='/arch-extract/' component={ ConnectedArchExtract } />
+                    <Route path='/arch-extract/:archExtractId' component={ ConnectedArchExtract } />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>
             </Router>

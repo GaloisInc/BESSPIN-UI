@@ -6,6 +6,12 @@ import {
 
 import {
     cloneWorkflow as cloneWorkflowApi,
+    listArchExtract as listArchExtractApi,
+    fetchArchExtract as fetchArchExtractApi,
+    newArchExtract as newArchExtractApi,
+    submitArchExtract as submitArchExtractApi,
+    runArchExtract as runArchExtractApi,
+    convertArchExtract as convertArchExtractApi,
     fetchConfigurator,
     fetchConfiguratorByVulnConfig as fetchConfiguratatorByVulnConfigApi,
     fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
@@ -34,7 +40,34 @@ import {
     mapWorkflow,
     mapWorkflows,
     mapSystemConfigInputToServerside,
+    mapArchExtractList,
+    mapArchExtractFetch,
+    mapArchExtractNew,
+    mapArchExtractRun,
+    mapArchExtractConvert,
 } from '../api/mappings';
+
+import {
+    ArchExtractActionTypes,
+    listArchExtract as listArchExtractAction,
+    listArchExtractSuccess,
+    listArchExtractFailure,
+    fetchArchExtract as fetchArchExtractAction,
+    fetchArchExtractSuccess,
+    fetchArchExtractFailure,
+    newArchExtract as newArchExtractAction,
+    newArchExtractSuccess,
+    newArchExtractFailure,
+    submitArchExtract as submitArchExtractAction,
+    submitArchExtractSuccess,
+    submitArchExtractFailure,
+    runArchExtract as runArchExtractAction,
+    runArchExtractSuccess,
+    runArchExtractFailure,
+    convertArchExtract as convertArchExtractAction,
+    convertArchExtractSuccess,
+    convertArchExtractFailure,
+} from './archExtract'
 
 import {
     createTestgenConfigInput as createTestgenConfigInputAction,
@@ -95,6 +128,7 @@ import {
     WorkflowActionTypes,
 } from './workflow';
 
+
 function redirectTo(path: string): void {
     if (window && window.location && window.location.href) {
         window.location.href = path;
@@ -122,6 +156,72 @@ function* fetchSystemConfigInput(action: ReturnType<typeof fetchSystemConfigurat
     } catch (e) {
         console.error(e);
         yield put(fetchSystemConfigInputFailure(e.message));
+    }
+}
+
+
+function* listArchExtract(action: ReturnType<typeof listArchExtractAction>) {
+    try {
+        const archExtractIdList = yield call(listArchExtractApi);
+        const mappedRes = mapArchExtractList(archExtractIdList);
+        yield put(listArchExtractSuccess(mappedRes));
+    } catch (e) {
+        console.error(e);
+        yield put(listArchExtractFailure(e.message));
+    }
+}
+
+function* fetchArchExtract(action: ReturnType<typeof fetchArchExtractAction>) {
+    try {
+        const archExtractRecord = yield call(fetchArchExtractApi, action.data.archExtractId);
+        const mappedRes = mapArchExtractFetch(archExtractRecord);
+        yield put(fetchArchExtractSuccess(mappedRes));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchArchExtractFailure(e.message));
+    }
+}
+
+function* newArchExtract(action: ReturnType<typeof newArchExtractAction>) {
+    try {
+        const archExtractRecord = yield call(newArchExtractApi, action.data.cpuTemplate, action.data.label);
+        const mappedRes = mapArchExtractNew(archExtractRecord);
+        yield put(newArchExtractSuccess(mappedRes));
+    } catch (e) {
+        console.error(e);
+        yield put(newArchExtractFailure(e.message));
+    }
+}
+
+function* submitArchExtract(action: ReturnType<typeof submitArchExtractAction>) {
+    try {
+        yield call(submitArchExtractApi, action.data.archExtractId, action.data.archExtractInput);
+        yield put(submitArchExtractSuccess(action.data.archExtractInput));
+    } catch (e) {
+        console.error(e);
+        yield put(submitArchExtractFailure(e.message));
+    }
+}
+
+function* runArchExtract(action: ReturnType<typeof runArchExtractAction>) {
+    try {
+        const serverResponse = yield call(runArchExtractApi, action.data.archExtractId);
+        const mappedResponse = mapArchExtractRun(serverResponse);
+        yield put(runArchExtractSuccess(mappedResponse));
+    } catch (e) {
+        console.error(e);
+        yield put(runArchExtractFailure(e.message));
+    }
+}
+
+function* convertArchExtract(action: ReturnType<typeof convertArchExtractAction>) {
+    try {
+        const serverResponse = yield call(convertArchExtractApi, action.data.archExtractOutputId);
+        const mappedResponse = mapArchExtractConvert(serverResponse);
+        yield put(convertArchExtractSuccess(mappedResponse));
+    } catch (e) {
+        console.error(e);
+        yield put(convertArchExtractFailure(e.message));
     }
 }
 
@@ -320,6 +420,12 @@ function* updateSystemConfigInput(action: ReturnType<typeof updateSystemConfigIn
 
 // Register all the actions that should trigger our sagas
 export function* rootSaga() {
+    yield takeLatest(ArchExtractActionTypes.LIST_ARCH_EXTRACT, listArchExtract);
+    yield takeLatest(ArchExtractActionTypes.FETCH_ARCH_EXTRACT, fetchArchExtract);
+    yield takeLatest(ArchExtractActionTypes.NEW_ARCH_EXTRACT, newArchExtract);
+    yield takeLatest(ArchExtractActionTypes.SUBMIT_ARCH_EXTRACT, submitArchExtract);
+    yield takeLatest(ArchExtractActionTypes.RUN_ARCH_EXTRACT, runArchExtract);
+    yield takeLatest(ArchExtractActionTypes.CONVERT_ARCH_EXTRACT, convertArchExtract);
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VULNERABILITY_CLASS, submitVulnerabilityClass);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);

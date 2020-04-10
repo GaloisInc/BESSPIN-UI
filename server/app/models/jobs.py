@@ -12,7 +12,7 @@ class JobStatus(db.Model):
     )
 
     def __repr__(self):
-        return '<JobStatus id="{}" label="{}">'.format(self.statusId, self.label)
+        return f'<JobStatus statusId="{self.statusId}" label="{self.label}">'
 
     INITIAL_STATUS = 'running'
     SUCCEEDED_STATUS = 'succeeded'
@@ -67,7 +67,7 @@ class Job(db.Model, MetaDataColumnsMixin):
     }
 
     def __repr__(self):
-        return f'<Job id="{self.jobId}" label="{self.label}" status="{self.status.label}">'
+        return f'<Job jobId="{self.jobId}" label="{self.label}" status="{self.status.label}">'
 
 
 class FeatureExtractionJob(Job):
@@ -94,12 +94,13 @@ class ReportJob(Job):
         db.ForeignKey('workflows.workflowId', ondelete='CASCADE'),
         nullable=False
     )
-
     log = db.Column(
         db.Text(),
         nullable=True,
         comment='log of report',
     )
+
+    scores = db.relationship('CweScore', back_populates='report')
 
     __mapper_args__ = {
         'polymorphic_identity': 'report',

@@ -168,6 +168,7 @@ describe('mappings', () => {
                                     statusId: 1,
                                     label: 'running',
                                 },
+                                scores: [],
                             };
 
                             beforeEach(() => {
@@ -215,6 +216,7 @@ describe('mappings', () => {
                                         updatedAt: TEST_REPORT.updatedAt,
                                         label: TEST_REPORT.label,
                                         status: JobStatus.Running,
+                                        scores: [],
                                     }],
                                 } as IWorkflow);
                             });
@@ -241,6 +243,7 @@ describe('mappings', () => {
                                                 label: JobStatus.Succeeded,
                                             },
                                             log: TEST_REPORT_LOG,
+                                            scores: [{ scoreId: 1, cwe: 123, score: 'V_HIGH', notes: ''}],
                                         }],
                                     };
                                 });
@@ -273,6 +276,9 @@ describe('mappings', () => {
                                             label: TEST_REPORT.label,
                                             status: JobStatus.Succeeded,
                                             log: TEST_REPORT_LOG,
+                                            scores: [
+                                                { id: 1, cwe: 123, score: 'V_HIGH', notes: '' },
+                                            ],
                                         }],
                                     } as IWorkflow);
                                 });

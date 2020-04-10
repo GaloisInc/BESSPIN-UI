@@ -1,26 +1,68 @@
+variables:
+  GITLAB_PERSO_ACCESS_TOKEN_NAME: "VM-Besspin-UI-TokenTil-08-2020"
+  GITLAB_PERSO_ACCESS_TOKEN_PATH: "/home/gitlab-runner/.gitlabcredentials/PERSO_ACCESS_TOKEN.txt"
+
+
+stages:
+  - .pre
+  - build
+  - test
+
 before_script:
   - docker info
+  - BESSPIN_TOOLSUITE_VERSION=$(grep "BESSPIN_TOOLSUITE_VERSION=" .env | sed -E 's/([A-Z_]*)=(.*)/\2/')
+  - BESSPIN_UI_VERSION=$(grep "BESSPIN_UI_VERSION=" .env| sed -E 's/([A-Z_]*)=(.*)/\2/g')
+
+
+docker_system_prune:
+  stage: .pre
+  script:
+    - echo "y" | docker system prune
+  tags:
+    - "besspin-ui-tag"
+  when: manual
+  allow_failure: true
+
+
+images_purge:
+  stage: .pre
+  script:
+    - docker images purge
+  tags:
+    - "besspin-ui-tag"
+  when: manual
+  allow_failure: true
 
 pull_server_image:
+  stage: build
   script:
-    - docker pull artifactory.galois.com:5008/besspin-ui:latest
+    - docker pull artifactory.galois.com:5008/besspin-toolsuite:${BESSPIN_TOOLSUITE_VERSION}
+    - docker build -f Dockerfile-toolsuite-ui
+      --build-arg BESSPIN_TOOLSUITE_VERSION=${BESSPIN_TOOLSUITE_VERSION}
+      --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME
+      --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)"
+      -t besspin-ui:${BESSPIN_UI_VERSION}
+      .
   tags:
     - "besspin-ui-tag"
 
 test_server:
+  stage: test
   script:
-    - docker run besspin-ui:latest sh -c 'cd server && flask test unit'
+    - docker run -t besspin-ui:${BESSPIN_UI_VERSION} sh -c 'cd server && flask test unit'
   tags:
     - "besspin-ui-tag"
 
 build_ui_image:
+  stage: build
   script:
-    - docker build -f client/Dockerfile -t besspin-ui-client .
+    - docker build -f client/Dockerfile -t besspin-ui-client:${BESSPIN_UI_VERSION} .
   tags:
     - "besspin-ui-tag"
 
 test_ui:
+  stage: test
   script:
-    - docker run --env CI=true besspin-ui-client:latest npm test
+    - docker run --env CI=true besspin-ui-client:${BESSPIN_UI_VERSION} npm test
   tags:
     - "besspin-ui-tag"

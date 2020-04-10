@@ -7,6 +7,10 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 
 import {
+    IArchExtractState,
+    reducerArchExtract as archExtract,
+} from './archExtract'
+import {
     reducerSystem as system,
     reducerSystemConfigInput as systemConfigInput,
     IFeatureModelConfigState,
@@ -37,6 +41,7 @@ export interface IState {
     testResults: ITestResultsState,
     ui: IUiState,
     workflow: IWorkflowState,
+    archExtract: IArchExtractState,
 };
 
 const rootReducer = combineReducers({
@@ -46,6 +51,7 @@ const rootReducer = combineReducers({
     testResults,
     ui,
     workflow,
+    archExtract,
 });
 
 const sagaMiddleware = createSagaMiddleware();

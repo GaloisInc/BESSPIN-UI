@@ -53,7 +53,7 @@ def convert_model_to_json(source):
         f.write(source)
 
     if config['default'].USE_TOOLSUITE and config['default'].USE_TOOLSUITE_CONFIGURATOR:
-        cp = run_nix_subprocess('~/toolsuite', quote(CMD_CLAFER.format(filename_cfr)))
+        cp = run_nix_subprocess('~/tool-suite', quote(CMD_CLAFER.format(filename_cfr)))
     else:
         cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
 
@@ -204,7 +204,7 @@ def configuration_algo(cfr_source, feature_selection):
         current_app.logger.debug('CFR+CONSTRAINTS: \n' + text)
 
     cmd = quote(CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json))
-    cp = run_nix_subprocess('~/toolsuite', cmd)
+    cp = run_nix_subprocess('~/tool-suite', cmd)
     current_app.logger.debug('configuration algo stdout: ' + str(cp.stdout))
     current_app.logger.debug('configuration algo stderr: ' + str(cp.stderr))
 

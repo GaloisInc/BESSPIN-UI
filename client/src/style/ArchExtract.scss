@@ -1,0 +1,30 @@
+/* import the necessary Bootstrap files */
+@import '../../node_modules/bootstrap/scss/functions';
+@import '../../node_modules/bootstrap/scss/variables';
+
+.ArchExtract {
+    .load-arch-extract {
+        padding: 1em;
+
+        .form-control-file {
+            padding: 3em;
+            margin-left: 2em;
+            width: 100%;
+        }
+    }
+    .edit-arch-extract-input {
+        padding: 1em;
+    }
+    .convert-arch-extract {
+        padding: 1em;
+
+        .converted-arch-extract {
+            padding: 1em;
+            div:first-child {
+                border-style: solid;
+                border-width: 1px;
+                border-color: black;
+            }
+        }
+    }
+}

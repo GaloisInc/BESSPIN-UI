@@ -1,22 +1,25 @@
+import csv
+import json
 import os
-import stat
 import pwd
+import stat
+import sys
 import tempfile
 
-import json
 from flask import current_app, request
 from flask_restplus import abort, Resource, fields
 
 from config import config
 from app.models import (
     db,
+    CweScore,
     JobStatus,
     ReportJob,
     Workflow,
     VulnerabilityConfigurationInput,
     FeatureModel,
 )
-from app.lib.testgen_utils import (
+from app.lib.toolsuite_utils import (
     get_config_ini_template,
     set_variable,
     set_unique_vuln_class_to_constaints,
@@ -58,6 +61,21 @@ new_report_job = api.model('NewReportJob', {
         description='Id of workflow record'),
 })
 
+cwe_score = api.model('CweScore', {
+    'scoreId': fields.Integer(
+        required=True,
+        description='Id of score record'),
+    'cwe': fields.Integer(
+        required=True,
+        description='Number of given CWE'),
+    'score': fields.String(
+        required=True,
+        description='score value for cwe'),
+    'notes': fields.String(
+        required=True,
+        description='additional notes about given score'),
+})
+
 """
     since the only difference between a "new" report job and an existing one
     is the presence of a system-supplied ID, we inherit the "NewReportJob"
@@ -86,9 +104,120 @@ existing_report_job = api.inherit(
         'log': fields.String(
             required=False,
             description='contents of logging for given report'
-        )
+        ),
+        'scores': fields.List(fields.Nested(cwe_score))
     }
 )
+
+
+def save_test_config(workflow: Workflow, constraints_path: str, testgen_config_path: str):
+    if (workflow.testgenConfigInput):
+        current_app.logger.debug('USE TESTGEN CONFIG INPUT FROM DB')
+
+        testgen_config_text = workflow.testgenConfigInput.configInput
+        testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
+        testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
+        testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
+    else:
+        testgen_config_text = get_config_ini_template()
+
+        current_app.logger.debug('USE TEMPLATE TESTGEN CONFIG INPUT: ' + str(testgen_config_text))
+
+        testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
+        testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
+        testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
+        testgen_config_text = set_variable(testgen_config_text, 'nTests', '2')
+
+    current_app.logger.debug(testgen_config_text)
+
+    with open(testgen_config_path, 'w') as f:
+        f.write(testgen_config_text)
+
+
+def fetch_scores(score_path: str):
+    current_app.logger.debug(f'Looking for scores in "{score_path}"')
+
+    scores = []
+
+    try:
+        with open(score_path) as csvfile:
+            score_reader = csv.reader(csvfile)
+            for row in score_reader:
+                current_app.logger.debug(f'row: {row}')
+                score = {'cwe': int(row[0]), 'score': row[1], 'notes': ', '.join(row[3:])}
+                current_app.logger.debug(f'score: {score}')
+                scores.append(score)
+    except FileNotFoundError:
+        current_app.logger.error(f'Unable to find scores file: "{score_path}"')
+    except:  # noqa E722
+        current_app.logger.error(f'Unexpected error reading {score_path} "{sys.exc_info()[0]}"')
+
+    return scores
+
+
+def generate_test_constraints(work_dir: str, vulnerability: VulnerabilityConfigurationInput, vuln_feature_model: FeatureModel):
+    constraints_path = os.path.join(work_dir, 'constraints_generated.cfr')
+    current_app.logger.debug('Constraints PATH: ' + constraints_path)
+
+    constraints_text = (
+        set_unique_vuln_class_to_constaints(vulnerability.vulnClass) +
+        vuln_feature_model.configs_pp
+    )
+    current_app.logger.debug('CONSTRAINTS_TXT: ' + constraints_text)
+
+    with open(constraints_path, 'w') as f:
+        f.write(constraints_text)
+
+    return constraints_path
+
+
+def generate_test_config(work_dir: str, constraints_path: str, workflow: Workflow):
+    testgen_config_path = os.path.join(work_dir, 'config_generated.ini')
+    current_app.logger.debug('CONFIG PATH: ' + testgen_config_path)
+
+    save_test_config(workflow, constraints_path, testgen_config_path)
+
+    # NOTE: Have to change the permissions and owner from root to besspinuser
+    os.chmod(testgen_config_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+    besspinuser_uid = pwd.getpwnam('besspinuser').pw_uid
+    besspinuser_gid = pwd.getpwnam('besspinuser').pw_gid
+    os.chown(testgen_config_path, besspinuser_uid, besspinuser_gid)
+
+    return testgen_config_path
+
+
+def make_nix_call(workflow: Workflow, vulnerability: VulnerabilityConfigurationInput, vuln_feature_model: FeatureModel):
+    if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
+        WORK_DIR_OBJ = tempfile.TemporaryDirectory()
+        WORK_DIR = WORK_DIR_OBJ.name
+    else:
+        WORK_DIR = tempfile.gettempdir()
+
+    current_app.logger.debug('WORK_DIR: ' + WORK_DIR)
+
+    constraints_path = generate_test_constraints(WORK_DIR, vulnerability, vuln_feature_model)
+    testgen_config_path = generate_test_config(WORK_DIR, constraints_path, workflow)
+
+    try:
+        testgen_path = config['default'].TESTGEN_PATH
+        cp = run_nix_subprocess(testgen_path, f'./testgen.sh {testgen_config_path} ; ./scripts/CI/ciJobDecision.py runOnPush')
+
+        current_app.logger.debug('Testgen stdout: ' + str(cp.stdout.decode('utf8')))
+        current_app.logger.debug('Testgen stderr: ' + str(cp.stderr.decode('utf8')))
+
+        log_output = str(cp.stdout.decode('utf8'))
+
+        current_app.logger.debug(f'testgen_path="{testgen_path}')
+        score_path = os.path.join(testgen_path, 'workDir', config['default'].TESTGEN_VULN_DIR_MAP[vulnerability.vulnClass], 'scores.csv')
+        scores = fetch_scores(score_path)
+    except TypeError as err:
+        current_app.logger.error(f'Unexpected error running nix: {err}')
+    except:  # noqa E722
+        current_app.logger.error(f'Unexpected error running nix: {sys.exc_info()[0]}')
+        log_output = 'Exception occurred runing tests. Please check server logs for more information'
+        scores = []
+
+    return [log_output, scores]
 
 
 @ns.route('')
@@ -123,9 +252,6 @@ class ReportJobListApi(Resource):
 
         vuln_feature_model = FeatureModel.query.filter_by(uid=vulnerability.featureModelUid).first()
         current_app.logger.debug(f'feature model configs_pp: {str(vuln_feature_model.configs_pp)}')
-        """
-            INSERT NIX CALLS HERE...
-        """
 
         new_report_job = ReportJob(
             label=report_job_input['label'],
@@ -136,66 +262,26 @@ class ReportJobListApi(Resource):
         db.session.commit()
 
         if config['default'].USE_TOOLSUITE:
-            if os.environ.get('BESSPIN_CONFIGURATOR_USE_TEMP_DIR'):
-                WORK_DIR_OBJ = tempfile.TemporaryDirectory()
-                WORK_DIR = WORK_DIR_OBJ.name
-            else:
-                WORK_DIR = tempfile.gettempdir()
-
-            current_app.logger.debug('WORK_DIR: ' + WORK_DIR)
-
-            constraints_path = os.path.join(WORK_DIR, 'constraints_generated.cfr')
-            current_app.logger.debug('Constraints PATH: ' + constraints_path)
-
-            testgen_config_path = os.path.join(WORK_DIR, 'config_generated.ini')
-            current_app.logger.debug('CONFIG PATH: ' + testgen_config_path)
-
-            if (workflow.testgenConfigInput):
-                current_app.logger.debug('USE TESTGEN CONFIG INPUT FROM DB')
-                testgen_config_text = workflow.testgenConfigInput.configInput
-                testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
-                testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
-                testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
-            else:
-                testgen_config_text = get_config_ini_template()
-                current_app.logger.debug('USE TEMPLATE TESTGEN CONFIG INPUT: ' + str(testgen_config_text))
-                testgen_config_text = set_variable(testgen_config_text, 'useFeatureModel', 'Yes')
-                testgen_config_text = set_variable(testgen_config_text, 'backend', 'qemu')
-                testgen_config_text = set_variable(testgen_config_text, 'featureModelConstraints', constraints_path)
-                testgen_config_text = set_variable(testgen_config_text, 'nTests', '2')
-
-            current_app.logger.debug(testgen_config_text)
-
-            with open(testgen_config_path, 'w') as f:
-                f.write(testgen_config_text)
-
-            # NOTE: Have to change the permissions and owner from root to besspinuser
-            os.chmod(testgen_config_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-            besspinuser_uid = pwd.getpwnam('besspinuser').pw_uid
-            besspinuser_gid = pwd.getpwnam('besspinuser').pw_gid
-            os.chown(testgen_config_path, besspinuser_uid, besspinuser_gid)
-
-            constraints_text = (
-                set_unique_vuln_class_to_constaints(vulnerability.vulnClass) +
-                vuln_feature_model.configs_pp
-            )
-            current_app.logger.debug('CONSTRAINTS_TXT: ' + constraints_text)
-
-            with open(constraints_path, 'w') as f:
-                f.write(constraints_text)
-
-            cp = run_nix_subprocess('~/testgen', f'./testgen.sh {testgen_config_path} ; ./scripts/CI/ciJobDecision.py runOnPush')
-            current_app.logger.debug('Testgen stdout: ' + str(cp.stdout.decode('utf8')))
-            current_app.logger.debug('Testgen stderr: ' + str(cp.stderr.decode('utf8')))
-            log_output = str(cp.stdout.decode('utf8'))
+            [log_output, scores] = make_nix_call(workflow, vulnerability, vuln_feature_model)
         else:
             log_output = 'TOOLSUITE_NEEDED'
+            scores = []
 
         job_status_succeeded = JobStatus.query.filter_by(label=JobStatus.SUCCEEDED_STATUS).first()
 
         existing_report_job = ReportJob.query.get_or_404(new_report_job.jobId)
         existing_report_job.status = job_status_succeeded
         existing_report_job.log = log_output
+
+        current_app.logger.debug(f'adding scores: {scores} to {existing_report_job}')
+        for score in scores:
+            cs = CweScore(
+                reportJobId=existing_report_job.jobId,
+                cwe=score['cwe'],
+                score=score['score'],
+                notes=score['notes']
+            )
+            db.session.add(cs)
 
         db.session.add(existing_report_job)
         db.session.commit()

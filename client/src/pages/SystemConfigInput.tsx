@@ -161,9 +161,25 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                                 </div>
                             </InputGroup>
                         </Col>
+                    </Form.Group>
+                </Form>
+            </Container>
+            <AceEditor
+                className='config-viewer'
+                mode='json'
+                name='editor-configs'
+                onChange={ (newConfig) => setNixConfig(newConfig) }
+                setOptions={{ useWorker: false }}
+                theme='monokai'
+                value={ nixConfig }
+                width='100%'
+                height='65vh' />
+            <Container className='sysconfig-form'>
+                <Form>
+                    <Form.Group as={Row}>
                         <Col sm={10}>
                             <Button
-                                className='btn btn-light btn-outline-secondary'
+                                className='submit-config btn btn-light btn-outline-secondary'
                                 onClick={ onSubmitHandler }>
                                 <FontAwesomeIcon icon={ faPlus }/>
                                 <span> Upload Config </span>
@@ -172,16 +188,6 @@ export const SystemConfigInput: React.FC<ISystemConfigInputProps> = ({
                     </Form.Group>
                 </Form>
             </Container>
-            <AceEditor
-                className='config-viewer'
-                mode='json'
-                name='editor-configs'
-                readOnly={ true }
-                setOptions={{ useWorker: false }}
-                theme='monokai'
-                value={ nixConfig }
-                width='100%'
-                height='65vh' />
         </Container>
     );
 };

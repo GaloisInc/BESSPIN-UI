@@ -1,4 +1,5 @@
-FROM artifactory.galois.com:5008/besspin-toolsuite:latest
+ARG BESSPIN_TOOLSUITE_VERSION=latest
+FROM artifactory.galois.com:5008/besspin-toolsuite:${BESSPIN_TOOLSUITE_VERSION}
 
 USER besspinuser
 ENV USER besspinuser
