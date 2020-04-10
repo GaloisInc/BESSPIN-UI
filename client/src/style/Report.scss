@@ -12,8 +12,18 @@
     .report-menu {
         padding: 20px;
         background-color: white;
-        .rerun-report {
+        .rerun-report,
+        .show-log-output {
             margin-left: 1em;
         }
+    }
+
+    .table {
+        background-color: white;
+    }
+
+    .no-scores {
+        background-color: white;
+        padding: 20px;
     }
 }
