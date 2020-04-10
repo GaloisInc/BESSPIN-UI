@@ -46,13 +46,13 @@ export const WorkflowButton: React.FC<IWorkflowButtonProps> = ({
   inProgress,
   onClick
 }) => {
-    const renderTooltip: React.FC<IErrorTooltipProps> = (props) => (<Popover {...props} content={true}>{props.label}</Popover>);
+    const renderTooltip = (props: IErrorTooltipProps): React.ReactNode => (<Popover {...props} content={true}>{props.label}</Popover>);
     const variantType = inProgress ? 'warning' :
                           disabled ? 'secondary' :
                            variant ? variant : 'primary';
 
     return tooltipError ?
-      <OverlayTrigger placement='bottom' overlay={(props: IErrorTooltipProps) => renderTooltip({ ...props, label: tooltipError })}>
+      <OverlayTrigger placement='bottom' overlay={(props: any) => renderTooltip({ ...props, label: tooltipError })}>
         <Button className={className || '' } disabled={disabled} variant='danger' href={url}>{label}</Button>
       </OverlayTrigger>
       : (

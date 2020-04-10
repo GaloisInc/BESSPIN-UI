@@ -32,8 +32,16 @@ export interface IVulnerabilityConfig extends IConfig {
     featureModel: string;
 }
 
+export interface ITestScore {
+    id: number;
+    cwe: number;
+    score: string;
+    notes: string;
+}
+
 export interface IReportConfig extends IConfig {
   status: JobStatus;
+  scores: ITestScore[];
   log?: string;
 }
 

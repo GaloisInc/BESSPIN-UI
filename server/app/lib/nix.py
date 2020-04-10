@@ -1,8 +1,9 @@
-import subprocess
+from subprocess import CompletedProcess, run
+from typing import Iterable
 from shlex import quote
 
 
-def make_nix_command(path, cmd):
+def make_nix_command(path: str, cmd: Iterable[str]) -> Iterable[str]:
     """
     :param
     :param cmd: string of the command to run
@@ -13,17 +14,17 @@ def make_nix_command(path, cmd):
     return [nix_cmd]
 
 
-def run_nix_subprocess(path, cmd):
+def run_nix_subprocess(path: str, cmd: Iterable[str]) -> CompletedProcess:
     """
     :param path: string of path to run command in
     :param cmd: string of the command to run in Nix
 
-    :return: subprocess handle
+    :return: CompletedProcess object
     """
 
     nix_cmd = make_nix_command(path, cmd)
 
-    return subprocess.run(
+    return run(
         nix_cmd,
         capture_output=True,
         shell=True

@@ -6,9 +6,12 @@ import {
     Button,
     ButtonToolbar,
     Card,
+    Col,
     Container,
     Dropdown,
     DropdownButton,
+    Row,
+    Table,
 } from 'react-bootstrap';
 
 import AceEditor from 'react-ace';
@@ -28,6 +31,7 @@ import {
     fetchWorkflow,
     getWorkflowById,
     IReportConfig,
+    ITestScore,
     JobStatus,
     triggerReport,
 } from '../state/workflow';
@@ -71,6 +75,7 @@ export const Report: React.FC<IReportProps> = ({
     const aceRef = useRef<AceEditor>(null);
 
     const [currentReport, setCurrentReport] = useState(reports[0]);
+    const [isLogShown, setIsLogShown] = useState(false);
 
     useEffect(() => {
         const editor  = aceRef && aceRef.current;
@@ -120,10 +125,19 @@ export const Report: React.FC<IReportProps> = ({
                                 onClick={(e: any) => {
                                     e.preventDefault();
                                     setCurrentReport(reports[i])
-                                }}>{r.label}</Dropdown.Item>
+                                }}>{r.label} (run {r.createdAt})</Dropdown.Item>
                         ))
                     }
                 </DropdownButton>
+                <Button
+                    className='show-log-output'
+                    variant='outline-secondary'
+                    key={`show-log-${currentReport ? currentReport.id : 0}`}
+                    disabled={!currentReport || currentReport.status === JobStatus.Running}
+                    onClick={(e: any) => {
+                        e.preventDefault();
+                        setIsLogShown(!isLogShown)
+                }}>{ isLogShown ? 'Hide' : 'Show '} Log Output</Button>
                 <Button
                     className='rerun-report'
                     variant='outline-success'
@@ -134,18 +148,41 @@ export const Report: React.FC<IReportProps> = ({
                         if (workflowId) triggerReport(workflowId, workflowLabel);
                 }}>Run again</Button>
             </ButtonToolbar>
-            <AceEditor
-                ref={aceRef}
-                className='report-viewer'
-                mode='plain_text'
-                cursorStart={10}
-                name='report-log'
-                readOnly={ true }
-                setOptions={{ useWorker: false }}
-                theme='monokai'
-                value={ currentReport && currentReport.log }
-                width='100%'
-                height='85vh' />
+            { currentReport && currentReport.scores.length > 0 &&
+                <Table className='scores' striped bordered hover>
+                    <thead>
+                        <tr>
+                            <th>CWE</th>
+                            <th>Score</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { currentReport.scores.map((s, i) => (
+                            <tr key={`score-${i}`}>
+                                <td>{s.cwe}</td>
+                                <td>{s.score}</td>
+                                <td>{s.notes}</td>
+                            </tr>
+                        )) }
+                    </tbody>
+                </Table>
+            }
+            { currentReport && currentReport.scores.length === 0 && <Container className='no-scores'><Row><Col className='text-center'>No Scores Found</Col></Row></Container> }
+            { isLogShown && 
+                <AceEditor
+                    ref={aceRef}
+                    className='report-viewer'
+                    mode='plain_text'
+                    cursorStart={10}
+                    name='report-log'
+                    readOnly={ true }
+                    setOptions={{ useWorker: false }}
+                    theme='monokai'
+                    value={ currentReport && currentReport.log }
+                    width='100%'
+                    height='85vh' />
+            }
             <p />
             <h1>PPAS results</h1>
             <h2>CPU_Power</h2>

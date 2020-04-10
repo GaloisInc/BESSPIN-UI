@@ -195,7 +195,7 @@ function* newArchExtract(action: ReturnType<typeof newArchExtractAction>) {
 
 function* submitArchExtract(action: ReturnType<typeof submitArchExtractAction>) {
     try {
-        const archExtractRecord = yield call(submitArchExtractApi, action.data.archExtractId, action.data.archExtractInput);
+        yield call(submitArchExtractApi, action.data.archExtractId, action.data.archExtractInput);
         yield put(submitArchExtractSuccess(action.data.archExtractInput));
     } catch (e) {
         console.error(e);

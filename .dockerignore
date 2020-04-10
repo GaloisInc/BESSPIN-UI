@@ -3,3 +3,4 @@
 Dockerfile-*
 docker-compose*.yaml
 scripts/publish-docker-images.sh
+client/node_modules

@@ -7,7 +7,7 @@ import {
 } from '../state/feature-model';
 import { IFeatureMap, IFeatureModel } from '../components/graph-helper';
 import { ITestgenConfigInputRecord } from '../state/testgenConfigInput';
-import { IWorkflow, JobStatus } from '../state/workflow';
+import { ITestScore, IWorkflow, JobStatus } from '../state/workflow';
 
 import {
     IArchExtractRecord,
@@ -55,6 +55,13 @@ interface IServersideJobStatus {
     label: string;
 }
 
+interface IServersideScore {
+    scoreId: number;
+    cwe: number;
+    score: string;
+    notes: string;
+}
+
 export interface IServersideReport {
     jobId: number;
     createdAt: string;
@@ -62,6 +69,7 @@ export interface IServersideReport {
     label: string;
     workflowId: number;
     status: IServersideJobStatus;
+    scores: IServersideScore[];
     log?: string;
 }
 
@@ -203,6 +211,15 @@ const mapJobStatusLabel = (label: string): JobStatus => {
     }
 };
 
+const mapTestScores = (scores: IServersideScore[]): ITestScore[] => {
+    return scores.map<ITestScore>(s => ({
+        id: s.scoreId,
+        cwe: s.cwe,
+        score: s.score,
+        notes: s.notes,
+    }));
+};
+
 export const mapSystemConfigInput = (config: IServersideSysConfigInput): ISystemConfigInput => {
     return {
         id: config.sysConfigId,
@@ -264,6 +281,7 @@ export const mapWorkflow = (workflow: IServersideWorkflow): IWorkflow => {
             updatedAt: r.updatedAt,
             label: r.label,
             status: mapJobStatusLabel(r.status.label),
+            scores: mapTestScores(r.scores),
             ...(r.log ? { log: r.log } : null),
         })),
         ...(workflow.systemConfigurationInput && workflow.systemConfigurationInput.sysConfigId ? {
