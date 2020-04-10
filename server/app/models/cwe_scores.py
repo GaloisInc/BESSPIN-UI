@@ -29,4 +29,4 @@ class CweScore(db.Model):
     report = db.relationship('ReportJob', back_populates='scores')
 
     def __repr__(self):
-        return f'<CweScore scoreId="{self.scoreId}" reportJobId="{self.reportJobI}" cwe="{self.cwe}" score="{self.score}" notes="{self.notes}">'  # noqa E501
+        return f'<CweScore scoreId="{self.scoreId}" reportJobId="{self.reportJobId}" cwe="{self.cwe}" score="{self.score}" notes="{self.notes}">'  # noqa E501
