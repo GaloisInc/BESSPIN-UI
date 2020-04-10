@@ -61,6 +61,21 @@ new_report_job = api.model('NewReportJob', {
         description='Id of workflow record'),
 })
 
+cwe_score = api.model('CweScore', {
+    'scoreId': fields.Integer(
+        required=True,
+        description='Id of score record'),
+    'cwe': fields.Integer(
+        required=True,
+        description='Number of given CWE'),
+    'score': fields.String(
+        required=True,
+        description='score value for cwe'),
+    'notes': fields.String(
+        required=True,
+        description='additional notes about given score'),
+})
+
 """
     since the only difference between a "new" report job and an existing one
     is the presence of a system-supplied ID, we inherit the "NewReportJob"
@@ -89,7 +104,8 @@ existing_report_job = api.inherit(
         'log': fields.String(
             required=False,
             description='contents of logging for given report'
-        )
+        ),
+        'scores': fields.List(fields.Nested(cwe_score))
     }
 )
 
@@ -127,7 +143,9 @@ def fetch_scores(score_path: str):
         with open(score_path) as csvfile:
             score_reader = csv.reader(csvfile)
             for row in score_reader:
-                score = {'cwe': row[0], 'score': row[1], 'notes': row[3:]}
+                current_app.logger.debug(f'row: {row}')
+                score = {'cwe': int(row[0]), 'score': row[1], 'notes': ', '.join(row[3:])}
+                current_app.logger.debug(f'score: {score}')
                 scores.append(score)
     except FileNotFoundError:
         current_app.logger.error(f'Unable to find scores file: "{score_path}"')
@@ -249,20 +267,19 @@ class ReportJobListApi(Resource):
             log_output = 'TOOLSUITE_NEEDED'
             scores = []
 
-        current_app.logger.debug(f'scores: {scores}')
-
         job_status_succeeded = JobStatus.query.filter_by(label=JobStatus.SUCCEEDED_STATUS).first()
 
         existing_report_job = ReportJob.query.get_or_404(new_report_job.jobId)
         existing_report_job.status = job_status_succeeded
         existing_report_job.log = log_output
 
+        current_app.logger.debug(f'adding scores: {scores} to {existing_report_job}')
         for score in scores:
             cs = CweScore(
                 reportJobId=existing_report_job.jobId,
-                cwe=score.cwe,
-                score=score.score,
-                notes=score.notes
+                cwe=score['cwe'],
+                score=score['score'],
+                notes=score['notes']
             )
             db.session.add(cs)
 
