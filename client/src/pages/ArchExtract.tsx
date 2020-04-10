@@ -121,15 +121,15 @@ export const ArchExtract: React.FC<IProps> = ({
                 { isLoading && <LoadingIndicator /> }
                 { errors && errors.length > 0 && <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }</Alert> }
                 <Form>
-                    <Form.Group controlId="SelectListOfArchExtract">
+                    <Form.Group controlId='SelectListOfArchExtract'>
                         <Form.Label></Form.Label>
-                        <Form.Control as="select" onChange={ (event:any) => setLoadExisting(event.target.value) }>
+                        <Form.Control as='select' onChange={ (event:any) => setLoadExisting(event.target.value) }>
                             { ((archExtractIdList === undefined) ? [] : archExtractIdList).map((value, index, array) => <option value={value.archExtractId}> {value.archExtractId} - {value.label} </option>) }
                         </Form.Control>
                     </Form.Group>
                 </Form>
                 <ButtonToolbar>
-                <ButtonGroup className="mr-2" aria-label="First group">
+                <ButtonGroup className='mr-2' aria-label='First group'>
                 <Button
                     onClick={() => fetchArchExtract(loadExisting) }
                     disabled={(loadExisting === -42)? true : false}
@@ -141,14 +141,14 @@ export const ArchExtract: React.FC<IProps> = ({
                 </ButtonToolbar>
                 <Form>
                     <Form.Row>
-                        <Form.Group as={Col} controlId="formGridLabel">
+                        <Form.Group as={Col} controlId='formGridLabel'>
                         <Form.Label>Label</Form.Label>
                         <Form.Control onChange={(event:any) => setNewLabel(event.target.value)}/>
                         </Form.Group>
 
-                        <Form.Group as={Col} controlId="formGridTemplate">
+                        <Form.Group as={Col} controlId='formGridTemplate'>
                         <Form.Label>CPU Template</Form.Label>
-                        <Form.Control as="select" onClick={ (event:any) => setCpuTemplate(event.target.value)}>
+                        <Form.Control as='select' onClick={ (event:any) => setCpuTemplate(event.target.value)}>
                             <option value='piccolo'>piccolo</option>
                             <option value='rocket-p1'>rocket-p1</option>
                             <option value='piccolo-low-level'>piccolo-low-level</option>
@@ -177,11 +177,9 @@ export const ArchExtract: React.FC<IProps> = ({
                 </ButtonGroup>
 
                 <AceEditor
-                    mode="python"
+                    mode='python'
                     name='editor-arch-extract'
-                    //setOptions={{ useWorker: false }}
                     theme='monokai'
-                    //value={ configInput? configInput : '' }
                     onChange={ (newValue) => setEditorText(newValue) }
                     value={ editorText }
                     width='100%'
@@ -197,12 +195,12 @@ export const ArchExtract: React.FC<IProps> = ({
 
             <Container className='convert-arch-extract'>
                 <Form>
-                    <Form.Group controlId="SelectArchExtractOuput">
+                    <Form.Group controlId='SelectArchExtractOuput'>
                         <Form.Label>Select dot file to convert to PNG: </Form.Label>
-                        <Form.Control as="select" onClick={ (event:any) => setSelectedDotFile(event.target.value) }>
+                        <Form.Control as='select' onClick={ (event:any) => setSelectedDotFile(event.target.value) }>
                             { (archExtractRecord.archExtractOutputList ?
                                 archExtractRecord.archExtractOutputList: []
-                                ).map((value, index, array) => <option value={value.archExtractOutputId}> {value.archExtractOutputFilename} </option>) }
+                                ).map((value, _index, _array) => <option value={value.archExtractOutputId}> {value.archExtractOutputFilename} </option>) }
                         </Form.Control>
                     </Form.Group>
                 </Form>
@@ -218,7 +216,7 @@ export const ArchExtract: React.FC<IProps> = ({
                         <TransformWrapper>
                         <TransformComponent>
                         { (archExtractOutputRecord !== undefined) ?
-                            <img id="ItemPreview" src={png_dyn}></img> :
+                            <img id='ItemPreview' alt='Preview Item' src={png_dyn}></img> :
                             <div />
                         }
                         </TransformComponent>
