@@ -5,25 +5,88 @@
 *Disclaimer: this UI is under development is considered a
  proof-of-concept towards a prototype.*
 
-The UI is made of several main components depicted in the screenshots
+The UI provides a single-user, workflow-based interface with which to
+interact with the BESSPIN ToolSuite and Testgen systems.
+
+It is comprised main components depicted in the screenshots
 above. The components listed below:
 
-- Overview: tables summarizing the CPUs configured, the tests
-  configured, the build processes and the results of testing CPUs.
+- Overview: Table view of all existing workflows, with buttons to
+  intiate actions within that workflow.
+
+- System Configuration: Allows a user to upload a Nix system configuration
+  file as well as edit uploaded files within the browser.
+
+- Testgen Configuration: Allows a user to edit a configuration file
+  that customizes the behavior of the testgen system.
+
+- Vulnerability Configuration: Allows a user to select a given vulnerbility
+  selecting specific CWEs to run.
+
+- Report Viewer: Provides user with a status of the run of a given set of
+  tests, displaying a table of successful test scores as well as the ability
+  to view the logfile for a given run.
 
 - CPU Configurator: UI to configure and explore the configuration of
   CPUs.
 
-- Tests Configurator: UI to configure and explore the configuration of
-  Tests.
+## Overview
 
-- Pipeline: views and controls of build processes for CPUs, Tests
-  and running tests against CPUs.
+The main page for the UI is the overview page which is where management of
+workflows happens. At it's core, this page is simply a table listing all
+the workflows that have been created, (sorted by creation timestamp with
+the most recent at the top).
 
-- Dashboard: views, visualizations and controls related to the CPUs
-  tests and results.
+### Workflow Management
 
-These components are accessible from the sidebar of the UI.
+The basic workflow flow available from this page is as follows:
+
+#### Create Workflow
+
+By clicking on the "Create Workflow" button on the overview page, the user is
+shown a modal input for defining a user-friendly label to identify the workflow.
+
+Once this is done, a new row is displayed on the overview page which lists the
+new workflow label, a date timestamp for the creation of the workflow and a set
+of buttons for the actions that need to be taken to configure the workflow for
+running a set of tests.
+
+#### Configure System
+
+By clicking on the "System" button a user is taken to the "System Configuration"
+screen which allows them to select a Nix configuration file from their local
+filesystem to upload. Once added, it can be edited in the UI to make changes.
+
+#### Configure Testgen
+
+By clicking the "Testgen" button for the workflow a user is taken to the "Testgen
+Configuration" screen which allows them to initialize the configuration from a 
+template stored on the server. They can then make edits to that configuration within
+the UI.
+
+#### Configure Vulnerability
+
+By clicking the "Vuln" button, the user is taken to the "Vulnerability Configuration"
+screen which allows them to select a vulnerability class. They are then shown a graph
+of the feature model for that vulnerability class which they can configure by clicking
+on nodes in the feature model graph to enable/disable features/CWEs to be tested. There
+is a "validate" button to allow them to validate that they are configuring the feature
+model correctly.
+
+#### Build/Run
+
+Once all the previous steps are complete, the user can click the "Build/Run" button
+which triggers a Nix build of the configured system and a run of the configured tests.
+While that is running the button's label will change to "Running" and will then change
+to "View" when the tests complete.
+
+Once complete, the view on the screen will display the status of "succeeded" or "failed"
+depending upon whether there were errors encountered in building/running. If the run
+succeeded, there will be a table of the resulting scores.
+
+There is also a button to view the underlying log file.
+
+Finally, there are placeholders for PPA metrics which are a feature still in development.
 
 ## Configurator UI
 
@@ -57,7 +120,7 @@ features of the configurator are:
    system and to change the set of features selected, click on
    "Overview" in the sidebar and select the model to configure.
 
-### Note on UI
+## Note on UI
 
 The UI has it's own [README.md](./client/README.md) that details it's structure
 
@@ -67,35 +130,7 @@ All api routes are prefixed with `/api`. You can access an interactive Swagger U
 
 ### Running locally
 
-The best way to run this application locally is to run the following commant:
-
-```
-$ TOKEN_NAME='<<NAME OF YOUR GITLAB ACCESS TOKEN>>' PRIVATE_TOKEN='<<VALUE OF YOUR TOKEN>>' docker-compose up
-```
-
-This will run the API/UI server locally on your machine using docker and docker-compose. It should show log output from both applications.
-
-#### Stopping the server
-
-You should be able to simply hit `Ctrl-C` to quit the servers. To fully shut down the docker containers, issue the command:
-
-```
-$ docker-compose down
-```
-
-#### Customizing the clafer version used
-
-It is also possible to indicate a specific version of Clafer to use, by
-setting the environment variable `BESSPIN_CLAFER`:
-
-```
-BESSPIN_CLAFER=<path-to-clafer> TOKEN_NAME='<<GITLAB ACCESS TOKEN NAME>> ' PRIVATE_TOKEN='<<GITLAB TOKEN>>' docker-compose up
-```
-
-The UI is accessible at the url:
-```
-http://localhost:3784/
-```
+The best way to run this application locally is to build the docker images and use them.
 
 ### Build/Publish Docker image
 
@@ -111,16 +146,20 @@ requires the following variables to be defined:
 - `BINCACHE_LOGIN` for the artifactory username
 - `BINCACHE_APIKEY` the api token to use
 
+In addition to this, there is a `.env` file which specifies version information to use
+when publishing images. If you do not use this, the images will be tagged with `latest`
+(this is the method typically used for building images for local development).
+
 **WARNING** this script takes a long time to run (~20min to build the images
 and ~2hr to push them to artifactory). You may want to consider disabling any
 settings that automatically put your machine to sleep while this is running.
 
 ### Running in Docker
 
-There is an included `docker-compose` for spinning up a containerized instance of the server and UI:
+There is an included `docker-compose-toolsuite.yaml` for spinning up a containerized instance of the server and UI:
 
 ```
-$ docker-compose up
+$ docker-compose -f docker-compose-toolsuite.yaml up
 ```
 
 #### ENV vars
@@ -132,56 +171,16 @@ how the server runs:
  * HOST: the host to run flask on (defaults to `0.0.0.0` so you can access the server within docker)
  * DEBUG: flag to run flask in debug mode (defaults to `True`)
 
-### Build Docker with toolsuite
-
-The build of the toolsuite follows the one of the basic Docker image and
-it starts by creating a toolsuite image given 4 environment variables:
-
-  * `BINCACHE_LOGIN`: artifactory login
-  * `BINCACHE_APIKEY`: artifactory apikey
-  * `TOKEN_NAME`: gitlab token name
-  * `PRIVATE_TOKEN`: gitlab private token associated with the token name
-
-Provide these parameters as environment variables into the following
-`docker build` command.
-(NOTE: this build can take between 30 minutes to 2 hours depending on state of binary cache)
-```
-docker build -f Dockerfile-toolsuite \
-  --build-arg BINCACHE_LOGIN=$ARTIFACTORY_LOGIN \
-  --build-arg BINCACHE_APIKEY="$(cat ~/.ssh/artifactory_api_key)" \
-  --build-arg TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN \
-  --build-arg PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" \
-  -t besspin-toolsuite-image .
-```
-
-This will produce a `besspin-toolsuite-image` that will be used as a base
-image for building the server image. Use the file`docker-compose-toolsuite.yaml`
-to build the client and server images:
-```
-TOKEN_NAME=$GITLAB_PERSO_ACCESS_TOKEN_NAME \
-PRIVATE_TOKEN="$(cat $GITLAB_PERSO_ACCESS_TOKEN_PATH)" \
-docker-compose -f docker-compose-toolsuite.yaml build
-```
-
-To start and stop the app do the usual docker-compose commands:
-```
-docker-compose -f docker-compose-toolsuite.yaml up
-docker-compose -f docker-compose-toolsuite.yaml dowm
-```
-
 ## Architecture
 
 Server side:
 
 - Database
-- Configurator
 - REST API
 
 Client Side:
-- Overview UI
-- Configurator UI for CPUs and Tests
-- Pipeline UI
-- Dashboard UI
+
+- React/Redux UI
 
 ![alt text](docs/BESSPIN-UI-architecture.png "BESSPIN UI Architecture")
 
@@ -193,13 +192,29 @@ The API backing the BESSPIN UI uses the following data model:
 
 #### Key Concepts
 
-The data model separates out the notion of "inputs" and "jobs". The inputs are settings used to configure a job which is then run within nix. All of the top-level tables support additional meta-data, specifically user-generated labels, and datetime stamps to track when it was created as well as updated.
+##### Workflows
 
-##### Inputs
+The basic unit for the UI is the `workflow` which is used to represent the steps needed to run a set of
+tests against a given system configuration. A workflow simply consists of a `label` to allow for easy
+identification by users, along with created and updated timestamps.
 
-Inputs are expected primarily to be pointers to versioned resources. More specifically, they are expected to be URLs to GitLab resources. For this, we have a notion of a "versioned resource" which consists of a URL and a version identifier.
+##### System Configuration
 
-In some cases (particularly vulnerability and system configurations), there is an expectation of text-based information (a LANDO spec in the case of vulnerabilities and a nix-config in the case of system configurations).
+All tests need to run against a given system configuration. This consists of a `Nix` configuration file
+that the user can upload, then edit within the UI. It too has a `label` as a user convenience.
+
+##### Testgen Configuration
+
+Testgen needs to be configured to control its runtime behavior which is reflected in the `.ini`
+file used for running tests. There is a template configuration file that is used to initialize
+the configuration and then the user is able to edit that configuration via the UI. Again, this
+model supports a `label` property.
+
+##### Vulnerability Configuration
+
+The actual tests run against the configured system are determined by the vulnerability feature
+model created for the test-run. Once a user selects the vulnerability class to test, they are
+given a graph of the feature model and visually edit the features/CWEs that should be tested
 
 ##### Jobs
 
@@ -207,9 +222,8 @@ Once inputs are gathered, they are expected to be used to run a job within nix t
 
  - some status (e.g. "running", "succeeded", "failed")
  - a pointer to the inputs record configuring the job
- - a path to a nix derivation file describing the top-level inputs/outputs for the nix build the job will invoke
  - a path to a log of the nix command output
- - a path to the nix store directory containing the actual generated artifact(s) from the job
+ - a list of test score results (CWE, score, notes)
 
 Given that there are jobs for most of the top-level inputs, there is a "jobs" super-type table and sub-types for each of the specific inputs. It is expected that each unique combination of inputs will correspond to exactly one successful job run, but that is a requirement that the API layer must enforce.
 
