@@ -91,7 +91,6 @@ feat_extract_record = api.model('FeatExtract', {
     ),
 })
 
-
 feat_extract_input = api.model('FeatExtractInput', {
     'featExtractInput': fields.String(
         reuired=True,
