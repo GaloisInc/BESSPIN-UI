@@ -14,7 +14,7 @@ import {
 } from 'react-bootstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUndo, faRedo, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faUndo, faRedo, faPlus, faDownload } from '@fortawesome/free-solid-svg-icons';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/mode-json';
@@ -138,7 +138,7 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
         <Container className='ConfigureCpu'>
 
             <Header />
-            <h1>Configure CPU</h1>
+            <h1>Configure</h1>
             { isLoading && <LoadingIndicator /> }
             { errors && errors.length > 0 && <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }</Alert> }
             <Form inline={ true }>
@@ -192,6 +192,8 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                     <FontAwesomeIcon icon={faRedo} />
                 </Button>
             </ButtonGroup>
+            </Col>
+            <Col xs={6} md={4}>
             <Button
                     className="btn btn-primary"
                     onClick={ () => { submitValidateConfiguration(system.uid, system.configs) } }
@@ -199,14 +201,15 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                     Validate
             </Button>
             </Col>
-            <Col md={{ span: 4, offset: 5 }}>
+            <Col xs={6} md={4}>
             <Button
                 className="btn btn-dark"
                 onClick={() =>
                     downloadTxtFile(JSON.stringify(system.configuredConftree) , system.filename.split('.')[0] + '-configured.fm.json')}
                 disabled = {(system.filename) ? false : true}
             >
-                Download .fm.json
+                <FontAwesomeIcon icon={faDownload} />
+                 Download Model
             </Button>
             </Col>
             </Row>
