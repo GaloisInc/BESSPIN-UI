@@ -18,6 +18,7 @@ export interface IFeatureModelRecord {
     configsPP?: string;
     configs: ISelectionType[];
     conftree: IFeatureModel;
+    configuredConftree: IFeatureModel;
     createdAt: string;
     featureCount: number;
     filename: string;
@@ -61,6 +62,7 @@ export const DEFAULT_CONFIG_SYSTEM_STATE: IFeatureModelConfigState = {
     featureModelRecord: {
         configs: [],
         conftree: DEFAULT_FEATURE_MODEL,
+        configuredConftree: DEFAULT_FEATURE_MODEL,
         createdAt: '',
         featureCount: -1,
         filename: '',
@@ -422,6 +424,7 @@ export const reducerSystem = (state = DEFAULT_CONFIG_SYSTEM_STATE, action: ISyst
                     ...state.featureModelRecord,
                     configs: action.data.validateResult.validatedFeatures,
                     configsPP: action.data.validateResult.serverConstraints,
+                    configuredConftree: action.data.validateResult.configuredFeatureModel,
                 }
             };
         case SystemActionTypes.SELECT_FEATURE: {

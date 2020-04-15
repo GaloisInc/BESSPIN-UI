@@ -57,6 +57,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case WorkflowActionTypes.FETCH_WORKFLOW:
         case WorkflowActionTypes.FETCH_WORKFLOWS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT:
+        case SystemActionTypes.SUBMIT_SYSTEM:
             return {
                 ...state,
                 isLoading: true,
@@ -88,6 +89,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case WorkflowActionTypes.TRIGGER_REPORT_SUCCESS:
         case WorkflowActionTypes.CLONE_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.UPDATE_WORKFLOW_SUCCESS:
+        case SystemActionTypes.SUBMIT_SYSTEM_SUCCESS:
         case SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_SUCCESS:
         case SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_SUCCESS:
         case SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_SUCCESS:
@@ -113,6 +115,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case WorkflowActionTypes.TRIGGER_REPORT_FAILURE:
         case WorkflowActionTypes.CLONE_WORKFLOW_FAILURE:
         case WorkflowActionTypes.UPDATE_WORKFLOW_FAILURE:
+        case SystemActionTypes.SUBMIT_SYSTEM_FAILURE:
         case SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_FAILURE:
         case SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_FAILURE:
         case SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_FAILURE:

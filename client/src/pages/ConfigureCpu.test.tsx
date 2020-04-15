@@ -24,6 +24,12 @@ describe('ConfigureCpu', () => {
               roots: [],
               version: { base: 1 },
             },
+            configuredConftree: {
+                constraints: [],
+                features: {},
+                roots: [],
+                version: { base: 1 },
+            },
             selectionUndos: [],
         };
         const submitValidateConfigurationSpy = jest.fn();
@@ -43,6 +49,8 @@ describe('ConfigureCpu', () => {
                     selectFeatureRedo={ selectFeatureRedoSpy }
                     fetchSystem={ fetchSystemSpy }
                     dataRequested={ true }
+                    isLoading = { false }
+                    errors = { [] }
                     systemUid={ testSystem.uid }
                     system={ testSystem } />
             </MemoryRouter>

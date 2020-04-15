@@ -119,7 +119,7 @@ def selected_features_to_constraints(feats, even_not_validated=False):
 
 def combine_featmodel_cfgs(model, cfgs):
     """
-    Combine a feature model with configurations
+    Combine a feature model in fm.json format with configurations
     :param model:
     :param cfgs:
 

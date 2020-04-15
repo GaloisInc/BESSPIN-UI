@@ -46,6 +46,7 @@ export interface IConfigurator {
 export interface IUploadResponse {
     uid: string,
     tree: IFeatureModel,
+    filename: string,
     configured_feature_model: IFeatureMap,
     source: string,
 }
@@ -190,6 +191,7 @@ export const mapConfiguratorToSystem = (configurator: IConfigurator): IFeatureMo
         featureCount: configurator.nb_features_selected,
         filename: configurator.filename,
         conftree: configurator.conftree,
+        configuredConftree: configurator.conftree,
         configsPP: configurator.configs_pp,
         source: configurator.source,
         configs:
@@ -209,8 +211,9 @@ export const mapUploadConfiguratorToSystem = (configurator: IUploadResponse): IF
         createdAt: "",
         lastUpdate: "",
         featureCount: -1,
-        filename: "",
+        filename: configurator.filename,
         conftree: configurator.tree,
+        configuredConftree: configurator.tree,
         configs: [],
         selectionUndos: [],
     };

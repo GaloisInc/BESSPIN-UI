@@ -120,8 +120,6 @@ class FeatExtractFetchApi(Resource):
         current_app.logger.debug(f'fetching an feat extract entry')
         existing_feat_extract = FeatExtract.query.get_or_404(int(featExtractId))
 
-        current_app.logger.debug(f'SDFSd: {str(existing_feat_extract.featExtractOutputFilename)}')
-        current_app.logger.debug(f'SDFSd: {str(existing_feat_extract.featExtractOutputContent)}')
         return existing_feat_extract
 
 
