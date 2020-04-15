@@ -15,6 +15,13 @@ import {
     IArchExtractListElem,
 } from '../state/archExtract';
 
+
+import {
+    IFeatExtractRecord,
+    IFeatExtractListElem,
+} from '../state/featExtract';
+
+
 export interface IConfig {
     uid: string;
     mode: string;
@@ -137,6 +144,27 @@ interface IServersideArchExtractOutput {
 export interface IServersideArchExtractOutputList {
     archExtractOutputList: IServersideArchExtractOutput[]
 }
+
+
+export interface IServersideFeatExtractListElem {
+    featExtractId: number,
+    label: string,
+}
+
+export interface IServersideFeatExtractList {
+    featExtractIdList: IServersideFeatExtractListElem[]
+}
+
+export interface IServersideFeatExtractRecord {
+    featExtractId: number,
+    featExtractInput: string,
+    featExtractOutputFilename?: string,
+    featExtractOutputContent?: string,
+    featExtractOutputFilenameSimplified?: string,
+    featExtractOutputContentSimplified?: string,
+}
+
+
 
 /* eslint-enable camelcase */
 
@@ -319,6 +347,8 @@ export const mapWorkflows = (workflows: IServersideWorkflow[]): IWorkflow[] => {
     return workflows.map(mapWorkflow);
 };
 
+
+// mappings for archi-extract
 export const mapArchExtractList = (archExtractList: IServersideArchExtractList): IArchExtractListElem[] => {
     return archExtractList.archExtractIdList;
 }
@@ -337,4 +367,26 @@ export const mapArchExtractRun = (archExtractOutputList: IServersideArchExtractO
 
 export const mapArchExtractConvert = (archExtractOutput: IServersideArchExtractOutput): IArchExtractOutputRecord => {
     return archExtractOutput;
+}
+
+
+// mappings for feat-extract
+export const mapFeatExtractList = (featExtractList: IServersideFeatExtractList): IFeatExtractListElem[] => {
+    return featExtractList.featExtractIdList;
+}
+
+export const mapFeatExtractFetch = (serverResp: IServersideFeatExtractRecord): IFeatExtractRecord => {
+    return serverResp;
+}
+
+export const mapFeatExtractNew = (serverResp: IServersideFeatExtractRecord): IFeatExtractRecord => {
+    return serverResp;
+}
+
+export const mapFeatExtractRun = (featExtractRecord: IServersideFeatExtractRecord): IFeatExtractRecord => {
+    return featExtractRecord;
+}
+
+export const mapFeatExtractSimplify = (featExtractRecord: IServersideFeatExtractRecord): IFeatExtractRecord => {
+    return featExtractRecord;
 }

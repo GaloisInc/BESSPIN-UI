@@ -12,6 +12,12 @@ import {
     submitArchExtract as submitArchExtractApi,
     runArchExtract as runArchExtractApi,
     convertArchExtract as convertArchExtractApi,
+    listFeatExtract as listFeatExtractApi,
+    fetchFeatExtract as fetchFeatExtractApi,
+    newFeatExtract as newFeatExtractApi,
+    submitFeatExtract as submitFeatExtractApi,
+    runFeatExtract as runFeatExtractApi,
+    simplifyFeatExtract as simplifyFeatExtractApi,
     fetchConfigurator,
     fetchConfiguratorByVulnConfig as fetchConfiguratatorByVulnConfigApi,
     fetchSystemConfigurationInput as fetchSystemConfigurationInputApi,
@@ -45,6 +51,11 @@ import {
     mapArchExtractNew,
     mapArchExtractRun,
     mapArchExtractConvert,
+    mapFeatExtractList,
+    mapFeatExtractFetch,
+    mapFeatExtractNew,
+    mapFeatExtractRun,
+    mapFeatExtractSimplify,
 } from '../api/mappings';
 
 import {
@@ -68,6 +79,30 @@ import {
     convertArchExtractSuccess,
     convertArchExtractFailure,
 } from './archExtract'
+
+
+import {
+    FeatExtractActionTypes,
+    listFeatExtract as listFeatExtractAction,
+    listFeatExtractSuccess,
+    listFeatExtractFailure,
+    fetchFeatExtract as fetchFeatExtractAction,
+    fetchFeatExtractSuccess,
+    fetchFeatExtractFailure,
+    newFeatExtract as newFeatExtractAction,
+    newFeatExtractSuccess,
+    newFeatExtractFailure,
+    submitFeatExtract as submitFeatExtractAction,
+    submitFeatExtractSuccess,
+    submitFeatExtractFailure,
+    runFeatExtract as runFeatExtractAction,
+    runFeatExtractSuccess,
+    runFeatExtractFailure,
+    simplifyFeatExtract as simplifyFeatExtractAction,
+    simplifyFeatExtractSuccess,
+    simplifyFeatExtractFailure,
+} from './featExtract'
+
 
 import {
     createTestgenConfigInput as createTestgenConfigInputAction,
@@ -159,6 +194,7 @@ function* fetchSystemConfigInput(action: ReturnType<typeof fetchSystemConfigurat
     }
 }
 
+// api calls for arch-extract
 
 function* listArchExtract(action: ReturnType<typeof listArchExtractAction>) {
     try {
@@ -224,6 +260,75 @@ function* convertArchExtract(action: ReturnType<typeof convertArchExtractAction>
         yield put(convertArchExtractFailure(e.message));
     }
 }
+
+// api calls for feat-extract
+
+function* listFeatExtract(action: ReturnType<typeof listFeatExtractAction>) {
+    try {
+        const featExtractIdList = yield call(listFeatExtractApi);
+        const mappedRes = mapFeatExtractList(featExtractIdList);
+        yield put(listFeatExtractSuccess(mappedRes));
+    } catch (e) {
+        console.error(e);
+        yield put(listFeatExtractFailure(e.message));
+    }
+}
+
+function* fetchFeatExtract(action: ReturnType<typeof fetchFeatExtractAction>) {
+    try {
+        const featExtractRecord = yield call(fetchFeatExtractApi, action.data.featExtractId);
+        const mappedRes = mapFeatExtractFetch(featExtractRecord);
+        yield put(fetchFeatExtractSuccess(mappedRes));
+    } catch (e) {
+        console.error(e);
+        yield put(fetchFeatExtractFailure(e.message));
+    }
+}
+
+function* newFeatExtract(action: ReturnType<typeof newFeatExtractAction>) {
+    try {
+        const featExtractRecord = yield call(newFeatExtractApi, action.data.cpuTemplate, action.data.label, action.data.preBuilt);
+        const mappedRes = mapFeatExtractNew(featExtractRecord);
+        yield put(newFeatExtractSuccess(mappedRes));
+    } catch (e) {
+        console.error(e);
+        yield put(newFeatExtractFailure(e.message));
+    }
+}
+
+function* submitFeatExtract(action: ReturnType<typeof submitFeatExtractAction>) {
+    try {
+        yield call(submitFeatExtractApi, action.data.featExtractId, action.data.featExtractInput);
+        yield put(submitFeatExtractSuccess(action.data.featExtractInput));
+    } catch (e) {
+        console.error(e);
+        yield put(submitFeatExtractFailure(e.message));
+    }
+}
+
+function* runFeatExtract(action: ReturnType<typeof runFeatExtractAction>) {
+    try {
+        const serverResponse = yield call(runFeatExtractApi, action.data.featExtractId);
+        const mappedResponse = mapFeatExtractRun(serverResponse);
+        yield put(runFeatExtractSuccess(mappedResponse));
+    } catch (e) {
+        console.error(e);
+        yield put(runFeatExtractFailure(e.message));
+    }
+}
+
+function* simplifyFeatExtract(action: ReturnType<typeof simplifyFeatExtractAction>) {
+    try {
+        const serverResponse = yield call(simplifyFeatExtractApi, action.data.featExtractId);
+        const mappedResponse = mapFeatExtractSimplify(serverResponse);
+        yield put(simplifyFeatExtractSuccess(mappedResponse));
+    } catch (e) {
+        console.error(e);
+        yield put(simplifyFeatExtractFailure(e.message));
+    }
+}
+
+// End of api calls for feat-extract
 
 function* createTestgenConfigInput(action: ReturnType<typeof createTestgenConfigInputAction>) {
     try {
@@ -426,6 +531,12 @@ export function* rootSaga() {
     yield takeLatest(ArchExtractActionTypes.SUBMIT_ARCH_EXTRACT, submitArchExtract);
     yield takeLatest(ArchExtractActionTypes.RUN_ARCH_EXTRACT, runArchExtract);
     yield takeLatest(ArchExtractActionTypes.CONVERT_ARCH_EXTRACT, convertArchExtract);
+    yield takeLatest(FeatExtractActionTypes.LIST_FEAT_EXTRACT, listFeatExtract);
+    yield takeLatest(FeatExtractActionTypes.FETCH_FEAT_EXTRACT, fetchFeatExtract);
+    yield takeLatest(FeatExtractActionTypes.NEW_FEAT_EXTRACT, newFeatExtract);
+    yield takeLatest(FeatExtractActionTypes.SUBMIT_FEAT_EXTRACT, submitFeatExtract);
+    yield takeLatest(FeatExtractActionTypes.RUN_FEAT_EXTRACT, runFeatExtract);
+    yield takeLatest(FeatExtractActionTypes.SIMPLIFY_FEAT_EXTRACT, simplifyFeatExtract);
     yield takeLatest(SystemActionTypes.SUBMIT_SYSTEM, submitSystem);
     yield takeLatest(SystemActionTypes.SUBMIT_VULNERABILITY_CLASS, submitVulnerabilityClass);
     yield takeLatest(SystemActionTypes.FETCH_TEST_SYSTEM, fetchSystem);
