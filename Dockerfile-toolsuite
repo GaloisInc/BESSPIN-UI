@@ -47,10 +47,7 @@ ARG TOOLSUITE_BRANCH=master
 ARG TESTGEN_BRANCH=master
 
 WORKDIR /home/besspinuser
-RUN curl --silent --header "PRIVATE-TOKEN: ${PRIVATE_TOKEN}" https://gitlab-ext.galois.com/api/v4/projects/ssith%2Ftool-suite/repository/archive?sha=${TOOLSUITE_BRANCH} -o tool-suite.tar
-RUN tar -xvf tool-suite.tar && \
-    mv tool-suite-* tool-suite && \
-    rm tool-suite.tar
+RUN git clone --depth 1 --single-branch --branch ${TOOLSUITE_BRANCH} "https://${TOKEN_NAME}:${PRIVATE_TOKEN}@gitlab-ext.galois.com/ssith/tool-suite.git"
 
 WORKDIR /home/besspinuser/tool-suite
 
