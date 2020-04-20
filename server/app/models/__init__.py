@@ -16,4 +16,5 @@ from .jobs import Job, JobStatus, FeatureExtractionJob, ReportJob  # noqa: E501,
 from .workflows import Workflow  # noqa: E501, E402, F401Y
 from .feature_models import FeatureModel  # noqa: E501, E402, F401Y
 from .arch_extract import ArchExtract, ArchExtractOutput  # noqa: E501, E402, F401Y
+from .feat_extract import FeatExtract  # noqa: E501, E402, F401Y
 from .cwe_scores import CweScore  # noqa: E501, E402, F401Y

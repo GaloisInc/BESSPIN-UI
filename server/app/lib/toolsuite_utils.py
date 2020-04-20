@@ -34,6 +34,20 @@ def get_config_arch_extract_template(cpu):
         config_text = f.read()
     return config_text
 
+def get_config_feat_extract_template(cpu):
+    """
+    Get the default feat-extract config file
+
+    :param cpu:
+    :return: str of config file
+    """
+
+    DEFAULT_FEAT_EXTRACT_CONFIG = f'/home/besspinuser/tool-suite/tutorial/{cpu}.toml'
+
+    with open(DEFAULT_FEAT_EXTRACT_CONFIG, 'r') as f:
+        config_text = f.read()
+    return config_text
+
 def get_variable(config_text, variable):
     """
     Get the value of a variable in config text
@@ -102,3 +116,14 @@ def set_unique_vuln_class_to_constaints(vuln_class):
         constr_string += "[ !" + all_vuln_classes[k][:-4] + '_Test' + " ]\n"
 
     return constr_string
+
+
+def get_prebuilt_piccolo():
+    """
+    :return: pair of picollo feature model filename and fm.json as a string
+    """
+    DEFAULT_PREBUILT_PICCOLO = f'/home/besspinuser/tool-suite/tutorial/piccolo-simple-pregen.fm.json'
+
+    with open(DEFAULT_PREBUILT_PICCOLO, 'r') as f:
+        feature_model = f.read()
+    return 'piccolo-simple-pregen.fm.json', feature_model

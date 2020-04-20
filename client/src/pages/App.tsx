@@ -10,6 +10,7 @@ import { ConnectedDashboard } from './Dashboard';
 import { ConnectedConfigureCpu } from './ConfigureCpu';
 import { ConnectedOverview } from './Overview';
 import { ConnectedArchExtract } from './ArchExtract';
+import { ConnectedFeatExtract } from './FeatExtract';
 import { ConnectedSystemConfigInput } from './SystemConfigInput';
 import { ConnectedTestgenConfigInput } from './TestgenConfigInput';
 import { ConnectedVulnerability } from './Vulnerability';
@@ -35,6 +36,7 @@ export const App: React.FC = () => {
                     <Route path='/report/:workflowId' component={ ConnectedReport } />
                     <Route path='/arch-extract/' component={ ConnectedArchExtract } />
                     <Route path='/arch-extract/:archExtractId' component={ ConnectedArchExtract } />
+                    <Route path='/feat-extract/' component={ ConnectedFeatExtract } />
                     <Route path='/' component={ ConnectedOverview } />
                 </Switch>
             </Router>

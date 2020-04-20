@@ -53,7 +53,7 @@ def convert_model_to_json(source):
         f.write(source)
 
     if config['default'].USE_TOOLSUITE and config['default'].USE_TOOLSUITE_CONFIGURATOR:
-        cp = run_nix_subprocess('~/tool-suite', quote(CMD_CLAFER.format(filename_cfr)))
+        cp = run_nix_subprocess('~/tool-suite', CMD_CLAFER.format(filename_cfr))
     else:
         cp = subprocess.run([CLAFER, filename_cfr, '-m', 'fmjson'], capture_output=True)
 
@@ -83,7 +83,7 @@ def fmjson_to_clafer(source):
     filename_json = filename + '.fm.json'
     with open(filename_json, 'wb') as f:
         f.write(source)
-    cmd = quote(CMD_PRINT_CLAFER.format(filename_json))
+    cmd = CMD_PRINT_CLAFER.format(filename_json)
 
     cp = run_nix_subprocess('~/tool-suite', cmd)
     current_app.logger.debug('besspin-feature-model-tool stdout: ' + str(cp.stdout))
@@ -119,7 +119,7 @@ def selected_features_to_constraints(feats, even_not_validated=False):
 
 def combine_featmodel_cfgs(model, cfgs):
     """
-    Combine a feature model with configurations
+    Combine a feature model in fm.json format with configurations
     :param model:
     :param cfgs:
 
@@ -203,7 +203,7 @@ def configuration_algo(cfr_source, feature_selection):
         text = f.read()
         current_app.logger.debug('CFR+CONSTRAINTS: \n' + text)
 
-    cmd = quote(CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json))
+    cmd = CMD_CONFIGURATION_ALGO.format(filename_cfr, filename_json)
     cp = run_nix_subprocess('~/tool-suite', cmd)
     current_app.logger.debug('configuration algo stdout: ' + str(cp.stdout))
     current_app.logger.debug('configuration algo stderr: ' + str(cp.stderr))

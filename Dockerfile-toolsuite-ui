@@ -1,6 +1,11 @@
 ARG BESSPIN_TOOLSUITE_VERSION=latest
 FROM artifactory.galois.com:5008/besspin-toolsuite:${BESSPIN_TOOLSUITE_VERSION}
 
+USER root
+WORKDIR /
+
+RUN apt-get install -y python3.7 python3-pip sqlite3
+
 USER besspinuser
 ENV USER besspinuser
 

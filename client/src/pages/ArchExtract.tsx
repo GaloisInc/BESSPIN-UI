@@ -150,7 +150,6 @@ export const ArchExtract: React.FC<IProps> = ({
                         <Form.Label>CPU Template</Form.Label>
                         <Form.Control as='select' onClick={ (event:any) => setCpuTemplate(event.target.value)}>
                             <option value='piccolo'>piccolo</option>
-                            <option value='rocket-p1'>rocket-p1</option>
                             <option value='piccolo-low-level'>piccolo-low-level</option>
                             <option value='piccolo-high-level'>piccolo-high-level</option>
                         </Form.Control>
