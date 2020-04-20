@@ -3,4 +3,7 @@
 Dockerfile-*
 docker-compose*.yaml
 scripts/publish-docker-images.sh
+scripts/dev.env
+scripts/production.env
 client/node_modules
+server/*.db
