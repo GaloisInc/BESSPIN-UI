@@ -9,24 +9,118 @@ interact with the BESSPIN ToolSuite and Testgen systems.
 It is comprised main components depicted in the screenshots
 above. The components listed below:
 
-- Overview: Table view of all existing workflows, with buttons to
+## Contents: ##
+
+- [Architecture Extraction](#architecture-extraction): Allows a user to run
+  architecture extraction commands and visualize the results.
+
+- [Feature Extraction](#feature-extraction): Allows a user to run
+  feature extraction commands and visualize the results.
+
+- [Configurator](#configurator): Allows a user to load a feature model,
+  to configure it interactively and to save it in the database.
+
+- [Overview](#overview): Table view of all existing workflows, with buttons to
   intiate actions within that workflow.
 
-- System Configuration: Allows a user to upload a Nix system configuration
-  file as well as edit uploaded files within the browser.
+- [System Configuration](#configure-system): Allows a user to upload a Nix
+  system configuration file as well as edit uploaded files within the browser.
 
-- Testgen Configuration: Allows a user to edit a configuration file
-  that customizes the behavior of the testgen system.
+- [Testgen Configuration](#configure-testgen): Allows a user to edit a
+  configuration file that customizes the behavior of the testgen system.
 
-- Vulnerability Configuration: Allows a user to select a given vulnerbility
-  selecting specific CWEs to run.
+- [Vulnerability Configuration](#configure-vulnerability): Allows a user to select
+  a given vulnerbility selecting specific CWEs to run.
 
-- Report Viewer: Provides user with a status of the run of a given set of
+- [Report Viewer](#build-run): Provides user with a status of the run of a given set of
   tests, displaying a table of successful test scores as well as the ability
   to view the logfile for a given run.
 
-- CPU Configurator: UI to configure and explore the configuration of
-  CPUs.
+- [Developer's Manual](#developer-manual): Contains information useful for developers.
+
+
+## Architecture Extraction
+
+The UI supports the main workflows related to Architecture Extraction. It provides UI
+elements to edit the main configuration file, buttons to execute commands, and
+visualize results. During this interactive process, intermediate states of the session
+are stored in a database. The session can be restored from the database so the user
+can continue exploring Architecture Extraction.
+
+### Session
+
+To return to a previous session of Architecture Extraction, select a label
+associated with a previous session and then clicking on the "Load" button.
+As a result it restores the UI the this past state.
+
+To start a new architecture extraction session, select a "CPU template config file"
+from the list of prepolulated ones, and use the "Label" textbox by writing a few words
+indicating the purpose of this session (the labels are used to differentiate between
+sessions). Then click the "New" button and get a config file as a result in the text
+editor.
+
+### Edit config file
+
+Edit the config file directly in the text editor and save it by clicking the "Save" button.
+
+### Build
+
+Based on the config file edited in the previous step, the "Build" button
+sends a request to execute an architecture extraction command on the server. The
+result of this execution is a list of output files stored in the database whose list
+is returned to the UI.
+
+### Visualize
+
+Select an output file that resulted from the build step and click on "Visualize" to
+visualize the output in the UI page.
+
+
+## Feature Extraction
+
+The UI supports the main workflows related to Feature Extraction in a similar fashion
+as the UI related to Artchitecture Extraction, in particular upto to the "Build" step.
+
+### Build and Simplify
+
+Once the config file has been edited, run the Feature Extraction process by clicking
+on the "Build" button. Th execution of this process takes a long time
+(15 minutes is not uncommon) and the result is printed in the text editor
+under the "Build" button.
+
+It is also possible to *simplify* the feature model extracted during the previous step
+by clicking on the "Simplify" button. The result of this process returns a feature
+model that is printed in the dedicated text editor under the "Simplify" button.
+
+Both the basic and the simplified feature models can be downloaded by clicking on their
+respective "Download" button. The format of this feature model is `.fm.json` which is
+not particularly human readable but is intended to be the input of the next step in
+the Configurator.
+
+
+## Configurator
+
+The Configurator UI is a dedicated that can be used to configure any feature model
+in BESSPIN. The feature models can be either provided in `.fm.json` format or as a
+`.cfr` Clafer file.
+
+Using the "Browse" button, browse your local file system to find a feature model
+to configure. By clicking the "Upload model" button, it loads the feature model
+and present a graphical representation of the model.
+
+Features in a model can be turned `on`, `off`, or `opt` by simply clicking.
+This status of the selection is translated into colors: green, red, or blank,
+with various shades based on the history or selection or constraints of the model.
+
+Once the feature selection is ready to be validated, click on the "Validate" button.
+This action verifies that the feature selection is valid with respect to the source
+model.
+
+At the bottom, two text editors show the source feature model and a text version of
+the feature selection after validation.
+
+Click "Download model" to download the configured feature model.
+
 
 ## Overview
 
@@ -58,7 +152,7 @@ filesystem to upload. Once added, it can be edited in the UI to make changes.
 #### Configure Testgen
 
 By clicking the "Testgen" button for the workflow a user is taken to the "Testgen
-Configuration" screen which allows them to initialize the configuration from a 
+Configuration" screen which allows them to initialize the configuration from a
 template stored on the server. They can then make edits to that configuration within
 the UI.
 
@@ -71,7 +165,7 @@ on nodes in the feature model graph to enable/disable features/CWEs to be tested
 is a "validate" button to allow them to validate that they are configuring the feature
 model correctly.
 
-#### Build/Run
+#### Build-Run
 
 Once all the previous steps are complete, the user can click the "Build/Run" button
 which triggers a Nix build of the configured system and a run of the configured tests.
@@ -86,47 +180,16 @@ There is also a button to view the underlying log file.
 
 Finally, there are placeholders for PPA metrics which are a feature still in development.
 
-## Configurator UI
-
-A common UI is used for configuring both CPUs and tests. The current
-features of the configurator are:
-
-- *Load a new feature model*: from the local filesystem. The supported
-  formats for feature models are Clafer files `.cfr` or fm-json format
-  `.fm.json`. Some examples of feature models are provided in the
-  `examples` folder.
-
-- *Model visualization*: A model is translated into a graphical
-   tree-like structure where every feature is represented as a node
-   and indicating its selection.
-
-- *Feature selection by clicking*: Features in a model can be turned
-  `on`, `off`, or `opt` by simply clicking.  This status of the
-  selection is translated into colors: green, red, or blank, with
-  various shades based on the history or selection or constraints of
-  the model.
-
-- *Validate configurations*: A button is provided to validate the
-  current feature selection. This is done by the backend -- it
-  validates the feature selection and returns an updated feature model.
-
-- *Download configured model*: button to download the configured model
-  (model + constraints) into the filesystem of the client.
-
-
-- *Continue configuring feature model*. When a model is already in the
-   system and to change the set of features selected, click on
-   "Overview" in the sidebar and select the model to configure.
 
 ## Note on UI
 
-The UI has it's own [README.md](./client/README.md) that details it's structure
+The UI has its own [README.md](./client/README.md) that details its structure
 
-## Configurator API
+## API documentation
 
 All api routes are prefixed with `/api`. You can access an interactive Swagger UI to explore the API via `http://0.0.0.0:3784/api/doc`
 
-### Running locally
+## Developer Manual
 
 The best way to run this application locally is to build the docker images and use them.
 

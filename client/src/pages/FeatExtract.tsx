@@ -130,6 +130,7 @@ export const FeatExtract: React.FC<IProps> = ({
             <Container className='load-feat-extract'>
                 { isLoading && <LoadingIndicator /> }
                 { errors && errors.length > 0 && <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }</Alert> }
+                <h2> Session </h2>
                 <Form>
                     <Form.Group controlId='SelectListOfFeatExtract'>
                         <Form.Label></Form.Label>
@@ -151,16 +152,16 @@ export const FeatExtract: React.FC<IProps> = ({
                 </ButtonToolbar>
                 <Form>
                     <Form.Row>
-                        <Form.Group as={Col} controlId='formGridLabel'>
-                        <Form.Label>Label</Form.Label>
-                        <Form.Control onChange={(event:any) => setNewLabel(event.target.value)}/>
-                        </Form.Group>
-
                         <Form.Group as={Col} controlId='formGridTemplate'>
                         <Form.Label>CPU Template</Form.Label>
                         <Form.Control as='select' onClick={ (event:any) => setCpuTemplate(event.target.value)}>
                             <option value='piccolo'>piccolo</option>
                         </Form.Control>
+                        </Form.Group>
+
+                        <Form.Group as={Col} controlId='formGridLabel'>
+                        <Form.Label>Label</Form.Label>
+                        <Form.Control onChange={(event:any) => setNewLabel(event.target.value)}/>
                         </Form.Group>
                     </Form.Row>
                 </Form>
@@ -181,6 +182,7 @@ export const FeatExtract: React.FC<IProps> = ({
             </Container>
             <hr />
             <Container className='edit-feat-extract-input'>
+                <h2> Edit config file </h2>
                 <ButtonGroup>
                     <Button
                         className='btn-space'
@@ -201,6 +203,7 @@ export const FeatExtract: React.FC<IProps> = ({
                     height='30vh' />
             </Container>
             <Container>
+            <h2> Build </h2>
             <Row className="justify-content-md-center">
                 <Col>
                 <ButtonGroup>
@@ -243,8 +246,8 @@ export const FeatExtract: React.FC<IProps> = ({
                 </ButtonGroup>
                 </Col>
             </Row>
-
             </Container>
+
             { (featExtractRecord.featExtractOutputContent) ?
                 <Row>
                 <Col>

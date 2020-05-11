@@ -3,6 +3,9 @@
 @import '../../node_modules/bootstrap/scss/variables';
 
 .ArchExtract {
+    .btn-space {
+        margin-bottom: 0.5em;
+    }
     .load-arch-extract {
         padding: 1em;
 
@@ -13,6 +16,9 @@
         }
     }
     .edit-arch-extract-input {
+        padding: 1em;
+    }
+    .build-arch-extract {
         padding: 1em;
     }
     .convert-arch-extract {
