@@ -1,6 +1,4 @@
-# BESSPIN UI
-
-![alt text](docs/screenshot_UI.png "Screenshot UI")
+# BESSPIN Tool Suite UI
 
 *Disclaimer: this UI is under development is considered a
  proof-of-concept towards a prototype.*
