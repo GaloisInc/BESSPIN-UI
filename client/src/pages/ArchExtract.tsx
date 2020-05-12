@@ -120,10 +120,12 @@ export const ArchExtract: React.FC<IProps> = ({
             <Container className='load-arch-extract'>
                 { isLoading && <LoadingIndicator /> }
                 { errors && errors.length > 0 && <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }</Alert> }
+
+                <h2> Session </h2>
                 <Form>
                     <Form.Group controlId='SelectListOfArchExtract'>
                         <Form.Label></Form.Label>
-                        <Form.Control as='select' onChange={ (event:any) => setLoadExisting(event.target.value) }>
+                        <Form.Control as='select' onClick={ (event:any) => setLoadExisting(event.target.value) }>
                             { ((archExtractIdList === undefined) ? [] : archExtractIdList).map((value, index, array) => <option value={value.archExtractId}> {value.archExtractId} - {value.label} </option>) }
                         </Form.Control>
                     </Form.Group>
@@ -141,18 +143,17 @@ export const ArchExtract: React.FC<IProps> = ({
                 </ButtonToolbar>
                 <Form>
                     <Form.Row>
-                        <Form.Group as={Col} controlId='formGridLabel'>
-                        <Form.Label>Label</Form.Label>
-                        <Form.Control onChange={(event:any) => setNewLabel(event.target.value)}/>
-                        </Form.Group>
-
                         <Form.Group as={Col} controlId='formGridTemplate'>
-                        <Form.Label>CPU Template</Form.Label>
+                        <Form.Label>CPU Template config file</Form.Label>
                         <Form.Control as='select' onClick={ (event:any) => setCpuTemplate(event.target.value)}>
                             <option value='piccolo'>piccolo</option>
                             <option value='piccolo-low-level'>piccolo-low-level</option>
                             <option value='piccolo-high-level'>piccolo-high-level</option>
                         </Form.Control>
+                        </Form.Group>
+                        <Form.Group as={Col} controlId='formGridLabel'>
+                        <Form.Label>Label</Form.Label>
+                        <Form.Control onChange={(event:any) => setNewLabel(event.target.value)}/>
                         </Form.Group>
                     </Form.Row>
                 </Form>
@@ -165,7 +166,10 @@ export const ArchExtract: React.FC<IProps> = ({
                 <br />
             </Container>
 
+            <hr />
+
             <Container className='edit-arch-extract-input'>
+                <h2>Edit config file</h2>
                 <ButtonGroup>
                     <Button
                         onClick={() => submitArchExtract(archExtractRecord.archExtractId, editorText) }
@@ -183,19 +187,24 @@ export const ArchExtract: React.FC<IProps> = ({
                     value={ editorText }
                     width='100%'
                     height='35vh' />
-                <Button
+            </Container>
+
+            <Container className='build-arch-extract'>
+                <h2> Build </h2>
+            <Button
                     onClick={() => runArchExtract(archExtractRecord.archExtractId) }
                     disabled={(archExtractRecord.archExtractId > 0)? false: true}
                 >
                     Build
-                </Button>
+            </Button>
             </Container>
 
 
             <Container className='convert-arch-extract'>
+                <h2> Visualize </h2>
                 <Form>
                     <Form.Group controlId='SelectArchExtractOuput'>
-                        <Form.Label>Select dot file to convert to PNG: </Form.Label>
+                        <Form.Label>Select output file to visualize: </Form.Label>
                         <Form.Control as='select' onClick={ (event:any) => setSelectedDotFile(event.target.value) }>
                             { (archExtractRecord.archExtractOutputList ?
                                 archExtractRecord.archExtractOutputList: []
@@ -207,7 +216,7 @@ export const ArchExtract: React.FC<IProps> = ({
                     onClick={() => convertArchExtract(selectedDotFile) }
                     disabled={(selectedDotFile === -42)}
                 >
-                    Convert
+                    Visualize
                 </Button>
 
                 <Container className='converted-arch-extract'>
