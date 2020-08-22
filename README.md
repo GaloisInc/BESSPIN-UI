@@ -259,32 +259,12 @@ images and use them as predictable a runtime environment.
 
 ### Build/Publish Docker image
 
-Docker images built can be published to the Galois Artifactory
-server. In order to build/publish images, there is a helper script
-(`./scripts/publish-docker-images.sh`) which you use to
-tag/build/publish all the necessary images. This file depends upon an
-ENV file (`./scripts/production.env`) which you set up with the
-necessary environmental variables. Use `./scripts/sample.env` as your
-template. It requires the following variables to be defined:
-
-- `TOKEN_NAME` for the name of the GitLab-ext personal access token
-  you wish to use
-- `PRIVATE_TOKEN` the aforementioned private GitLab-ext token's value
-- `BINCACHE_LOGIN` the Galois Artifactory username you wish to use
-- `BINCACHE_APIKEY` the Galois Artifactory API token for that login
-
-In addition to this environmental configuration for access to Galois
-GitLab-ext and Artifactory servers, there is a `.env` file which
-specifies version information to use when publishing images. If you do
-not use this, the images will be tagged with `latest`, which is the
-method typically used for building images for local development.
-
-**WARNING** This script takes a long time to run: ~20 minutes to build
-the Docker images and at least 2 hours to push them to the Galois
-Artifactory. Both of these estimates depend upon your build machine's
-performance and your network bandwidth. You may want to consider
-disabling any settings that automatically put your machine to sleep
-while this script is running.
+Images through the end of SSITH phase 2 were originally
+specified as a part of each subproject, but are now (as of Summer
+2020) collected into the BESSPIN 
+[docker-tools project](https://gitlab-ext.galois.com/ssith/docker-tools) 
+on Galois's GitLab-ext server. See that project for more information
+on building images.
 
 ### Running in Docker
 
