@@ -8,6 +8,7 @@ services:
       - internal-service-layer
     depends_on:
       - server
+    stdin_open: true
     command: npm run start:debug
     build: # this is only for development, we should use when we are ready for production
       context: .
