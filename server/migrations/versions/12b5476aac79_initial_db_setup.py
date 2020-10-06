@@ -160,6 +160,7 @@ def upgrade():
         sa.Column('featExtractOutputContentClafer', sa.Text(), nullable=True),
         sa.Column('featExtractOutputFilenameSimplified', sa.Text(), nullable=True),
         sa.Column('featExtractOutputContentSimplified', sa.Text(), nullable=True),
+        sa.Column('featExtractOutputContentClaferSimplified', sa.Text(), nullable=True),
         sa.PrimaryKeyConstraint('featExtractId')
     )
     # ### end Alembic commands ###
