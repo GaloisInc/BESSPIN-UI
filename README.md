@@ -217,10 +217,10 @@ settings that automatically put your machine to sleep while this is running.
 
 ### Running in Docker
 
-There is an included `docker-compose-toolsuite.yaml` for spinning up a containerized instance of the server and UI:
+There is an included `docker-compose.yaml` for spinning up a containerized instance of the server and UI:
 
 ```
-$ docker-compose -f docker-compose-toolsuite.yaml up
+$ docker-compose -f docker-compose.yaml up
 ```
 
 #### ENV vars
