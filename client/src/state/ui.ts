@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 
 import { IArchExtractAction, ArchExtractActionTypes } from './archExtract';
+import { IFeatExtractAction, FeatExtractActionTypes } from './featExtract';
 import { ISystemAction, SystemActionTypes } from './feature-model';
 import {
     WorkflowActionTypes,
@@ -36,7 +37,8 @@ export type IUiAction =
     ReturnType<typeof isLoading> |
     ISystemAction |
     IWorkflowAction |
-    IArchExtractAction;
+    IArchExtractAction |
+    IFeatExtractAction;
 
 // Reducers
 
@@ -47,9 +49,15 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case ArchExtractActionTypes.NEW_ARCH_EXTRACT:
         case ArchExtractActionTypes.RUN_ARCH_EXTRACT:
         case ArchExtractActionTypes.CONVERT_ARCH_EXTRACT:
+        case FeatExtractActionTypes.LIST_FEAT_EXTRACT:
+        case FeatExtractActionTypes.FETCH_FEAT_EXTRACT:
+        case FeatExtractActionTypes.NEW_FEAT_EXTRACT:
+        case FeatExtractActionTypes.RUN_FEAT_EXTRACT:
+        case FeatExtractActionTypes.SIMPLIFY_FEAT_EXTRACT:
         case WorkflowActionTypes.FETCH_WORKFLOW:
         case WorkflowActionTypes.FETCH_WORKFLOWS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT:
+        case SystemActionTypes.SUBMIT_SYSTEM:
             return {
                 ...state,
                 isLoading: true,
@@ -69,6 +77,11 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case ArchExtractActionTypes.NEW_ARCH_EXTRACT_SUCCESS:
         case ArchExtractActionTypes.RUN_ARCH_EXTRACT_SUCCESS:
         case ArchExtractActionTypes.CONVERT_ARCH_EXTRACT_SUCCESS:
+        case FeatExtractActionTypes.LIST_FEAT_EXTRACT_SUCCESS:
+        case FeatExtractActionTypes.FETCH_FEAT_EXTRACT_SUCCESS:
+        case FeatExtractActionTypes.NEW_FEAT_EXTRACT_SUCCESS:
+        case FeatExtractActionTypes.RUN_FEAT_EXTRACT_SUCCESS:
+        case FeatExtractActionTypes.SIMPLIFY_FEAT_EXTRACT_SUCCESS:
         case WorkflowActionTypes.FETCH_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.FETCH_WORKFLOWS_SUCCESS:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_SUCCESS:
@@ -76,6 +89,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case WorkflowActionTypes.TRIGGER_REPORT_SUCCESS:
         case WorkflowActionTypes.CLONE_WORKFLOW_SUCCESS:
         case WorkflowActionTypes.UPDATE_WORKFLOW_SUCCESS:
+        case SystemActionTypes.SUBMIT_SYSTEM_SUCCESS:
         case SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_SUCCESS:
         case SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_SUCCESS:
         case SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_SUCCESS:
@@ -89,6 +103,11 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case ArchExtractActionTypes.NEW_ARCH_EXTRACT_FAILURE:
         case ArchExtractActionTypes.RUN_ARCH_EXTRACT_FAILURE:
         case ArchExtractActionTypes.CONVERT_ARCH_EXTRACT_FAILURE:
+        case FeatExtractActionTypes.LIST_FEAT_EXTRACT_FAILURE:
+        case FeatExtractActionTypes.FETCH_FEAT_EXTRACT_FAILURE:
+        case FeatExtractActionTypes.NEW_FEAT_EXTRACT_FAILURE:
+        case FeatExtractActionTypes.RUN_FEAT_EXTRACT_FAILURE:
+        case FeatExtractActionTypes.SIMPLIFY_FEAT_EXTRACT_FAILURE:
         case WorkflowActionTypes.FETCH_WORKFLOW_FAILURE:
         case WorkflowActionTypes.FETCH_WORKFLOWS_FAILURE:
         case SystemActionTypes.FETCH_SYSTEM_CONFIG_INPUT_FAILURE:
@@ -96,6 +115,7 @@ export const reducer = (state = DEFAULT_STATE, action: IUiAction): IUiState => {
         case WorkflowActionTypes.TRIGGER_REPORT_FAILURE:
         case WorkflowActionTypes.CLONE_WORKFLOW_FAILURE:
         case WorkflowActionTypes.UPDATE_WORKFLOW_FAILURE:
+        case SystemActionTypes.SUBMIT_SYSTEM_FAILURE:
         case SystemActionTypes.SUBMIT_VALIDATE_CONFIGURATION_FAILURE:
         case SystemActionTypes.FETCH_TEST_SYSTEM_BY_VULN_FAILURE:
         case SystemActionTypes.SUBMIT_VULNERABILITY_CLASS_FAILURE:

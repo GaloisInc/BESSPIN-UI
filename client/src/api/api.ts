@@ -90,6 +90,61 @@ export const convertArchExtract = async (archExtractOutputId: number) => {
     });
 };
 
+export const listFeatExtract = async () => {
+    return request({
+        url: 'api/feat-extract/list',
+        method: 'get',
+        headers: { ...DEFAULT_HEADERS },
+        data: {},
+    });
+};
+
+export const fetchFeatExtract = async (featExtractId: number) => {
+    return request({
+        url: `api/feat-extract/fetch/${featExtractId.toString()}`,
+        method: 'get',
+        headers: { ...DEFAULT_HEADERS },
+        data: {},
+    });
+};
+
+export const newFeatExtract = async (cpuTemplate: string, label: string, preBuilt: boolean) => {
+    return request({
+        url: `api/feat-extract/new/${cpuTemplate}/${preBuilt ? 'preBuilt' : 'notPreBuilt'}`,
+        method: 'post',
+        headers: { ...DEFAULT_HEADERS },
+        data: { label: label },
+    });
+};
+
+export const submitFeatExtract = async (featExtractId: number, featExtractInput: string) => {
+    return request({
+        url: `api/feat-extract/submit/${featExtractId.toString()}`,
+        method: 'post',
+        headers: { ...DEFAULT_HEADERS },
+        data: {
+            featExtractInput
+        },
+    });
+};
+
+export const runFeatExtract = async (featExtractId: number) => {
+    return request({
+        url: `api/feat-extract/run/${featExtractId.toString()}`,
+        method: 'post',
+        headers: { ...DEFAULT_HEADERS },
+        data: {},
+    });
+};
+
+export const simplifyFeatExtract = async (featExtractId: number) => {
+    return request({
+        url: `api/feat-extract/simplify/${featExtractId.toString()}`,
+        method: 'get',
+        headers: { ...DEFAULT_HEADERS },
+    });
+};
+
 export const fetchConfigurator = async (systemUid: string) => {
     return request({
         url: '/api/feature-model/fetch-by-uid',

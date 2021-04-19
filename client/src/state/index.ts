@@ -11,6 +11,10 @@ import {
     reducerArchExtract as archExtract,
 } from './archExtract'
 import {
+    IFeatExtractState,
+    reducerFeatExtract as featExtract,
+} from './featExtract'
+import {
     reducerSystem as system,
     reducerSystemConfigInput as systemConfigInput,
     IFeatureModelConfigState,
@@ -42,6 +46,7 @@ export interface IState {
     ui: IUiState,
     workflow: IWorkflowState,
     archExtract: IArchExtractState,
+    featExtract: IFeatExtractState,
 };
 
 const rootReducer = combineReducers({
@@ -52,6 +57,7 @@ const rootReducer = combineReducers({
     ui,
     workflow,
     archExtract,
+    featExtract,
 });
 
 const sagaMiddleware = createSagaMiddleware();

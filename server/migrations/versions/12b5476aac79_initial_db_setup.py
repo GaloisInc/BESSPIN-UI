@@ -148,6 +148,21 @@ def upgrade():
         sa.PrimaryKeyConstraint('archExtractOutputId'),
         sa.ForeignKeyConstraint(['archExtractId'], ['arch_extract.archExtractId'], ondelete='CASCADE'),
     )
+    op.create_table(
+        'feat_extract',
+        sa.Column('label', sa.String(length=128), nullable=True, comment='user-defined label for usability'),
+        sa.Column('createdAt', sa.DateTime(), nullable=False),
+        sa.Column('updatedAt', sa.DateTime(), nullable=True),
+        sa.Column('featExtractId', sa.Integer(), unique=True),
+        sa.Column('featExtractInput', sa.Text(), nullable=True),
+        sa.Column('featExtractOutputFilename', sa.Text(), nullable=True),
+        sa.Column('featExtractOutputContent', sa.Text(), nullable=True),
+        sa.Column('featExtractOutputContentClafer', sa.Text(), nullable=True),
+        sa.Column('featExtractOutputFilenameSimplified', sa.Text(), nullable=True),
+        sa.Column('featExtractOutputContentSimplified', sa.Text(), nullable=True),
+        sa.Column('featExtractOutputContentClaferSimplified', sa.Text(), nullable=True),
+        sa.PrimaryKeyConstraint('featExtractId')
+    )
     # ### end Alembic commands ###
 
     # add our initial resource types and job statuses

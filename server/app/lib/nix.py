@@ -10,7 +10,7 @@ def make_nix_command(path: str, cmd: Iterable[str]) -> Iterable[str]:
 
     :return: list of parameters for subprocess to use
     """
-    nix_cmd = f'whoami && cd {path} && . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell --run {quote(cmd)}'
+    nix_cmd = f'cd {path} && . $HOME/.nix-profile/etc/profile.d/nix.sh && nix-shell --run {quote(cmd)}'
     return [nix_cmd]
 
 

@@ -36,6 +36,8 @@ export const Header: React.FC = () => {
               </NavDropdown.Item>
             </NavDropdown>
             <Nav.Link href='/arch-extract'>ArchExtract</Nav.Link>
+            <Nav.Link href='/feat-extract'>FeatExtract</Nav.Link>
+            <Nav.Link href='/configure-cpu'>Configure</Nav.Link>
             <Nav.Link href='/'>Overview</Nav.Link>
             {/*
             <Nav.Link href='/vuln-class-selector'>vuln class selector</Nav.Link>

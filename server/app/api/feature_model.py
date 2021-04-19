@@ -100,6 +100,7 @@ featureModelFetch = api.model('FeatureModelFetchParams', {
 
 uploadResponse = api.model('FeatureModelUploadResponse', {
     'uid': fields.String(description=uid_desc),
+    'filename': fields.String(description='original uploaded filename'),
     'tree': fields.Raw(description='fmjson representation of the uploaded feature-model'),
     'configured_feature_model': fields.Raw,  # TODO: describe what this is for
     'source': fields.String(description='original uploaded source')
@@ -312,12 +313,9 @@ class ConfiguratorConfigure(Resource):
         try:
             entry.configs = validated_features
             current_app.logger.debug(f'updating feature_model({entry})')
-            db.session.commit()
 
-            # pylint: disable=line-too-long
-            # cp = subprocess.run(['claferIG', filename_cfr, '--useuids', '--addtypes', '--ss=simple', '--maxint=31', '--json'])
-            # app.logger.debug('ClaferIG output: ' + (str(cp.stdout)))
-            # d = load_json(filename_json)
+            db.session.add(entry)
+            db.session.commit()
 
             return entry
         except Exception as err:

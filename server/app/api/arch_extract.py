@@ -78,20 +78,20 @@ arch_extract_record = api.model('ArchExtract', {
         required=True,
         description='Id of arch extract record'),
     'archExtractInput': fields.String(
-        reuired=True,
+        required=True,
         description='Text of the arch-extract config',
     ),
     'archExtractOutputList': fields.List(
         fields.Nested(arch_extract_output_record, skip_none=True),
         skip_none=True,
-        reuired=False,
+        required=False,
         description='arch-extract Output List',
     )
 })
 
 arch_extract_input = api.model('ArchExtractInput', {
     'archExtractInput': fields.String(
-        reuired=True,
+        required=True,
         description='Text of the arch-extract config',
     )
 })

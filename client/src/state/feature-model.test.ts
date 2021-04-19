@@ -24,6 +24,7 @@ const genDate = (): string => {
 const DEFAULT_SYSTEM: IFeatureModelRecord = {
     configs: [],
     conftree: DEFAULT_FEATURE_MODEL,
+    configuredConftree: DEFAULT_FEATURE_MODEL,
     uid: 'TEST-HASH',
     createdAt: genDate(),
     lastUpdate: genDate(),

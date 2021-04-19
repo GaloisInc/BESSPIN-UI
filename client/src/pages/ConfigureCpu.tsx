@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { match } from 'react-router-dom';
 
 import {
+    Alert,
     InputGroup,
     Col,
     Container,
@@ -13,13 +14,18 @@ import {
 } from 'react-bootstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUndo, faRedo, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faUndo, faRedo, faPlus, faDownload } from '@fortawesome/free-solid-svg-icons';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-monokai';
 import 'ace-builds/src-noconflict/mode-json';
 
 import { IState } from '../state';
 import { getDataRequested } from '../state/ui';
+
+import {
+    getError,
+    getIsLoading,
+} from '../state/ui';
 
 import {
     fetchSystem,
@@ -36,10 +42,13 @@ import {
 import { Header } from '../components/Header';
 import { Graph } from '../components/Graph';
 import { IFeatureModel } from '../components/graph-helper';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 import '../style/ConfigureCpu.scss';
 
 export interface IConfigureCpuProps {
+    errors: string[];
+    isLoading: boolean;
     dataRequested: boolean;
     submitSystem: typeof submitSystem;
     fetchSystem: typeof fetchSystem;
@@ -59,7 +68,18 @@ export const DEFAULT_FEATURE_MODEL: IFeatureModel = {
 };
 
 
+const downloadTxtFile = (theText: string, filename: string): void => {
+    const element = document.createElement("a");
+    const file = new Blob([theText], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = filename;
+    document.body.appendChild(element);
+    element.click();
+}
+
 export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
+    errors,
+    isLoading,
     submitSystem,
     fetchSystem,
     selectFeature,
@@ -116,8 +136,11 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
 
     return (
         <Container className='ConfigureCpu'>
+
             <Header />
-            <h1>Configure CPU</h1>
+            <h1>Configure</h1>
+            { isLoading && <LoadingIndicator /> }
+            { errors && errors.length > 0 && <Alert variant='danger'>{ <ul>{errors.map((e, i) => (<li key={`error-${i}`}>{e}</li>))} </ul> }</Alert> }
             <Form inline={ true }>
                 <Form.Row>
                     <Col>
@@ -146,6 +169,9 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                     </Col>
                 </Form.Row>
             </Form>
+            <hr />
+            <Row>
+            <Col>
             <ButtonGroup className="mr-2" aria-label="First group">
                 <Button
                     className="btn-light btn-outline-secondary"
@@ -166,12 +192,27 @@ export const ConfigureCpu: React.FC<IConfigureCpuProps> = ({
                     <FontAwesomeIcon icon={faRedo} />
                 </Button>
             </ButtonGroup>
+            </Col>
+            <Col xs={6} md={4}>
             <Button
                     className="btn btn-primary"
                     onClick={ () => { submitValidateConfiguration(system.uid, system.configs) } }
             >
                     Validate
             </Button>
+            </Col>
+            <Col xs={6} md={4}>
+            <Button
+                className="btn btn-dark"
+                onClick={() =>
+                    downloadTxtFile(JSON.stringify(system.configuredConftree) , system.filename.split('.')[0] + '-configured.fm.json')}
+                disabled = {(system.filename) ? false : true}
+            >
+                <FontAwesomeIcon icon={faDownload} />
+                 Download Model
+            </Button>
+            </Col>
+            </Row>
             <Graph
                 system={ system }
                 selectFeature={ selectFeature }
@@ -213,12 +254,18 @@ interface IConfigureCpuMapProps extends IConfigureCpuProps {
 }
 
 const mapStateToProps = (state: IState, props: IConfigureCpuMapProps): IConfigureCpuProps => {
+    const error = getError(state);
+    const isLoading = getIsLoading(state);
+    const errors = error ? [error] : [];
+
     const systemUid = props.match.params.systemUid || '';
     const system = getSystem(state);
     const dataRequested = getDataRequested(state);
 
     return {
         ...props,
+        errors,
+        isLoading,
         dataRequested,
         system: system,
         systemUid,

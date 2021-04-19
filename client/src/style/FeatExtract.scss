@@ -2,11 +2,11 @@
 @import '../../node_modules/bootstrap/scss/functions';
 @import '../../node_modules/bootstrap/scss/variables';
 
-.ArchExtract {
+.FeatExtract {
     .btn-space {
         margin-bottom: 0.5em;
     }
-    .load-arch-extract {
+    .load-feat-extract {
         padding: 1em;
 
         .form-control-file {
@@ -15,16 +15,13 @@
             width: 100%;
         }
     }
-    .edit-arch-extract-input {
+    .edit-feat-extract-input {
         padding: 1em;
     }
-    .build-arch-extract {
-        padding: 1em;
-    }
-    .convert-arch-extract {
+    .simplify-feat-extract {
         padding: 1em;
 
-        .converted-arch-extract {
+        .converted-feat-extract {
             padding: 1em;
             div:first-child {
                 border-style: solid;

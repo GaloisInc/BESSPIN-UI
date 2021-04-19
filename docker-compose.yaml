@@ -8,8 +8,8 @@ services:
       - internal-service-layer
     depends_on:
       - server
+    stdin_open: true
     command: npm run start:debug
-    # image: besspin-ui_client:latest 
     build: # this is only for development, we should use when we are ready for production
       context: .
       dockerfile: client/Dockerfile
@@ -26,13 +26,11 @@ services:
 
   server:
     user: besspinuser
-    # image: besspin-ui_server:latest
-    build: # this is only for development, we should use when we are ready for production
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - TOKEN_NAME
-        - PRIVATE_TOKEN
+    # to build the image, edit a /script/production.env
+    # ./script/publish-docker-images.sh
+    # In order to override the BESSPIN_UI_VERSION from the .env file you have to
+    # export the variable in the terminal, for example `export BESSPIN_UI_VERSION=latest`
+    image: "artifactory.galois.com:5008/besspin-ui:${BESSPIN_UI_VERSION}"
     restart: always
     networks:
       - proxy-layer
@@ -43,6 +41,7 @@ services:
     volumes: # this is also only for development
       - '~/.local/share/besspin:/home/besspinuser/.local/share/besspin'
       - './server:/besspin-ui/server'
+      - './scripts/:/besspin-ui/scripts'
     environment:
       DB_PATH: /besspin-ui/server # NOTE: if we use this docker-compose set up in production, we will need to remove this variable
       XDG_BASE_DATA: /home/besspinuser/.local/share
@@ -51,6 +50,8 @@ services:
       BESSPIN_CLAFER: /home/besspinuser/.local/bin/clafer
       HOST: 0.0.0.0
       PORT: 3784
+      USE_TOOLSUITE: "True"
+      USE_TOOLSUITE_CONFIGURATOR: "True"
 
 networks:
   proxy-layer:
