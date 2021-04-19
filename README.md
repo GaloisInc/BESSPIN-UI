@@ -1,7 +1,7 @@
 # BESSPIN Tool Suite UI
 
 *Disclaimer: this UI is under development is considered a
- proof-of-concept towards a prototype.*
+ proof-of-concept towards a prototype. A working docker build can be found in [BESSPIN environment](https://github.com/GaloisInc/BESSPIN-Environment/tree/master/docker/ui)*
 
 The UI provides a single-user, workflow-based interface with which to
 interact with the BESSPIN ToolSuite and Testgen systems.
